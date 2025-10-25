@@ -1,12 +1,14 @@
-import Signup from "./components/reusable/Signup"
+import { BrowserRouter } from "react-router-dom";
+import AuthRoutes from "./routes/AuthRoutes";
 
 
-function App() {
+const App: React.FC=()=> {
   return (
-    <>
-    <Signup/>
-    </>
+    <BrowserRouter>
+        <AuthRoutes/>
+    </BrowserRouter>
+ 
   )
 }
 
-export default App
+export default App;
