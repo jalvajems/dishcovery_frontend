@@ -19,7 +19,9 @@ export default function Signup() {
         <div className="flex items-center gap-2">
          <img src={logo} alt="" className=' h-14'/>
         </div>
-        <button className="px-6 py-2 bg-green-100 text-green-800 rounded-md hover:bg-green-200 transition-colors">
+        <button
+        onClick={handleBackToLogin} 
+        className="px-6 py-2 bg-green-100 text-green-800 rounded-md hover:bg-green-200 transition-colors">
           Login
         </button>
       </header>

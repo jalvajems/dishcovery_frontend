@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const useResetPass=()=>{
     
+  const navigate=useNavigate();
   const [formData, setFormData] = useState({
     newPassword: '',
     confirmPassword: ''
@@ -24,12 +26,11 @@ export const useResetPass=()=>{
       alert('Passwords do not match');
       return;
     }
-    console.log('Password reset:', formData);
-    alert('Password reset successfully!');
+    navigate('/otp-verify')
   };
 
   const handleLogIn = () => {
-    console.log('Navigate to login');
+    navigate('/login')
   };
 
   return{

@@ -1,6 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const useLogin=()=>{
+
+  const navigate=useNavigate();
+
     const [formData, setFormData] = useState({
     emailOrUsername: '',
     password: ''
@@ -25,9 +29,11 @@ export const useLogin=()=>{
   };
 
   const handleForgotPassword = () => {
-    console.log('Forgot password');
-    alert('Password reset link sent!');
+    navigate('/forgetPassword')
   };
+  const handleBackSignup=()=>{
+    navigate('/signup')
+  }
 
   return{
     formData,
@@ -35,6 +41,7 @@ export const useLogin=()=>{
     handleGoogleLogin,
     handleInputChange,
     handleLogin,
+    handleBackSignup
     
   }
 }

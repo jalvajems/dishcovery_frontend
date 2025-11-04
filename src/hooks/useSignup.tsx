@@ -1,6 +1,10 @@
+import API from "@/api/apiInstance";
+import { signupApi } from "@/api/authApi";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const useSignup=()=>{
+  const navigate=useNavigate();
 
     const [formData, setFormData] = useState({
     name: '',
@@ -18,21 +22,24 @@ export const useSignup=()=>{
     }));
   };
 
-  const handleSignUp = () => {
-    if (!agreedToTerms) {
-      alert('Please agree to the Terms & Conditions');
-      return;
+  const handleSignUp =async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    
+    try {
+      const res=await signupApi({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password
+      })   
+      console.log('signup data: ', res.data);
+      
+    } catch (error) {
+      console.error("signup error:", error);
     }
-    if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match');
-      return;
-    }
-    console.log('Sign up data:', formData);
-    alert('Sign up successful!');
   };
 
   const handleBackToLogin = () => {
-    console.log('Navigate to login');
+    navigate('/login');
   };
 
   return{

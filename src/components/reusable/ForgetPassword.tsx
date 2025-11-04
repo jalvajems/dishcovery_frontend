@@ -1,4 +1,6 @@
 import { useForgetPass } from "@/hooks/useForgetPass";
+import logo from "../../assets/logo.png";
+
 
 export default function ForgotPassword() {
 
@@ -11,17 +13,15 @@ export default function ForgotPassword() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="flex justify-between items-center px-6 py-4 border-b border-gray-200">
+       {/* Header */}
+      <header className="flex justify-between items-center px-6 border-b border-gray-200">
         <div className="flex items-center gap-2">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-            <path d="M8 12h8M12 8v8" stroke="currentColor" strokeWidth="2"/>
-          </svg>
-          <span className="text-xl font-semibold">Dishcovery</span>
+         <img src={logo} alt="" className=' h-14'/>
         </div>
-        <button className="px-6 py-2 bg-green-100 text-green-800 rounded-md hover:bg-green-200 transition-colors">
-          Sign up
+        <button 
+        onClick={handleLogIn}
+        className="px-6 py-2 bg-green-100 text-green-800 rounded-md hover:bg-green-200 transition-colors">
+          Login
         </button>
       </header>
 

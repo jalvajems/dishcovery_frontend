@@ -1,7 +1,10 @@
 import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export  const useOtp=()=>{
-    
+
+
+  const navigate=useNavigate();  
   const [otp, setOtp] = useState(['', '', '', '']);
   const inputRefs = [
     useRef<HTMLInputElement>(null),
@@ -40,12 +43,11 @@ export  const useOtp=()=>{
       alert('Please enter the complete 4-digit OTP');
       return;
     }
-    console.log('Verifying OTP:', otpCode);
-    alert('OTP verified successfully!');
+    navigate('/login')
   };
 
   const handleLogIn = () => {
-    console.log('Navigate to login');
+    navigate('/login')
   };
 
   return {

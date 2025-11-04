@@ -1,19 +1,20 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const useForgetPass=()=>{
-      const [email, setEmail] = useState('');
+  const navigate=useNavigate()
+  const [email, setEmail] = useState('');
 
   const handleSendOTP = () => {
     if (!email) {
       alert('Please enter your email address');
       return;
     }
-    console.log('Sending OTP to:', email);
-    alert('Reset OTP sent to your email!');
+    navigate('/resetPassword')
   };
 
   const handleLogIn = () => {
-    console.log('Navigate to login');
+    navigate('/login')
   };
   
   return {
