@@ -1,3 +1,4 @@
+import { forgetPassApi } from "@/api/authApi";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -5,12 +6,13 @@ export const useForgetPass=()=>{
   const navigate=useNavigate()
   const [email, setEmail] = useState('');
 
-  const handleSendOTP = () => {
-    if (!email) {
-      alert('Please enter your email address');
-      return;
+  const handleSendOTP = async() => {
+    try {
+      await forgetPassApi({email})
+      navigate('/otp-verify',{state:{email,type:'forgetPass'}})
+    } catch (error) {
+      
     }
-    navigate('/resetPassword')
   };
 
   const handleLogIn = () => {

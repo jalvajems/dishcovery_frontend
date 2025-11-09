@@ -34,14 +34,14 @@ export default function Login() {
           <div className="space-y-4">
             {/* Email or Username Input */}
             <div>
-              <label htmlFor="emailOrUsername" className="block text-sm font-medium text-gray-900 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-900 mb-2">
                 Email or Username
               </label>
               <input
                 type="text"
-                id="emailOrUsername"
-                name="emailOrUsername"
-                value={formData.emailOrUsername}
+                id="email"
+                name="email"
+                value={formData.email}
                 onChange={handleInputChange}
                 placeholder="Enter your email or username"
                 className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-green-600 focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-transparent"

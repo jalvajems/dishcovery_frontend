@@ -1,9 +1,10 @@
+import {  verifyOtpApi } from "@/api/authApi";
 import { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export  const useOtp=()=>{
 
-
+  const {state}=useLocation();
   const navigate=useNavigate();  
   const [otp, setOtp] = useState(['', '', '', '']);
   const inputRefs = [
@@ -22,7 +23,7 @@ export  const useOtp=()=>{
       return;
     }
 
-    const newOtp = [...otp];
+    let newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
 
@@ -37,13 +38,19 @@ export  const useOtp=()=>{
     }
   };
 
-  const handleVerify = () => {
-    const otpCode = otp.join('');
-    if (otpCode.length !== 4) {
-      alert('Please enter the complete 4-digit OTP');
-      return;
+  const handleVerify = async() => {
+    try {
+      let OtptoSend=otp.join('')
+      if(state.type=='signup'){
+        await verifyOtpApi({otp:OtptoSend,email:state.email})
+        navigate('/home')
+      }else if(state.type=='forgetPass'){
+        await verifyOtpApi({otp:OtptoSend,email:state.email})
+        navigate('/resetPassword',{state:{email:state.email}})
+      }
+    } catch (error) {
+      
     }
-    navigate('/login')
   };
 
   const handleLogIn = () => {

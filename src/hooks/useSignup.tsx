@@ -1,4 +1,3 @@
-import API from "@/api/apiInstance";
 import { signupApi } from "@/api/authApi";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -32,6 +31,8 @@ export const useSignup=()=>{
         password: formData.password
       })   
       console.log('signup data: ', res.data);
+
+      navigate('/otp-verify',{state:{email:formData.email,type:'signup'}})
       
     } catch (error) {
       console.error("signup error:", error);

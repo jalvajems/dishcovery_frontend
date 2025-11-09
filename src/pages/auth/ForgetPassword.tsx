@@ -3,7 +3,7 @@ import logo from "../../assets/logo.png";
 
 
 export default function ForgotPassword() {
-
+    
     const {
         setEmail,
         email,

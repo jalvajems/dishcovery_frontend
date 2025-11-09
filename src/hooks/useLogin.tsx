@@ -1,3 +1,4 @@
+import { loginApi } from "@/api/authApi";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -6,7 +7,7 @@ export const useLogin=()=>{
   const navigate=useNavigate();
 
     const [formData, setFormData] = useState({
-    emailOrUsername: '',
+    email: '',
     password: ''
   });
 
@@ -18,9 +19,13 @@ export const useLogin=()=>{
     }));
   };
 
-  const handleLogin = () => {
-    console.log('Login data:', formData);
-    alert('Login successful!');
+  const handleLogin = async() => {
+    try {
+      await loginApi({email:formData.email, password:formData.password})
+      navigate('/home')
+    } catch (error) {
+      
+    }
   };
 
   const handleGoogleLogin = () => {
