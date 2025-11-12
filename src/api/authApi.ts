@@ -19,3 +19,7 @@ export const verifyOtpApi=(OtpData:{otp:string,email:string|null})=>{
 export const resetPassApi=(ResetPassData:{email:string,newPass:string,confirmPass:string})=>{
     return API.post('/auth/resetPassword',ResetPassData);
 }
+
+export const homeApi=()=>{
+    return API.get('/auth/home')
+}

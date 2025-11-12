@@ -21,7 +21,9 @@ export const useLogin=()=>{
 
   const handleLogin = async() => {
     try {
-      await loginApi({email:formData.email, password:formData.password})
+      const data=await loginApi({email:formData.email, password:formData.password})
+      localStorage.setItem('accessToken',data.data.accessToken);
+      
       navigate('/home')
     } catch (error) {
       

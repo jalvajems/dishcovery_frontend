@@ -43,7 +43,7 @@ export  const useOtp=()=>{
       let OtptoSend=otp.join('')
       if(state.type=='signup'){
         await verifyOtpApi({otp:OtptoSend,email:state.email})
-        navigate('/home')
+        navigate('/login')
       }else if(state.type=='forgetPass'){
         await verifyOtpApi({otp:OtptoSend,email:state.email})
         navigate('/resetPassword',{state:{email:state.email}})
