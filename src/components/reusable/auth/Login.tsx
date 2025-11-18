@@ -1,27 +1,28 @@
-import { useLogin } from '@/hooks/useLogin';
-import logo from "../../assets/logo.png";
+import { useLogin } from '@/hooks/auth/useLogin';
+// import logo from "../../assets/logo.png";
 
 export default function Login() {
-   
-    const {
-        formData,
-        handleInputChange,
-        handleForgotPassword,
-        handleGoogleLogin,
-        handleLogin,
-        handleBackSignup
-    }=useLogin();
+
+  const {
+    formData,
+    handleInputChange,
+    handleForgotPassword,
+    handleGoogleLogin,
+    handleLogin,
+    handleBackSignup,
+    errors
+  } = useLogin();
 
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-        <header className="flex justify-between items-center px-6 border-b border-gray-200">
+      <header className="flex justify-between items-center px-6 border-b border-gray-200">
         <div className="flex items-center gap-2">
-         <img src={logo} alt="" className=' h-14'/>
+          <img alt="" className=' h-14' />
         </div>
-        <button 
-        onClick={handleBackSignup}
-        className="px-6 py-2 bg-green-100 text-green-800 rounded-md hover:bg-green-200 transition-colors">
+        <button
+          onClick={handleBackSignup}
+          className="px-6 py-2 bg-green-100 text-green-800 rounded-md hover:bg-green-200 transition-colors">
           Sign Up
         </button>
       </header>
@@ -30,13 +31,14 @@ export default function Login() {
       <main className="flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">
           <h1 className="text-3xl font-bold text-center mb-8">Welcome back</h1>
-          
+
           <div className="space-y-4">
             {/* Email or Username Input */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-900 mb-2">
                 Email or Username
               </label>
+              {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
               <input
                 type="text"
                 id="email"
@@ -48,11 +50,12 @@ export default function Login() {
               />
             </div>
 
-            {/* Password Input */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-900 mb-2">
                 Password
               </label>
+              {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+
               <input
                 type="password"
                 id="password"

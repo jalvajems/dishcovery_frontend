@@ -1,5 +1,5 @@
-import { useSignup } from "@/hooks/useSignup";
-import logo from "../../assets/logo.png";
+import { useSignup } from "@/hooks/auth/useSignup";
+// import logo from "@/assets/logo.png";
 
 export default function Signup() {
   const {
@@ -16,7 +16,7 @@ export default function Signup() {
     <div className="min-h-screen bg-white">
       <header className="flex justify-between items-center px-6 border-b border-gray-200">
         <div className="flex items-center gap-2">
-          <img src={logo} alt="" className="h-14" />
+          <img alt="" className="h-14" />
         </div>
         <button
           onClick={handleBackToLogin}
@@ -89,9 +89,9 @@ export default function Signup() {
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
                 Confirm Password
               </label>
-                {errors.confirmPassword && (
-                  <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
-                )}
+              {errors.confirmPassword && (
+                <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
+              )}
               <input
                 type="password"
                 id="confirmPassword"
@@ -102,6 +102,25 @@ export default function Signup() {
                 className="w-full px-4 py-3 bg-green-50 border-none rounded-md text-green-700 placeholder-green-600 focus:outline-none focus:ring-2 focus:ring-green-300"
               />
             </div>
+            {/* Role Dropdown */}
+            <div>
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
+                Select Role
+              </label>
+              {errors.role && <p className="text-red-500 text-sm mt-1">{errors.role}</p>}
+              <select
+                id="role"
+                name="role"
+                value={formData.role}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 bg-green-50 border-none rounded-md text-green-700 focus:outline-none focus:ring-2 focus:ring-green-300"
+              >
+                <option value="">Select your role</option>
+                <option value="user">User</option>
+                <option value="chef">Chef</option>
+              </select>
+            </div>
+
 
             {/* Terms Checkbox */}
             <div className="flex items-center gap-2 pt-2">

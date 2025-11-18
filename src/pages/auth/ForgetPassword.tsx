@@ -1,4 +1,4 @@
-import { useForgetPass } from "@/hooks/useForgetPass";
+import { useForgetPass } from "@/hooks/auth/useForgetPass";
 import logo from "../../assets/logo.png";
 
 

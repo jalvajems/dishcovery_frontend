@@ -1,4 +1,4 @@
-import { useResetPass } from '@/hooks/useResetPass';
+import { useResetPass } from '@/hooks/auth/useResetPass';
 import logo from "../../assets/logo.png";
 
 
@@ -8,7 +8,8 @@ export default function ResetPassword() {
         formData,
         handleInputChange,
         handleLogIn,
-        handleSubmit
+        handleSubmit,
+        errors
     }=useResetPass()
 
   return (
@@ -37,6 +38,9 @@ export default function ResetPassword() {
               <label htmlFor="newPassword" className="block text-sm font-medium text-gray-900 mb-2">
                 New password
               </label>
+               {errors.newPassword && (
+    <p className="text-red-600 text-sm mb-1">{errors.newPassword}</p>
+  )}
               <input
                 type="password"
                 id="newPassword"
@@ -50,9 +54,13 @@ export default function ResetPassword() {
 
             {/* Confirm Password Input */}
             <div>
+
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-900 mb-2">
                 confirm password
               </label>
+                {errors.confirmPassword && (
+    <p className="text-red-600 text-sm mb-1">{errors.confirmPassword}</p>
+  )}
               <input
                 type="password"
                 id="confirmPassword"
