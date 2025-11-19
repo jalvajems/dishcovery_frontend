@@ -7,9 +7,8 @@ export default function AuthProtectedRoute(){
     const {token,role}=useAuthStore();
    
       if (token) {
-    if (role === "admin") {
-      return <Navigate to="/admin-dashboard" replace />;
-    } else if (role === "user") {
+  
+    if (role === "user") {
       return <Navigate to="/foodie-dashboard" replace />;
     } else if (role === "chef") {
       return <Navigate to="/chef-dashboard" replace />;

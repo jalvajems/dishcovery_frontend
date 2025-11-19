@@ -1,6 +1,6 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import Sidebar from "@/components/reusable/admin/Sidebar";
-import Navbar from "@/components/reusable/admin/Navbar";
+import Sidebar from "@/components/shared/admin/Sidebar";
+import Navbar from "@/components/shared/admin/Navbar";
 
 export default function AdminLayout() {
   const location = useLocation();

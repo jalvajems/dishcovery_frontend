@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-import AdminLayout from "@/components/admin/AdminLayout";
+import AdminLayout from "@/pages/admin/AdminLayout";
 import Dashboard from "@/pages/admin/Dashboard";
 import { useAuthStore } from "@/store/authStore";
 import FoodieManagement from "@/pages/admin/FoodieManagement";

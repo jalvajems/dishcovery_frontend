@@ -7,6 +7,9 @@ export const loginApi = (LoginData: { email: string; password: string }) => {
     return API.post('/auth/login', LoginData)
 }
 
+export const adminLoginApi=(LoginData:{email:string; password:string})=>{
+    return API.post('/auth/admin-login',LoginData)
+}
 export const forgetPassApi = (email: { email: string }) => {
     return API.post('/auth/forgetPassword', email)
 }

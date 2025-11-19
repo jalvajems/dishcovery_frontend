@@ -2,7 +2,7 @@ import ChefDashboard from "@/pages/chef/ChefDashboard";
 import { Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./Protected.routes";
 import { useAuthStore } from "@/store/authStore";
-import Login from "@/components/reusable/auth/Login";
+import Login from "@/components/shared/auth/Login";
 
 function ChefRoutes(){
     const {role}=useAuthStore();

@@ -63,12 +63,11 @@ export const useLogin = () => {
       }
 
       login(data.accessToken, data.user);
-
-      if (data.user.role === 'admin') {
-        // await adminDashboardApi()
-        navigate('/admin-dashboard');
+       if (data.user.role == "admin") {
+        showError("Access denied.");
+        return;
       }
-      else if (data.user.role === 'chef') {
+      if (data.user.role === 'chef') {
         try {
           await chefDashboardApi();
           showSuccess('Login Successfully!!')
