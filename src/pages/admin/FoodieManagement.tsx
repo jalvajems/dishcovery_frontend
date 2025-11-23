@@ -30,6 +30,7 @@ export default function FoodieManagement() {
     filters,
     updateFilter,
   } = useAdminTable<Foodie>({
+    
     fetchApi: async (page, limit, search, filters) => {
       return adminFoodieListingApi(page, limit, search, filters.status);
     },

@@ -17,8 +17,8 @@ type UseAdminTableConfig<T> = {
 
 export function useAdminTable<T>({ fetchApi, filters }: UseAdminTableConfig<T>) {
   const [data, setData] = useState<T[]>([]);
-  const [searchInput, setSearchInput] = useState(""); // user typing
-  const [searchQuery, setSearchQuery] = useState(""); // debounced
+  const [searchInput, setSearchInput] = useState(""); 
+  const [searchQuery, setSearchQuery] = useState(""); 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const limit = 5;
