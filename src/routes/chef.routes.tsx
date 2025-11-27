@@ -22,6 +22,8 @@ function ChefRoutes(){
       </Route>
       <Route path="/recipe-detail/:id" element={<RecipeDetailPage/>}/>
       <Route path="/recipe-add" element={<AddRecipe/>} />
+      <Route path="/recipe-edit" element={<EditRecipe/>} />
+      
     </Routes>
 
             

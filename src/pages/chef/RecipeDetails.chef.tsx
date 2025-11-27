@@ -1,17 +1,19 @@
 import { useEffect, useState } from "react";
-import { Clock, Users, Tag, Star, ChefHat, Edit2, Trash2 } from "lucide-react";
-import { useParams } from "react-router-dom";
-import { getRecipeDetailApi } from "@/api/chefApi";
+import { Clock, Users, Tag,  ChefHat, Edit2, Trash2 } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
+import { deleteRecipeApi, getRecipeDetailApi } from "@/api/chefApi";
 import { showError } from "@/utils/toast";
 import { useAuthStore } from "@/store/authStore";
 
 export default function RecipeDetailPage() {
   const { id } = useParams();
-  
+  const navigate=useNavigate()
   const name=useAuthStore().user?.name
   
   const [recipe, setRecipe] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  if(!id)throw Error('no recipe id found');
+  
 
   useEffect(() => {
     
@@ -46,6 +48,13 @@ export default function RecipeDetailPage() {
         Recipe not found
       </div>
     );
+  }
+  const handleEditButton=async()=>{
+    navigate('/recipe-edit',{state:{recipeId:id}})
+  }
+  const handleDelete=async(id:string)=>{
+    await deleteRecipeApi(id)
+    navigate('/chef/recipe-listing')
   }
 
   return (
@@ -114,11 +123,11 @@ export default function RecipeDetailPage() {
 
         {/* ACTION BUTTONS */}
         <div className="flex gap-4">
-          <button className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl hover:scale-105 transition">
+          <button onClick={()=>handleEditButton()} className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl hover:scale-105 transition">
             <Edit2 className="w-5 h-5" />
             Edit
           </button>
-          <button className="px-8 py-4 bg-white border-2 border-gray-300 text-gray-700 font-bold rounded-xl hover:bg-gray-50 hover:scale-105 transition">
+          <button onClick={()=>handleDelete(id)} className="px-8 py-4 bg-white border-2 border-gray-300 text-gray-700 font-bold rounded-xl hover:bg-gray-50 hover:scale-105 transition">
             <Trash2 className="w-5 h-5" />
             Delete
           </button>

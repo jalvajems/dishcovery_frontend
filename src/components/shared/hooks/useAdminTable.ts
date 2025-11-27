@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 type FilterConfig = {
   key: string;
@@ -43,16 +43,16 @@ export function useAdminTable<T>({ fetchApi, filters }: UseAdminTableConfig<T>) 
     return () => clearTimeout(timer);
   }, [searchInput]);
 
-  const getData = async () => {
-    const res = await fetchApi(currentPage, limit, searchQuery, filterValues);
+  const getData = useCallback(async () => {
+  const res = await fetchApi(currentPage, limit, searchQuery, filterValues);
+  setData(res.data.data);
+  setTotalPages(res.data.totalPages);
+}, [currentPage, limit, searchQuery, filterValues]);
 
-    setData(res.data.data);
-    setTotalPages(res.data.totalPages);
-  };
 
   useEffect(() => {
     getData();
-  }, [currentPage, searchQuery, filterValues]);
+  }, [getData,currentPage, searchQuery, filterValues]);
 
   return {
     data,

@@ -7,7 +7,7 @@ export default function MyBlogsPage() {
   const [currentPage, setCurrentPage] = useState(1);
 
   const menuItems = [
-    { icon: Home, label: 'Home' },
+    { icon: Home, label: '' },
     { icon: BookOpen, label: 'Recipes' },
     { icon: Utensils, label: 'Workshops' },
     { icon: FileText, label: 'Blogs' },

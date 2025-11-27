@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Upload, ChevronDown, Plus, X } from 'lucide-react';
-import { addRecipePageApi } from '@/api/chefApi';
+import { addRecipePageApi, editRecipePageApi } from '@/api/chefApi';
 import { useAuthStore } from '@/store/authStore';
 import { showError, showSuccess } from '@/utils/toast';
+import { useLocation, useNavigate } from 'react-router-dom';
 
-export default function AddRecipe() {
+export default function EditRecipe() {
   const [formData, setFormData] = useState({
     title: '',
     cuisine: '',
@@ -59,23 +60,7 @@ export default function AddRecipe() {
     setSteps(newSteps);
   };
   const handleSaveRecipe = async() => {
-    try {
-      const recipeData={
-        chefId: useAuthStore.getState().user?._id,
-      title: formData.title,
-      cuisine: formData.cuisine,
-      cookingTime: Number(formData.cookingTime) || 0,
-      tags: formData.tags ? [formData.tags] : [],
-      dietType: formData.dietType ? [formData.dietType] : [],
-      ingredients: ingredients.filter(i => i.trim() !== ''),
-      steps: steps.filter(s => s.trim() !== ''),
-      isDraft: formData.isDraft
-      }
-      const result=await addRecipePageApi(recipeData)
-      showSuccess(result.data.message)
-    } catch (error:any) {
-      showError(error.response?.data?.message)
-    }
+   
   };
 
   const handleCancel = () => {
@@ -120,7 +105,7 @@ export default function AddRecipe() {
       {/* Main Content */}
       <main className="max-w-3xl mx-auto px-8 py-12">
         <h1 className="text-4xl font-bold mb-8 bg-gradient-to-r from-gray-900 via-green-700 to-emerald-700 bg-clip-text text-transparent">
-          Add Recipe
+          Edit Recipe
         </h1>
 
         <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl border border-gray-100 p-10">

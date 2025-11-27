@@ -12,7 +12,7 @@ import {
   AdminUnBlockApi,
   adminVerifyChefApi,
   adminUnverifyChefApi,
-} from "@/api/adminApin";
+} from "@/api/adminApi";
 
 import { useState } from "react";
 

@@ -1,9 +1,16 @@
 import { useState } from 'react';
 import { Upload, ChevronDown, Plus, X } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { editRecipePageApi } from '@/api/chefApi';
+import { showError, showSuccess } from '@/utils/toast';
 
 export default function EditRecipe() {
+    const navigate=useNavigate()
+  const location=useLocation()
+  const recipeId=location.state?.recipeId  
+
   const [formData, setFormData] = useState({
-    recipeName: '',
+    title: '',
     cuisine: '',
     cookingTime: '',
     tags: '',
@@ -56,12 +63,28 @@ export default function EditRecipe() {
     setSteps(newSteps);
   };
 
-  const handleSaveRecipe = () => {
-    console.log('Recipe data:', formData);
-    console.log('Ingredients:', ingredients);
-    console.log('Steps:', steps);
-    console.log('Uploaded images:', uploadedImages);
-    alert('Recipe saved successfully!');
+  const handleSaveRecipe = async() => {
+   try {
+      const recipeData={
+        id:recipeId,
+      title: formData.title,
+      cuisine: formData.cuisine,
+      cookingTime: Number(formData.cookingTime) || 0,
+      tags: formData.tags ? [formData.tags] : [],
+      dietType: formData.dietType ? [formData.dietType] : [],
+      ingredients: ingredients.filter(i => i.trim() !== ''),
+      steps: steps.filter(s => s.trim() !== ''),
+      isDraft: formData.isDraft
+      }
+      console.log('recipe data ',recipeData);
+      const result=await editRecipePageApi({recipeId:recipeId,recipeData:recipeData})
+      console.log('result ',result);
+      
+      navigate(`/recipe-detail/${recipeId}`)
+      showSuccess(result.data.message)
+    } catch (error:any) {
+      showError(error.response?.data?.message)
+    }
   };
 
   const handleCancel = () => {
@@ -118,9 +141,9 @@ export default function EditRecipe() {
               </label>
               <input
                 type="text"
-                id="recipeName"
-                name="recipeName"
-                value={formData.recipeName}
+                id="title"
+                name="title"
+                value={formData.title}
                 onChange={handleInputChange}
                 placeholder="Enter recipe name"
                 className="w-full px-4 py-4 bg-green-50 border border-green-100 rounded-xl text-gray-900 placeholder-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent transition-all"
@@ -348,7 +371,7 @@ export default function EditRecipe() {
                 Cancel
               </button>
               <button
-                onClick={handleSaveRecipe}
+                onClick={()=>handleSaveRecipe()}
                 className="flex-1 px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl hover:shadow-xl hover:scale-105 transition-all shadow-lg"
               >
                 Save Recipe

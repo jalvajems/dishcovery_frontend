@@ -4,7 +4,7 @@ import {
   adminFoodieListingApi,
   AdminBlockApi,
   AdminUnBlockApi,
-} from "@/api/adminApin";
+} from "@/api/adminApi";
 import ConfirmModal from "@/components/shared/ConfirmModal";
 import ReusableTable from "@/components/shared/DataTable";
 import Pagination from "@/components/shared/Pagination";
@@ -53,6 +53,7 @@ export default function FoodieManagement() {
 
     if (actionType === "BLOCK") await AdminBlockApi(selected._id);
     else await AdminUnBlockApi(selected._id);
+  
 
     setModalOpen(false);
   };
