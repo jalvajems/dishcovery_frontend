@@ -24,7 +24,7 @@ export default function ChefSidebar({ activePath, onMenuSelect }: SidebarProps) 
   { icon: Home, label: "Dashboard", path: "/chef/dashboard" },
   { icon: BookOpen, label: "Recipes", path: "/chef/recipes-listing" },
   { icon: Utensils, label: "Workshops", path: "/chef/workshops" },
-  { icon: FileText, label: "Blogs", path: "/chef/blogs" },
+  { icon: FileText, label: "Blogs", path: "/chef/blog-listing" },
   { icon: MessageCircle, label: "Chat", path: "/chef/chat" },
   { icon: User, label: "Profile", path: "/chef/profile" },
 ];

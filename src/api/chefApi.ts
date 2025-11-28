@@ -18,3 +18,23 @@ export const editRecipePageApi=(data:{recipeId:string,recipeData:object})=>{
 export const deleteRecipeApi=(id:string)=>{
     return API.delete(`/chef/recipe-delete/${id}`)
 }
+
+
+export const createBlogApi=(data:object)=>{
+    return API.post("/chef/blog-add",data)
+}
+export const editBlogApi=(data:object,blogId:string)=>{
+    return API.patch(`/chef/blog-edit/${blogId}`,data)
+}
+export const getBlogDetailChefApi = (id: string) => {
+    return API.get(`/chef/blog-details/${id}`);
+};
+export const deleteBlogApi=(blogId:string)=>{
+    console.log('sdl');
+    return API.delete(`/chef/blog-delete/${blogId}`)
+}
+export const getMyBlogsChefApi = ( page = 1, limit = 10) => {
+    return API.get(`/chef/blog-listing`, {
+        params: {  page, limit }
+    });
+};

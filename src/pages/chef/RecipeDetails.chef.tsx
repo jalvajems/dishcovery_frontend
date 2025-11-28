@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Clock, Users, Tag,  ChefHat, Edit2, Trash2 } from "lucide-react";
+import { Clock, Users, Tag, Star, ChefHat, Edit2, Trash2 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { deleteRecipeApi, getRecipeDetailApi } from "@/api/chefApi";
 import { showError } from "@/utils/toast";
@@ -12,7 +12,7 @@ export default function RecipeDetailPage() {
   
   const [recipe, setRecipe] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  if(!id)throw Error('no recipe id found');
+  if(!id)throw Error('no recipe found')
   
 
   useEffect(() => {
@@ -54,7 +54,7 @@ export default function RecipeDetailPage() {
   }
   const handleDelete=async(id:string)=>{
     await deleteRecipeApi(id)
-    navigate('/chef/recipe-listing')
+    navigate('/recipes-listing')
   }
 
   return (
