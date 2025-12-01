@@ -1,14 +1,17 @@
 import AddNewBlog from "@/pages/chef/AddBlog.chef";
 import AddRecipe from "@/pages/chef/AddRecipe.chef";
-import BlogDetailPage from "@/pages/chef/BlogDetail";
+import BlogDetailPage from "@/pages/chef/BlogDetail.chef";
 import BlogListChef from "@/pages/chef/BlogList";
 import ChefDashboard from "@/pages/chef/ChefDashboard";
 import ChefLayout from "@/pages/chef/ChefLayout";
 import EditBlog from "@/pages/chef/EditBlog.chef";
+import CreateProfileChef from "@/pages/chef/AddProfile.chef";
 import EditRecipe from "@/pages/chef/EditRecipe.chef";
 import RecipeDetailPage from "@/pages/chef/RecipeDetails.chef";
 import RecipeListing from "@/pages/chef/RecipeListing.chef";
 import { Route, Routes } from "react-router-dom";
+import ChefProfileEdit from "@/pages/chef/EditProfile.chef";
+import ChefProfilePage from "@/pages/chef/Profile.chef";
 // import ProtectedRoute from "./Protected.routes";
 // import { useAuthStore } from "@/store/authStore";
 
@@ -31,6 +34,10 @@ function ChefRoutes(){
       <Route path="/blog-add" element={<AddNewBlog/>}/>
       <Route path="/blog-edit/:blogId" element={<EditBlog/>} />
       <Route path="/blog-detail/:blogId" element={<BlogDetailPage/>} />
+
+      <Route path="/chef/profile" element={<ChefProfilePage/>} />
+      <Route path="/chef/profile-add" element={<CreateProfileChef/>}/>
+      <Route path="/chef/profile-edit" element={<ChefProfileEdit/>}/>
       
     </Routes>
 

@@ -3,8 +3,10 @@ import API from "./apiInstance"
 export const chefDashboardApi=()=>{
     return API.get('/chef/dashboard')
 }
+
+
 export const getAllRecipeApi=(id:string,page:number,limit:number,search?:string)=>{
-    return API.get(`/chef/recipes-list?chefId=${id}`,{params:{page,limit,search}})
+    return API.get(`/chef/recipes-list?chefId=${id}`,{params:{id,page,limit,search}})
 }
 export const getRecipeDetailApi=(id:string)=>{
     return API.get(`/chef/recipe-detail/${id}`)
@@ -38,3 +40,16 @@ export const getMyBlogsChefApi = ( page = 1, limit = 10) => {
         params: {  page, limit }
     });
 };
+
+
+export const getChefProfileApi=()=>{
+    return API.get('/chef/profile');
+}
+export const updateChefProfileApi=(payload:object)=>{
+    return API.put('/chef/profile-edit',payload)
+}
+export const createChefProfileApi=(payload:object)=>{
+    console.log('-====',payload);
+    
+    return API.post('/chef/profile',payload)
+}

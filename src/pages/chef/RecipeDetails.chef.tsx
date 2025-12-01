@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { deleteRecipeApi, getRecipeDetailApi } from "@/api/chefApi";
 import { showError } from "@/utils/toast";
 import { useAuthStore } from "@/store/authStore";
+import ChefReviewSection from "@/components/shared/ChefReviewSection";
 
 export default function RecipeDetailPage() {
   const { id } = useParams();
@@ -133,9 +134,11 @@ export default function RecipeDetailPage() {
           </button>
         </div>
 
+      <ChefReviewSection reviewableId={id} reviewableType="Recipe" />
       </main>
     </div>
   );
+
 }
 
 /* Small reusable detail item */

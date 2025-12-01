@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from "react-router-dom";
 import { deleteBlogApi, getBlogDetailChefApi } from "@/api/chefApi";
 import { showError, showSuccess } from "@/utils/toast";
+import ChefReviewSection from '@/components/shared/ChefReviewSection';
 
 export default function BlogDetailPage() {
   const { blogId } = useParams();
@@ -11,14 +12,15 @@ export default function BlogDetailPage() {
   const [blog, setBlog] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  if(!blogId)throw Error('blog id is not defined');
   useEffect(() => {
     fetchBlog();
   }, [blogId]);
-console.log('blogid',blogId);
-
+  console.log('blogid',blogId);
+  
   async function fetchBlog() {
     try {
-      if(!blogId)return;
+      if(!blogId)throw Error('blog id is not defined');
       const res = await getBlogDetailChefApi(blogId);
       setBlog(res.data.data);
       setLoading(false);
@@ -162,23 +164,12 @@ console.log('blogid',blogId);
           </div>
 
           {/* Engagement */}
-          <div className="px-10 pb-10">
+          {/* <div className="px-10 pb-10">
             <h2 className="text-2xl font-bold mb-6 text-gray-900">Engagement</h2>
             <div className="grid grid-cols-3 gap-6">
 
-              {/* Views */}
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200 hover:shadow-lg transition-all">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
-                    <Eye className="w-6 h-6 text-white" />
-                  </div>
-                  <span className="text-gray-700 font-semibold">Views</span>
-                </div>
-                <p className="text-4xl font-bold text-gray-900">{blog.views ?? 0}</p>
-              </div>
-
               {/* Likes */}
-              <div className="bg-gradient-to-br from-red-50 to-pink-100 rounded-2xl p-6 border border-pink-200 hover:shadow-lg transition-all">
+              {/* {/* <div className="bg-gradient-to-br from-red-50 to-pink-100 rounded-2xl p-6 border border-pink-200 hover:shadow-lg transition-all">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center">
                     <Heart className="w-6 h-6 text-white" />
@@ -186,23 +177,13 @@ console.log('blogid',blogId);
                   <span className="text-gray-700 font-semibold">Likes</span>
                 </div>
                 <p className="text-4xl font-bold text-gray-900">{blog.likes ?? 0}</p>
-              </div>
-
-              {/* Comments */}
-              <div className="bg-gradient-to-br from-green-50 to-emerald-100 rounded-2xl p-6 border border-green-200 hover:shadow-lg transition-all">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center">
-                    <MessageCircle className="w-6 h-6 text-white" />
-                  </div>
-                  <span className="text-gray-700 font-semibold">Comments</span>
-                </div>
-                <p className="text-4xl font-bold text-gray-900">{blog.commentsCount ?? 0}</p>
-              </div>
-
+              </div> 
             </div>
-          </div>
+          </div> */}
 
         </article>
+        <ChefReviewSection reviewableId={blogId} reviewableType="Blog" />
+
       </main>
     </div>
   );

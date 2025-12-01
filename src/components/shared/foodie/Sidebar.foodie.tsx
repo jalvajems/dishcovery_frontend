@@ -12,7 +12,7 @@ export default function FoodieSidebar() {
     { icon: Home, label: 'Home', path: '/foodie/dashboard' },
     { icon: ChefHat, label: 'Chef', path: '/foodie/chef' },
     { icon: BookOpen, label: 'Recipes', path: '/foodie/recipe-listing' },
-    { icon: FileText, label: 'Blogs', path: '/foodie/blogs' },
+    { icon: FileText, label: 'Blogs', path: '/foodie/blog-listing' },
     { icon: MapPin, label: 'Workshops', path: '/foodie/workshops' },
     { icon: MapPin, label: 'Food Spots', path: '/foodie/spots' },
     { icon: Heart, label: 'Donations', path: '/foodie/donations' },

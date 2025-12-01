@@ -22,6 +22,7 @@ export default function RecipeListing() {
   }
 
   const user = useAuthStore().user?._id
+
   console.log('user',user)
   
   useEffect(() => {
@@ -34,8 +35,11 @@ export default function RecipeListing() {
         showError("User ID missing");
         return;
       }
+      console.log('userid',user);
+      
       const res = await getAllRecipeApi(user,currentPage,limit,searchQuery);
       setRecipes(res.data.data)
+      
       setTotalPages(res.data.totalPages)
       console.log(res.data.data)
 

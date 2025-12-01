@@ -1,32 +1,55 @@
-import React, { useState } from 'react';
-import { Search, Bell, Heart, MessageCircle, Bookmark, ChevronRight } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Search, Bell, Heart, MessageCircle, Bookmark, ChevronRight, Tag } from 'lucide-react';
+import { useParams } from 'react-router-dom';
+import { getFoodieBlogDetailApi, getRelatedBlogsApi } from '@/api/foodieApi';
+import { showError } from '@/utils/toast';
+import ReviewSection from '@/components/shared/ReviewPage';
 
 const BlogDetailPage: React.FC = () => {
+  const [blog, setBlog] = useState<any>(null);
+  const [relatedBlogs, setRelatedBlogs] = useState([]);
+  const [comments, setComments] = useState([]);
+
   const [likes, setLikes] = useState(234);
   const [isLiked, setIsLiked] = useState(false);
+  const { blogId } = useParams();
+
+  if (!blogId) throw Error('blog id is missing');
+
+  useEffect(() => {
+    const fetchBlog = async () => {
+      try {
+        const res = await getFoodieBlogDetailApi(blogId);
+        setBlog(res.data.data);
+        console.log('blogs', res.data.data);
+      } catch (error: any) {
+        showError(error.response?.data?.message || "Failed to fetch blog details");
+      }
+    };
+    
+    fetchBlog();
+  }, [blogId]);
+
+  useEffect(()=>{
+    const fetchRelatedBlogs=async()=>{
+      try {
+        const res=await getRelatedBlogsApi(blog.tags[0])
+        setRelatedBlogs(res.data.relatedDatas)
+      } catch (error:any) {
+        showError(error.response?.data?.message)
+      }
+    }
+    fetchRelatedBlogs()
+  },[blogId])
+  
+  console.log('blogs===', blog);
+  console.log('blogsrelated===', relatedBlogs);
 
   const handleLike = () => {
     setIsLiked(!isLiked);
     setLikes(isLiked ? likes - 1 : likes + 1);
   };
 
-  const relatedBlogs = [
-    {
-      id: 1,
-      title: 'The Best Sauces for Homemade Pasta',
-      image: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=400&h=300&fit=crop'
-    },
-    {
-      id: 2,
-      title: 'Exploring Regional Italian Cuisine',
-      image: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=400&h=300&fit=crop'
-    },
-    {
-      id: 3,
-      title: 'Pasta Shapes and Their Perfect Pairings',
-      image: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=400&h=300&fit=crop'
-    }
-  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50">
@@ -79,165 +102,70 @@ const BlogDetailPage: React.FC = () => {
 
         {/* Blog Title */}
         <h1 className="text-4xl font-bold text-gray-900 mb-6">
-          The Ultimate Guide to Healthy Meal Prep
+          {blog?.title}
         </h1>
+
 
         {/* Featured Image */}
         <div className="rounded-2xl overflow-hidden shadow-2xl mb-8">
-          <img
-            src="https://images.unsplash.com/photo-1551462147-ff29053bfc14?w=1200&h=600&fit=crop"
-            alt="Pasta"
-            className="w-full h-96 object-cover"
-          />
+          <img src={blog?.image} className="w-full h-96 object-cover" />
+
         </div>
 
+  <div className="grid grid-cols-2 gap-6">
+            <DetailItem icon={<Tag />} label="Tags" value={blog?.tags?.join(", ")} />
+          </div>
         {/* Author & Date */}
         <div className="flex items-center gap-3 mb-8 text-gray-600 text-sm">
-          <span className="font-medium">By Chef Natasha Rossi</span>
+          <span className="font-medium">By {blog?.chefId?.name}</span>
           <span>•</span>
-          <span>Published on July 15, 2024</span>
-        </div>
+          <span>Published on {new Date(blog?.createdAt).toDateString()}</span>
 
+        </div>
         {/* Blog Content */}
-        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 shadow-xl mb-8">
-          <div className="prose prose-lg max-w-none">
-            <p className="text-gray-700 leading-relaxed mb-6">
-              Making pasta from scratch is a culinary art that connects you to the heart of Italian cuisine. This guide will walk you through the process, from selecting the right ingredients to shaping and cooking your pasta to perfection. Whether you're a beginner or an experienced cook, these tips will help you create pasta that's both delicious and satisfying.
-            </p>
+        {/* Content */}
+        <div className="px-10 pb-8">
+          <p className="text-lg text-gray-700 leading-relaxed mb-8">
+            {blog?.shortDescription}
+          </p>
 
-            <h3 className="text-2xl font-bold text-gray-900 mt-8 mb-4">
-              1. "Prepare the Dough:"
-            </h3>
-            <p className="text-gray-700 leading-relaxed mb-6">
-              On a clean work surface, mound the flour and create a well in the center. Crack the eggs into the well and add a drizzle of oil and a pinch of salt. Using a fork, begin to gradually incorporate the flour into the eggs until a shaggy dough forms. If the dough is too dry, add a teaspoon of water at a time until it comes together. If it's too wet, add a little more flour.
-            </p>
-
-            <h3 className="text-2xl font-bold text-gray-900 mt-8 mb-4">
-              2. "Knead the Dough:"
-            </h3>
-            <p className="text-gray-700 leading-relaxed mb-6">
-              Knead the dough for 8-10 minutes until it becomes smooth and elastic. The dough should spring back when lightly pressed. Wrap the dough in plastic wrap and let it rest at room temperature for at least 30 minutes to allow the gluten to relax.
-            </p>
-
-            <h3 className="text-2xl font-bold text-gray-900 mt-8 mb-4">
-              3. "Roll the Dough:"
-            </h3>
-            <p className="text-gray-700 leading-relaxed mb-6">
-              If using a rolling pin, roll the dough into a thin sheet, about 1/16 inch thick. If using a pasta machine, start with the widest setting and gradually decrease the thickness, passing the dough through each setting twice until you reach the desired thickness.
-            </p>
-
-            <h3 className="text-2xl font-bold text-gray-900 mt-8 mb-4">
-              4. "Shape the Pasta:"
-            </h3>
-            <p className="text-gray-700 leading-relaxed mb-6">
-              Cut the dough into your desired shape. For fettuccine or tagliatelle, use a pasta cutter or a knife to cut the dough into strips. For ravioli or tortellini, fill and shape the pasta according to your recipe.
-            </p>
-
-            <h3 className="text-2xl font-bold text-gray-900 mt-8 mb-4">
-              5. "Cook the Pasta:"
-            </h3>
-            <p className="text-gray-700 leading-relaxed mb-6">
-              Bring a large pot of salted water to a rolling boil. Add the pasta and cook for 2-4 minutes, or until al dente. Fresh pasta cooks much faster than dried pasta, so keep a close eye on it. Use a slotted spoon or spider to transfer the pasta to a colander, and serve immediately with your favorite sauce.
-            </p>
-
-            <h3 className="text-2xl font-bold text-gray-900 mt-8 mb-4">
-              6. "Tips for Success:"
-            </h3>
-            <ul className="list-disc list-inside text-gray-700 leading-relaxed space-y-3 mb-6">
-              <li><strong>"Fresh Dough Choice:"</strong> Using semolina flour will give your pasta a slightly coarser texture, which helps it hold onto sauces better.</li>
-              <li><strong>"Dough Consistency:"</strong> The dough should be firm but pliable. If it's too dry, it will be difficult to roll out. If it's too wet, it will stick to the rolling pin or pasta machine.</li>
-              <li><strong>"Resting Time:"</strong> Resting the dough is crucial for allowing the gluten to relax, making it easier to roll out and preventing it from snapping back.</li>
-              <li><strong>"Cooking Time:"</strong> Fresh pasta cooks very quickly, so don't overcook it. It should be al dente, with a slight bite to it.</li>
-            </ul>
-
-            <p className="text-gray-700 leading-relaxed">
-              By following these steps and tips, you'll be able to create delicious, homemade pasta that will impress your friends and family. Enjoy the process and the wonderful flavors of your freshly made pasta!
-            </p>
-          </div>
+          <p className="text-lg text-gray-700 leading-relaxed whitespace-pre-line">
+            {blog?.content}
+          </p>
         </div>
+
 
         {/* Engagement Actions */}
         <div className="flex items-center gap-6 mb-12">
           <button
             onClick={handleLike}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-              isLiked ? 'bg-green-100 text-green-700' : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${isLiked ? 'bg-green-100 text-green-700' : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
           >
             <Heart className={`w-5 h-5 ${isLiked ? 'fill-green-700' : ''}`} />
             <span className="font-medium">{likes}</span>
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
-            <MessageCircle className="w-5 h-5" />
-            <span className="font-medium">12</span>
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+          {/* <button className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
             <Bookmark className="w-5 h-5" />
             <span className="font-medium">58</span>
-          </button>
+          </button> */}
         </div>
 
         {/* Comments Section */}
         <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 shadow-xl mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">Comments</h2>
 
           <div className="space-y-6 mb-8">
-            {/* Comment 1 */}
-            <div className="flex gap-4">
-              <img
-                src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sophia"
-                alt="Sophia Clark"
-                className="w-12 h-12 rounded-full flex-shrink-0"
-              />
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="font-bold text-gray-900">Sophia Clark</span>
-                  <span className="text-gray-500 text-sm">3 days ago</span>
-                </div>
-                <p className="text-gray-700 mb-3 leading-relaxed">
-                  This guide is so helpful! I've always wanted to try making pasta from scratch, and now I feel confident enough to give it a go. Thanks for the detailed instructions and tips!
-                </p>
-                <button className="flex items-center gap-1 text-gray-500 hover:text-green-600 text-sm">
-                  <Heart className="w-4 h-4" />
-                  <span>5</span>
-                </button>
-              </div>
-            </div>
+        
+                     <ReviewSection reviewableId={blogId} reviewableType="Blog" />
 
-            {/* Comment 2 */}
-            <div className="flex gap-4">
-              <img
-                src="https://api.dicebear.com/7.x/avataaars/svg?seed=Ethan"
-                alt="Ethan Bennett"
-                className="w-12 h-12 rounded-full flex-shrink-0"
-              />
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="font-bold text-gray-900">Ethan Bennett</span>
-                  <span className="text-gray-500 text-sm">1 week ago</span>
-                </div>
-                <p className="text-gray-700 mb-3 leading-relaxed">
-                  I've made pasta a few times, but I always struggled with the dough consistency. Your tip about adding water gradually really helped! My pasta turned out perfectly this time.
-                </p>
-                <button className="flex items-center gap-1 text-gray-500 hover:text-green-600 text-sm">
-                  <Heart className="w-4 h-4" />
-                  <span>3</span>
-                </button>
-              </div>
-            </div>
           </div>
-
-          {/* Write a Review Button */}
-          <button className="w-full py-3 bg-green-100 text-green-700 font-semibold rounded-xl hover:bg-green-200 transition-colors">
-            Write a Review
-          </button>
         </div>
 
         {/* Related Blogs */}
         <div className="mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-8">Related Blogs</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {relatedBlogs.map((blog) => (
+            {relatedBlogs.map((blog:any) => (
               <div
                 key={blog.id}
                 className="bg-white/90 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 group cursor-pointer"
@@ -297,3 +225,14 @@ const BlogDetailPage: React.FC = () => {
 };
 
 export default BlogDetailPage;
+function DetailItem({ icon, label, value }: any) {
+  return (
+    <div className="flex items-center justify-between py-3 border-b border-gray-200">
+      <span className="text-green-600 font-semibold flex items-center gap-2">
+        {icon}
+        {label}
+      </span>
+      <span className="font-bold text-gray-900">{value}</span>
+    </div>
+  );
+}
