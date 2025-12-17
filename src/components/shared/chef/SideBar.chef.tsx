@@ -10,6 +10,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
 import { logoutApi } from "@/api/authApi";
+import { useUserStore } from "@/store/userStore";
 
 interface SidebarProps {
   activePath: string;
@@ -19,6 +20,9 @@ interface SidebarProps {
 export default function ChefSidebar({ activePath, onMenuSelect }: SidebarProps) {
   const navigate = useNavigate();
   const { logout } = useAuthStore();
+    const delUserStore=useUserStore().delUserStore
+    const {isVerifiedUser}=useUserStore()
+  
 
   const menuItems = [
   { icon: Home, label: "Dashboard", path: "/chef/dashboard" },
@@ -33,6 +37,7 @@ export default function ChefSidebar({ activePath, onMenuSelect }: SidebarProps) 
   const handleLogout = async () => {
     await logoutApi();
     logout();
+    delUserStore()
     navigate("/login");
   };
 
@@ -45,6 +50,7 @@ export default function ChefSidebar({ activePath, onMenuSelect }: SidebarProps) 
           return (
             <button
               key={path}
+              disabled={!isVerifiedUser}
               onClick={() => onMenuSelect(path)}
               className={`w-full flex items-center gap-4 px-5 py-4 rounded-xl transition-all ${
                 isActive

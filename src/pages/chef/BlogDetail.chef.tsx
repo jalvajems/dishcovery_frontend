@@ -4,6 +4,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { deleteBlogApi, getBlogDetailChefApi } from "@/api/chefApi";
 import { showError, showSuccess } from "@/utils/toast";
 import ChefReviewSection from '@/components/shared/ChefReviewSection';
+import ChefNavbar from '@/components/shared/chef/NavBar.chef';
+import { useUserStore } from '@/store/userStore';
 
 export default function BlogDetailPage() {
   const { blogId } = useParams();
@@ -11,6 +13,8 @@ export default function BlogDetailPage() {
 
   const [blog, setBlog] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+      const {isVerifiedUser}=useUserStore()
+  
 
   if(!blogId)throw Error('blog id is not defined');
   useEffect(() => {
@@ -60,38 +64,8 @@ export default function BlogDetailPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50">
 
-       {/* Top Navigation */}
-      <nav className="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-50 border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" className="text-green-600">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2.5"/>
-              <path d="M8 12h8M12 8v8" stroke="currentColor" strokeWidth="2.5"/>
-            </svg>
-            <span className="text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-              Dishcovery
-            </span>
-          </div>
-
-          <div className="flex items-center gap-6 text-gray-700 font-medium">
-            <a href="#" className="hover:text-green-600 transition-colors">Home</a>
-            <a href="#" className="hover:text-green-600 transition-colors">My Recipes</a>
-            <a href="#" className="hover:text-green-600 transition-colors">My Blogs</a>
-            <a href="#" className="hover:text-green-600 transition-colors">My Workshops</a>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <input
-              type="text"
-              placeholder="Search"
-              className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-green-400 transition-all"
-            />
-            <div className="w-11 h-11 rounded-full bg-gradient-to-br from-green-400 to-blue-500 shadow-lg ring-2 ring-white">
-              <img src="https://images.unsplash.com/photo-1583394293214-28ded15ee548?w=100&h=100&fit=crop" alt="User" className="w-full h-full rounded-full object-cover" />
-            </div>
-          </div>
-        </div>
-      </nav>
+      
+      <ChefNavbar/>
 
       <main className="max-w-5xl mx-auto px-8 py-12">
 
@@ -125,7 +99,7 @@ export default function BlogDetailPage() {
           <div className="px-10 pb-8">
             <div className="relative rounded-2xl overflow-hidden shadow-xl">
               <img 
-                src={blog.thumbnail}
+                src={blog.coverImage}
                 alt={blog.title}
                 className="w-full h-96 object-cover"
               />
@@ -147,6 +121,7 @@ export default function BlogDetailPage() {
           {/* Action Buttons */}
           <div className="px-10 pb-10 flex gap-4">
             <button
+            disabled={!isVerifiedUser}
               onClick={() => navigate(`/blog-edit/${blogId}`)}
               className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl hover:shadow-xl hover:scale-105 transition-all shadow-lg flex items-center gap-2"
             >

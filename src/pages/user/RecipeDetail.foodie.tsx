@@ -2,11 +2,14 @@ import { useEffect, useState } from 'react';
 import { Star, ThumbsUp, ThumbsDown, Clock, Flame, Droplet, ChefHat, Users, Tag } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import { getRecipeDetailFoodieApi, getRelatedRecipesApi } from '@/api/foodieApi';
-import { showError } from '@/utils/toast';
+import { showError, showSuccess } from '@/utils/toast';
 import ReviewSection from '@/components/shared/ReviewPage';
+import API from '@/api/apiInstance';
+import FoodieNavbar from '@/components/shared/foodie/Navbar.foodie';
 
 export default function RecipeDetailFoodie() {
     const {id}=useParams()
+    const [isSaved,setIsSaved]=useState(false);
     console.log('id indetail',id);
     
   const [likedReviews, setLikedReviews] = useState<{ [key: number]: boolean }>({});
@@ -24,7 +27,8 @@ export default function RecipeDetailFoodie() {
               const res = await getRecipeDetailFoodieApi(id);
               console.log('2');
               setRecipe(res.data.data);
-              console.log('recipe',res.data.data);
+              setIsSaved(res.data.isSaved)
+              console.log('recipe',res);
               
             } catch (error: any) {
               showError(error.response?.data?.message || "Failed to load recipe");
@@ -32,6 +36,7 @@ export default function RecipeDetailFoodie() {
           }
           fetchRecipe()
   },[id])
+console.log('save;',isSaved);
 
   
   useEffect(() => {
@@ -51,6 +56,12 @@ export default function RecipeDetailFoodie() {
   fetchRelatedRecipes();
 }, [recipe]);
 
+const handleToggleSave = async (recipeId:string) => {
+  const res = await API.post("/foodie/toggle-save-recipe", { recipeId });
+
+  setIsSaved(res.data.isSaved);
+};
+
 
 
   if (!recipe) {
@@ -64,10 +75,11 @@ export default function RecipeDetailFoodie() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50 p-8">
       <div className="max-w-7xl mx-auto">
+<FoodieNavbar/>
         <div className="grid grid-cols-3 gap-8">
           {/* Main Content - Left Side */}
           <div className="col-span-2 space-y-8">
-            {/* Header */}
+
             <div>
               <h1 className="text-5xl font-bold mb-3 bg-gradient-to-r from-gray-900 via-green-700 to-emerald-700 bg-clip-text text-transparent">
                 {recipe.title}
@@ -78,7 +90,7 @@ export default function RecipeDetailFoodie() {
             {/* Main Image */}
             <div className="relative rounded-3xl overflow-hidden shadow-2xl">
               <img 
-                src={recipe.image} 
+                src={recipe.images} 
                 alt={recipe.title}
                 className="w-full h-96 object-cover"
               />
@@ -88,10 +100,20 @@ export default function RecipeDetailFoodie() {
 
             {/* Tags and Save Button */}
             <div className="flex items-center gap-4">
-              
-              <button className="ml-auto px-6 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl hover:shadow-xl hover:scale-105 transition-all shadow-lg">
-                Save
+              {isSaved?
+              <button
+              onClick={()=>handleToggleSave(recipe?._id)}
+              className="ml-auto px-6 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl hover:shadow-xl hover:scale-105 transition-all shadow-lg">
+              Saved
+              </button>:
+              <button
+              onClick={()=>handleToggleSave(recipe?._id)}
+              className="ml-auto px-6 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl hover:shadow-xl hover:scale-105 transition-all shadow-lg">
+             Save
               </button>
+
+              
+            }
             </div>
                     <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-8 mb-10 border border-gray-100">
           <h2 className="text-2xl font-bold mb-6">Recipe Details</h2>
@@ -147,7 +169,7 @@ export default function RecipeDetailFoodie() {
                   <div key={related.id} className="bg-white/90 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 group">
                     <div className="h-56 overflow-hidden">
                       <img 
-                        src={related.image} 
+                        src={related.images} 
                         alt={related.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />

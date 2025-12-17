@@ -15,6 +15,10 @@ export const getRelatedRecipesApi=(cuisine:string)=>{
     return API.get(`/foodie/related-recipes/${cuisine}`)
 }
 
+export const getSavedRecipeApi=()=>{
+    return API.get(`/foodie/saved-recipes`)
+}
+
 
 export const getBlogsFoodieApi=(page:number,limit:number,search:string)=>{
     return API.get(`/foodie/blog-listing`,{params:{page,limit,search}})

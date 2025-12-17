@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Search, Bell, Upload, X } from 'lucide-react';
-import { createBlogApi, editBlogApi } from '@/api/chefApi';
+import { createBlogApi, editBlogApi, getBlogDetailChefApi } from '@/api/chefApi';
 import { showError, showSuccess } from '@/utils/toast';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useAwsS3Upload } from '@/components/shared/hooks/useAwsS3Upload';
+import ChefNavbar from '@/components/shared/chef/NavBar.chef';
+import { useUserStore } from '@/store/userStore';
 
 const EditBlog: React.FC = () => {
-    const {blogId}=useParams()
+    const { blogId } = useParams()
+    const navigate = useNavigate()
     const [title, setTitle] = useState("");
     const [shortDescription, setShortDescription] = useState("");
     const [content, setContent] = useState("");
@@ -15,40 +19,112 @@ const EditBlog: React.FC = () => {
 
     const [isPublished, setIsPublished] = useState(false);
     const [coverImage, setCoverImage] = useState<string | null>(null);
+    const { isVerifiedUser } = useUserStore()
+
+    type BlogErrors = {
+        title?: string;
+        shortDescription?: string;
+        content?: string;
+        coverImage?: string;
+        tags?: string;
+    };
+
+    const [errors, setErrors] = useState<BlogErrors>({});
+
+
+
+    useEffect(() => {
+        async function fetchBlog() {
+            if (!blogId) return;
+
+            try {
+                const res = await getBlogDetailChefApi(blogId);
+                const blog = res.data.data;
+
+                setTitle(blog.title || '');
+                setShortDescription(blog.shortDescription || '');
+                setContent(blog.content || '');
+                setTags(blog.tags || []);
+                setCoverImage(blog.coverImage || null);
+                setIsPublished(!blog.isDraft);
+
+            } catch (error: any) {
+                showError(error.response?.data?.message || 'Failed to load blog');
+            }
+        }
+
+        fetchBlog();
+    }, [blogId]);
+    const validateBlog = () => {
+        const newErrors: BlogErrors = {};
+
+        if (!title.trim()) {
+            newErrors.title = "Blog title is required";
+        }
+
+        if (!shortDescription.trim()) {
+            newErrors.shortDescription = "Short description is required";
+        } else if (shortDescription.length < 30) {
+            newErrors.shortDescription = "Minimum 30 characters required";
+        }
+
+        if (!content.trim()) {
+            newErrors.content = "Blog content is required";
+        } else if (content.length < 100) {
+            newErrors.content = "Content must be at least 100 characters";
+        }
+
+        if (!coverImage) {
+            newErrors.coverImage = "Cover image is required";
+        }
+
+        if (tags.length === 0) {
+            newErrors.tags = "Add at least one tag";
+        }
+
+        setErrors(newErrors);
+
+        return Object.keys(newErrors).length === 0;
+    };
+
 
     const handleCreateBlog = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!validateBlog()) return;
 
         const payload = {
             title,
             shortDescription,
             content,
             tags,
+            coverImage,
             isDraft: !isPublished
         };
-console.log('payload',payload);
+        console.log('payload', payload);
 
         try {
-            if(!blogId)return;
-            const response = await editBlogApi(payload,blogId); 
-            showSuccess(response.data.message||'blog created successfuly!')
-            console.log("Blog Created:", response.data);
-        } catch (error:any) {
+            if (!blogId) return;
+            const response = await editBlogApi(payload, blogId);
+            showSuccess(response.data.message || 'blog created successfuly!')
+            navigate('/chef/blog-listing')
+        } catch (error: any) {
             showError(error.response?.data?.message)
             console.error(error);
         }
     };
 
+    const { uploadToS3, fileUrl, loading, error } = useAwsS3Upload()
 
 
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setCoverImage(reader.result as string);
-            };
-            reader.readAsDataURL(file);
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+
+            const Image = e.target.files?.[0]
+            const url = await uploadToS3(Image)
+            console.log(url);
+
+            setCoverImage(url)
+
         }
     };
     const addTag = () => {
@@ -70,39 +146,8 @@ console.log('payload',payload);
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
             {/* Header */}
-            <header className="bg-white shadow-sm border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-                    <div className="flex items-center space-x-12">
-                        <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                            Dishcovery
-                        </h1>
-                        <nav className="hidden md:flex space-x-8">
-                            <a href="#" className="text-gray-600 hover:text-gray-900 transition">Home</a>
-                            <a href="#" className="text-gray-600 hover:text-gray-900 transition">My Recipes</a>
-                            <a href="#" className="text-gray-600 hover:text-gray-900 transition">My Blogs</a>
-                            <a href="#" className="text-gray-600 hover:text-gray-900 transition">My Workshops</a>
-                        </nav>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                            <input
-                                type="text"
-                                placeholder="Search"
-                                className="pl-10 pr-4 py-2 bg-gray-100 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-emerald-500 w-64"
-                            />
-                        </div>
-                        <button className="p-2 hover:bg-gray-100 rounded-lg transition">
-                            <Bell className="w-5 h-5 text-gray-600" />
-                        </button>
-                        <img
-                            src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"
-                            alt="Profile"
-                            className="w-10 h-10 rounded-full ring-2 ring-emerald-500"
-                        />
-                    </div>
-                </div>
-            </header>
+            <ChefNavbar />
+
 
             {/* Main Content */}
             <main className="max-w-4xl mx-auto px-6 py-12">
@@ -115,6 +160,11 @@ console.log('payload',payload);
                             <label className="block text-sm font-semibold text-gray-700 mb-2">
                                 Blog Title
                             </label>
+                            {errors.title && (
+                                <p className="text-red-500 text-sm mb-1 font-medium">
+                                    {errors.title}
+                                </p>
+                            )}
                             <input
                                 type="text"
                                 placeholder="Enter blog title"
@@ -130,6 +180,11 @@ console.log('payload',payload);
                             <label className="block text-sm font-semibold text-gray-700 mb-2">
                                 Short Description / Excerpt
                             </label>
+                            {errors.shortDescription && (
+                                <p className="text-red-500 text-sm mb-1 font-medium">
+                                    {errors.shortDescription}
+                                </p>
+                            )}
                             <textarea
                                 rows={4}
                                 value={shortDescription}
@@ -145,6 +200,12 @@ console.log('payload',payload);
                             <label className="block text-sm font-semibold text-gray-700 mb-2">
                                 Full Content
                             </label>
+                            {errors.content && (
+                                <p className="text-red-500 text-sm mb-1 font-medium">
+                                    {errors.content}
+                                </p>
+                            )}
+
                             <textarea
                                 rows={8}
                                 value={content}
@@ -160,6 +221,11 @@ console.log('payload',payload);
                             <label className="block text-sm font-semibold text-gray-700 mb-2">
                                 Upload Cover Image
                             </label>
+                            {errors.coverImage && (
+                                <p className="text-red-500 text-sm mb-2 font-medium">
+                                    {errors.coverImage}
+                                </p>
+                            )}
                             {!coverImage ? (
                                 <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-emerald-500 hover:bg-emerald-50 transition">
                                     <Upload className="w-10 h-10 text-gray-400 mb-2" />
@@ -193,6 +259,11 @@ console.log('payload',payload);
                         {/* Tags / Categories */}
                         <div>
                             <label className="block text-sm font-semibold mb-2">Tags</label>
+                            {errors.tags && (
+                                <p className="text-red-500 text-sm mb-2 font-medium">
+                                    {errors.tags}
+                                </p>
+                            )}
 
                             <div className="flex space-x-3">
                                 <input
@@ -232,7 +303,7 @@ console.log('payload',payload);
 
 
                         {/* Publish Status */}
-                        <div>
+                        {/* <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-2">
                                 Publish Status
                             </label>
@@ -257,17 +328,18 @@ console.log('payload',payload);
                                     />
                                 </button>
                             </div>
-                        </div>
+                        </div> */}
 
                         {/* Action Buttons */}
                         <div className="flex justify-end space-x-3 pt-4">
                             <button
+                                onClick={() => navigate(`/blog-detail/${blogId}`)}
                                 type="button"
                                 className="px-6 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium"
                             >
                                 Cancel
                             </button>
-                            <button
+                            {/* <button
                                 type="button"
                                 onClick={() => {
                                     setIsPublished(false);
@@ -276,9 +348,10 @@ console.log('payload',payload);
                                 className="px-6 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium"
                             >
                                 Save Draft
-                            </button>
+                            </button> */}
 
                             <button
+                                disabled={!isVerifiedUser}
                                 type="submit"
                                 className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg hover:from-emerald-600 hover:to-teal-600 transition font-medium shadow-lg shadow-emerald-500/30"
                             >

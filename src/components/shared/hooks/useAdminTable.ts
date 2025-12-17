@@ -64,5 +64,6 @@ export function useAdminTable<T>({ fetchApi, filters }: UseAdminTableConfig<T>) 
     searchQuery,
     filters: filterValues,
     updateFilter,
+    refetch:getData
   };
 }

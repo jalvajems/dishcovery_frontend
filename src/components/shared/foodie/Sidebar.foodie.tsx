@@ -4,13 +4,16 @@ import { Home, ChefHat, BookOpen, FileText, MapPin, Heart, MessageCircle, Bot, L
 import { logoutApi } from "@/api/authApi";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
+import { useUserStore } from "@/store/userStore";
 
 export default function FoodieSidebar() {
   const navigate = useNavigate();
+    const {delUserStore,name,email,image}=useUserStore()
+  
 
   const menuItems = [
     { icon: Home, label: 'Home', path: '/foodie/dashboard' },
-    { icon: ChefHat, label: 'Chef', path: '/foodie/chef' },
+    // { icon: ChefHat, label: 'Chef', path: '/foodie/chef' },
     { icon: BookOpen, label: 'Recipes', path: '/foodie/recipe-listing' },
     { icon: FileText, label: 'Blogs', path: '/foodie/blog-listing' },
     { icon: MapPin, label: 'Workshops', path: '/foodie/workshops' },
@@ -24,18 +27,25 @@ export default function FoodieSidebar() {
   const handleLogout = async () => {
     await logoutApi();
     useAuthStore.getState().logout();
+    delUserStore()
     navigate("/login");
   };
 
   return (
     <aside className="w-64 bg-white/80 p-6 sticky top-20 h-fit shadow-lg rounded-r-3xl">
       <div className="flex items-center gap-3 mb-8 pb-4 border-b border-gray-200">
-        <div className="w-12 h-12 rounded-full bg-green-500 text-white flex items-center justify-center font-bold">
-          J
-        </div>
+        <div className="w-12 h-12  rounded-full overflow-hidden shadow-xl ring-4 ring-green-100">
+              <img
+              onClick={()=>navigate('/foodie/profile')}
+                src={image || "/default-avatar.png"}
+                alt="profile"
+                className="w-full h-full object-cover"
+              />
+            </div>
+
         <div>
-          <p className="font-semibold">Jalva</p>
-          <p className="text-xs text-gray-500">Food Enthusiast</p>
+          <p className="font-semibold">{name}</p>
+          <p className="text-xs text-gray-500">{email}</p>
         </div>
       </div>
 

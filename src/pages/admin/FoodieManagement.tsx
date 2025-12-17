@@ -29,6 +29,7 @@ export default function FoodieManagement() {
 
     filters,
     updateFilter,
+    refetch
   } = useAdminTable<Foodie>({
     
     fetchApi: async (page, limit, search, filters) => {
@@ -56,6 +57,7 @@ export default function FoodieManagement() {
   
 
     setModalOpen(false);
+    refetch()
   };
 
   const columns = [

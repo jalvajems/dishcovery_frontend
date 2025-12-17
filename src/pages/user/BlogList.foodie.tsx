@@ -66,7 +66,7 @@ console.log("res----",result);
                             setSearchQuery(value);
                             setCurrentPage(1)
                         }}
-/>
+                        />
                     </div>
                 </div>
 

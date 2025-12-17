@@ -36,7 +36,8 @@ export default function ChefManagement() {
     setSearchInput,   
 
     filters,         
-    updateFilter,     
+    updateFilter,   
+    refetch  
   } = useAdminTable<Chef>({
     fetchApi: async (page, limit, search, filters) => {
       return adminChefListingApi(
@@ -58,11 +59,14 @@ export default function ChefManagement() {
   const [actionType, setActionType] =
     useState<"BLOCK" | "UNBLOCK" | "VERIFY" | "UNVERIFY" | null>(null);
 
-  const openConfirm = (chef: Chef, type: any) => {
-    setSelectedChef(chef);
-    setActionType(type);
-    setModalOpen(true);
-  };
+ type ActionType = "BLOCK" | "UNBLOCK" | "VERIFY" | "UNVERIFY";
+
+const openConfirm = (chef: Chef, type: ActionType) => {
+  setSelectedChef(chef);
+  setActionType(type);
+  setModalOpen(true);
+};
+
 
   const handleConfirm = async () => {
     if (!selectedChef || !actionType) return;
@@ -73,6 +77,7 @@ export default function ChefManagement() {
     if (actionType === "UNVERIFY") await adminUnverifyChefApi(selectedChef._id);
 
     setModalOpen(false);
+    refetch()
   };
 
   const columns: ITableColumn<Chef>[] = [

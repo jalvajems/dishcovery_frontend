@@ -1,16 +1,38 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { userDashboardApi } from '@/api/foodieApi';
+import { useUserStore } from '@/store/userStore';
+import ConfirmModal from '@/components/shared/ConfirmModal';
+import { useNavigate } from 'react-router-dom';
 
 export default function FoodieDashboard() {
 
-  useEffect(() => {
-    userDashboardApi();
-  }, []);
+  const {name}=useUserStore()
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const navigate=useNavigate()
+  
 
+  useEffect(() => {
+    checkFoodieProfile();
+  }, []);
+  
+  async function checkFoodieProfile() {
+    try {
+      const res = await userDashboardApi();
+  console.log('has=========',res.data.hasProfile);
+  
+      if (!res.data.hasProfile) {
+        setShowProfileModal(true);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  
+  
   const featuredRecipes = [
-    { id: 1, title: 'Delicious Pasta Carbonara', chef: 'Chef Isabella Rossi', image: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400&h=400&fit=crop' },
-    { id: 2, title: 'Spicy Thai Green Curry', chef: 'Chef Ethan Lee', image: 'https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=400&h=400&fit=crop' },
-    { id: 3, title: 'Classic French Ratatouille', chef: 'Chef Olivia Dubois', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&h=400&fit=crop' }
+    { id: 1, title: 'Delicious Pasta Carbonara', chef: 'Chef Isabella Rossi', images: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400&h=400&fit=crop' },
+    { id: 2, title: 'Spicy Thai Green Curry', chef: 'Chef Ethan Lee', images: 'https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=400&h=400&fit=crop' },
+    { id: 3, title: 'Classic French Ratatouille', chef: 'Chef Olivia Dubois', images: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&h=400&fit=crop' }
   ];
 
   const featuredBlogs = [
@@ -38,7 +60,7 @@ export default function FoodieDashboard() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
         <div className="absolute inset-0 flex flex-col justify-end p-10">
           <h1 className="text-5xl font-bold text-white mb-4 drop-shadow-lg">
-            Welcome back, Jalva!
+            Welcome back, {name}!
           </h1>
           <button className="px-8 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full font-semibold hover:shadow-xl hover:scale-105 transition-all w-fit shadow-lg">
             Find your taste
@@ -56,7 +78,7 @@ export default function FoodieDashboard() {
           {featuredRecipes.map(recipe => (
             <div key={recipe.id} className="bg-white rounded-2xl overflow-hidden shadow-lg hover:-translate-y-2 transition-all duration-300 group">
               <div className="relative h-56 overflow-hidden">
-                <img src={recipe.image} alt={recipe.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                <img src={recipe.images} alt={recipe.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
               </div>
               <div className="p-5">
                 <h3 className="font-bold text-lg text-gray-900">{recipe.title}</h3>
@@ -142,6 +164,16 @@ export default function FoodieDashboard() {
           </div>
         </div>
       </section>
+       <ConfirmModal
+        isOpen={showProfileModal}
+        title="Complete Your Chef Profile"
+        message="You need to create your chef profile before accessing the dashboard."
+        confirmText="Create Profile"
+        cancelText="Later"
+        confirmVariant="success"
+        onConfirm={() => navigate("/foodie/profile-add")}
+        onCancel={() => setShowProfileModal(false)}
+      />
 
     </div>
   );

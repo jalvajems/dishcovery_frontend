@@ -85,7 +85,7 @@ export default function RecipeListing() {
           <div className="space-y-8">
             {recipes.map((recipe: any) => (
               <div
-                key={recipe.id}
+                key={recipe._id}
                 className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-100 group"
               >
                 <div className="flex gap-6 items-center">
@@ -106,7 +106,7 @@ export default function RecipeListing() {
                   </div>
                   <div className="w-72 h-56 rounded-2xl overflow-hidden shadow-lg flex-shrink-0">
                     <img
-                      src={recipe.image}
+                      src={recipe.images}
                       alt={recipe.title}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />

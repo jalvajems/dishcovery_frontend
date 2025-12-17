@@ -3,9 +3,10 @@ import { getFoodieProfileApi, updateFoodieProfileApi } from "@/api/foodieApi";
 import { showError, showSuccess } from "@/utils/toast";
 import { User, Mail, Phone, MapPin, FileText, Image as ImageIcon, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAwsS3Upload } from "@/components/shared/hooks/useAwsS3Upload";
 
 export default function FoodieEditProfile() {
-    const navigate=useNavigate()
+    const navigate = useNavigate()
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
 
@@ -13,41 +14,108 @@ export default function FoodieEditProfile() {
     const [location, setLocation] = useState("");
     const [preferences, setPreferences] = useState([]);
     const [bio, setBio] = useState("");
-    const [image, setImage] = useState(null);
+    const [image, setImage] = useState<string | null>(null);
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
 
     useEffect(() => {
-        getFoodieProfileApi().then(({ data }) => {
-            setName(data.name);
-            setEmail(data.email);
+        async function fetchProfile() {
+            try {
+                const res = await getFoodieProfileApi();
+                const profile = res.data.data.data;
 
-            const f = data.foodie;
-            if (f) {
-                setPhone(f.phone);
-                setLocation(f.location);
-                setPreferences(f.preferences || []);
-                setBio(f.bio);
+                setName(profile.userId?.name ?? "");
+                setEmail(profile.userId?.email ?? "");
+                setPhone(profile.phone ?? "");
+                setLocation(profile.location ?? "");
+                setPreferences(profile.preferences ?? []);
+                setBio(profile.bio ?? "");
+                setImage(profile.image ?? null);
+
+            } catch (err) {
+                console.error("Failed to fetch profile", err);
             }
-        });
+        }
+
+        fetchProfile();
     }, []);
+
+
+
+    const { uploadToS3 } = useAwsS3Upload()
+
+
+    const handleImageChange = async (e) => {
+        if (e.target.files) {
+
+            const Image = e.target.files?.[0]
+            const url = await uploadToS3(Image)
+            console.log(url);
+
+            setImage(url)
+
+        }
+    };
+    const validateForm = () => {
+  const newErrors: Record<string, string> = {};
+
+  if (!name.trim()) {
+    newErrors.name = "Name is required";
+  } else if (name.length < 2) {
+    newErrors.name = "Name must be at least 2 characters";
+  }
+
+  if (!phone.trim()) {
+    newErrors.phone = "Phone number is required";
+  } else if (!/^\d{10}$/.test(phone)) {
+    newErrors.phone = "Enter a valid 10-digit phone number";
+  }
+
+  if (!location.trim()) {
+    newErrors.location = "Location is required";
+  }
+
+  if (!preferences.length) {
+    newErrors.preferences = "Please select a food preference";
+  }
+
+  if (!bio.trim()) {
+    newErrors.bio = "Bio is required";
+  } else if (bio.length < 10) {
+    newErrors.bio = "Bio must be at least 10 characters";
+  }
+
+  setErrors(newErrors);
+  return Object.keys(newErrors).length === 0;
+};
+
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const payload={
-            name:name,
+        
+  if (!validateForm()) {
+    showError("Ivalid Credentials");
+    return;
+  }
+
+        const payload = {
+            name: name,
             phone: phone,
-      location: location,
-      preferences: preferences,
-      bio: bio,
-      image:image
+            location: location,
+            preferences: preferences,
+            bio: bio,
+            image: image
         }
 
         try {
             await updateFoodieProfileApi(payload);
             showSuccess("Profile Updated!");
             navigate('/foodie/profile')
-        } catch (err:any) {
+        } catch (err: any) {
             showError(err.response?.data?.message);
         }
+
     };
 
     return (
@@ -59,10 +127,14 @@ export default function FoodieEditProfile() {
                 </h2>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
-                    
+
                     {/* Name */}
                     <div>
                         <label className="text-sm font-medium">Name</label>
+                       {errors.name && (
+  <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+)}
+
                         <div className="flex items-center bg-gray-50 rounded-lg px-3">
                             <User size={18} className="text-gray-400" />
                             <input
@@ -75,11 +147,15 @@ export default function FoodieEditProfile() {
                     </div>
 
                     {/* Email */}
-               
+
 
                     {/* Phone */}
                     <div>
                         <label className="text-sm font-medium">Phone Number</label>
+                       {errors.phone && (
+  <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+)}
+
                         <div className="flex items-center bg-gray-50 rounded-lg px-3">
                             <Phone size={18} className="text-gray-400" />
                             <input
@@ -94,6 +170,10 @@ export default function FoodieEditProfile() {
                     {/* Location */}
                     <div>
                         <label className="text-sm font-medium">Location</label>
+                        {errors.location && (
+  <p className="text-red-500 text-sm mt-1">{errors.location}</p>
+)}
+
                         <div className="flex items-center bg-gray-50 rounded-lg px-3">
                             <MapPin size={18} className="text-gray-400" />
                             <input
@@ -111,15 +191,21 @@ export default function FoodieEditProfile() {
                             <Heart size={16} className="text-red-500" />
                             Food Preferences
                         </label>
+                        {errors.preferences && (
+  <p className="text-red-500 text-sm mt-1">{errors.preferences}</p>
+)}
+
                         <select
                             className="w-full bg-gray-50 p-3 rounded-lg outline-none"
-                            value={preferences[0]}
+                            value={preferences[0] || ""}
                             onChange={(e) => setPreferences([e.target.value])}
                         >
-                            <option>Veg</option>
-                            <option>Non-Veg</option>
-                            <option>Chef Specials</option>
+                            <option value="">Select Preference</option>
+                            <option value="Veg">Veg</option>
+                            <option value="Non-Veg">Non-Veg</option>
+                            <option value="Chef Specials">Chef Specials</option>
                         </select>
+
                     </div>
 
                     {/* Bio */}
@@ -128,6 +214,10 @@ export default function FoodieEditProfile() {
                             <FileText size={16} />
                             Bio
                         </label>
+                        {errors.bio && (
+  <p className="text-red-500 text-sm mt-1">{errors.bio}</p>
+)}
+
                         <textarea
                             rows={4}
                             value={bio}
@@ -145,9 +235,19 @@ export default function FoodieEditProfile() {
                         <input
                             type="file"
                             className="w-full bg-gray-50 p-3 rounded-lg"
-                            onChange={(e) => setImage(e.target.files[0])}
+                            onChange={handleImageChange}
                         />
+                        {image && (
+                            <div className="mt-4 flex justify-center">
+                                <img
+                                    src={image}
+                                    alt="Preview"
+                                    className="w-40 h-40 object-cover rounded-xl shadow-md"
+                                />
+                            </div>
+                        )}
                     </div>
+
 
                     {/* Submit */}
                     <button

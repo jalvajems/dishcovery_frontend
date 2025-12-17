@@ -5,8 +5,8 @@ export const chefDashboardApi=()=>{
 }
 
 
-export const getAllRecipeApi=(id:string,page:number,limit:number,search?:string)=>{
-    return API.get(`/chef/recipes-list?chefId=${id}`,{params:{id,page,limit,search}})
+export const getAllRecipeApi=(page:number,limit:number,search='')=>{
+    return API.get(`/chef/recipes-list`,{params:{page,limit,search}})
 }
 export const getRecipeDetailApi=(id:string)=>{
     return API.get(`/chef/recipe-detail/${id}`)
@@ -35,9 +35,9 @@ export const deleteBlogApi=(blogId:string)=>{
     console.log('sdl');
     return API.delete(`/chef/blog-delete/${blogId}`)
 }
-export const getMyBlogsChefApi = ( page = 1, limit = 10) => {
+export const getMyBlogsChefApi = ( page = 1, limit = 10, search='') => {
     return API.get(`/chef/blog-listing`, {
-        params: {  page, limit }
+        params: {  page, limit,search }
     });
 };
 

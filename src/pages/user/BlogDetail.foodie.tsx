@@ -108,7 +108,7 @@ const BlogDetailPage: React.FC = () => {
 
         {/* Featured Image */}
         <div className="rounded-2xl overflow-hidden shadow-2xl mb-8">
-          <img src={blog?.image} className="w-full h-96 object-cover" />
+          <img src={blog?.coverImage} className="w-full h-96 object-cover" />
 
         </div>
 

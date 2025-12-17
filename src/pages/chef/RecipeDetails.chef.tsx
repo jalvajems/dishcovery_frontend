@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { Clock, Users, Tag, Star, ChefHat, Edit2, Trash2 } from "lucide-react";
+import { Clock, Users, Tag, Star, ChefHat, Edit2, Trash2, ChevronRight } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { deleteRecipeApi, getRecipeDetailApi } from "@/api/chefApi";
 import { showError } from "@/utils/toast";
 import { useAuthStore } from "@/store/authStore";
 import ChefReviewSection from "@/components/shared/ChefReviewSection";
+import ChefNavbar from "@/components/shared/chef/NavBar.chef";
+import { useUserStore } from "@/store/userStore";
 
 export default function RecipeDetailPage() {
   const { id } = useParams();
@@ -13,6 +15,8 @@ export default function RecipeDetailPage() {
   
   const [recipe, setRecipe] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+      const {isVerifiedUser}=useUserStore()
+  
   if(!id)throw Error('no recipe found')
   
 
@@ -33,6 +37,9 @@ export default function RecipeDetailPage() {
     fetchRecipe();
   }, [id]);
   console.log('recipe',recipe);
+
+    console.log("asdfasdfa",recipe?.images[0])
+
   
   // Loading state
   if (loading) {
@@ -51,7 +58,7 @@ export default function RecipeDetailPage() {
     );
   }
   const handleEditButton=async()=>{
-    navigate('/recipe-edit',{state:{recipeId:id}})
+    navigate(`/recipe-edit/${id}`,{state:{recipeId:id}})
   }
   const handleDelete=async(id:string)=>{
     await deleteRecipeApi(id)
@@ -60,9 +67,14 @@ export default function RecipeDetailPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50">
-
-      {/* MAIN CONTENT */}
+<ChefNavbar/>
       <main className="max-w-6xl mx-auto px-8 py-12">
+      {/* MAIN CONTENT */}
+              <div className="flex items-center gap-2 text-sm mb-8">
+          <a href="/chef/recipes-listing" className="text-green-600 font-semibold hover:underline">Recipe Lists</a>
+          <ChevronRight className="w-4 h-4 text-gray-400" />
+          <a href="/chef/" className="text-green-600 font-semibold hover:underline">{recipe?.title}</a>
+          </div>
 
         {/* TITLE SECTION */}
         <div className="mb-8">
@@ -70,13 +82,13 @@ export default function RecipeDetailPage() {
             {recipe.title}
           </h1>
           <div className="flex items-center gap-4 text-gray-700">
-            <span className="text-green-600 font-semibold">By {name}</span>
+            <span className="text-green-600 font-semibold">By: {recipe?.chefId?.name} </span>
           </div>
         </div>
 
         {/* HERO IMAGE */}
         <div className="relative mb-10 rounded-3xl overflow-hidden shadow-2xl">
-          <img src={recipe.image} alt={recipe.title} className="w-full h-96 object-cover" />
+          <img src={recipe.images[0]} alt={recipe.title} className="w-full h-96 object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/20"></div>
         </div>
 
@@ -124,11 +136,11 @@ export default function RecipeDetailPage() {
 
         {/* ACTION BUTTONS */}
         <div className="flex gap-4">
-          <button onClick={()=>handleEditButton()} className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl hover:scale-105 transition">
+          <button disabled={!isVerifiedUser} onClick={()=>handleEditButton()} className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl hover:scale-105 transition">
             <Edit2 className="w-5 h-5" />
             Edit
           </button>
-          <button onClick={()=>handleDelete(id)} className="px-8 py-4 bg-white border-2 border-gray-300 text-gray-700 font-bold rounded-xl hover:bg-gray-50 hover:scale-105 transition">
+          <button disabled={!isVerifiedUser} onClick={()=>handleDelete(id)} className="px-8 py-4 bg-white border-2 border-gray-300 text-gray-700 font-bold rounded-xl hover:bg-gray-50 hover:scale-105 transition">
             <Trash2 className="w-5 h-5" />
             Delete
           </button>

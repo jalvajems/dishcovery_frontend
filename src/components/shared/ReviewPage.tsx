@@ -128,7 +128,7 @@ console.log("review raw", reviews);
                 {loading ? <div>Loading reviews...</div> : reviews.map(r => (
                     <div key={r._id} className="bg-white p-6 rounded-xl shadow-sm">
                         <div className="flex items-center gap-4 mb-2">
-                            <img src={r.userId?.avatar || "/default-avatar.png"} alt={r.userId?.name} className="w-12 h-12 rounded-full object-cover" />
+                            <img src={r.userId?.images || "/default-avatar.png"} alt={r.userId?.name} className="w-12 h-12 rounded-full object-cover" />
                             <div>
                                 <div className="font-semibold">{r.userId?.name || "Anonymous"}</div>
                                 <div className="text-xs text-gray-500">{new Date(r.createdAt).toLocaleString()}</div>

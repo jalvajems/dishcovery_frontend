@@ -1,25 +1,44 @@
 import { useEffect, useState } from "react";
 import { ChevronRight, LogOut, Pencil } from "lucide-react";
-import { getFoodieProfileApi } from "@/api/foodieApi";
+import { getFoodieProfileApi, getSavedRecipeApi } from "@/api/foodieApi";
 import { showError } from "@/utils/toast";
 import { useNavigate } from "react-router-dom";
+import { useUserStore } from "@/store/userStore";
+import { useAuthStore } from "@/store/authStore";
+import { logoutApi } from "@/api/authApi";
+import Pagination from "@/components/shared/Pagination";
 
 export default function ProfileFoodie() {
   const [profile, setProfile] = useState<any>(null);
+  const [savedRecipe,setSavedRecipe]=useState([])
+
   const navigate = useNavigate();
+  const {setUserStore}=useUserStore();
+    const { logout } = useAuthStore();
+  
+  const {delUserStore}=useUserStore()
+
+  
+  
 
   useEffect(() => {
     (async () => {
       try {
         const res = await getFoodieProfileApi();
+        const recipe=await getSavedRecipeApi()
         setProfile(res.data.data.data);
-        console.log('res====',res.data.data);
+        setSavedRecipe(recipe.data.data)
         
+        console.log('res====',recipe.data.data);
       } catch (error: any) {
         showError(error.response?.data?.message || "Failed to load profile");
       }
     })();
   }, []);
+  useEffect(()=>{
+     setUserStore(profile?.userId?.name,profile?.userId?.email,profile?.image)
+
+  },[profile])
   console.log('profile====',profile);
 
   if (!profile)
@@ -29,8 +48,12 @@ export default function ProfileFoodie() {
       </p>
     );
 
-  const handleLogout = () => {
+  const handleLogout = async() => {
+
     localStorage.removeItem("token");
+    await logoutApi();
+    logout()
+    delUserStore()
     navigate("/login");
   };
 
@@ -146,6 +169,30 @@ export default function ProfileFoodie() {
                   <p className="text-gray-500 italic">No preferences added.</p>
                 )}
               </div>
+
+              <div className="mb-12">
+                        <h2 className="text-3xl font-bold mb-6">Saved  Recipes</h2>
+              
+                        {savedRecipe.length === 0 ? (
+                          <p className="text-gray-600 italic">No recipes yet.</p>
+                        ) : (
+                          <div className="grid grid-cols-2 gap-6 mb-6">
+                            {savedRecipe?.savedRecipes.map((recipe: any) => (
+                              <div key={recipe._id} className="bg-white rounded-2xl shadow">
+                                <div className="h-40 overflow-hidden">
+                                  <img src={recipe.images}
+                                  onClick={()=>navigate(`/foodie/recipe-detail/${recipe._id}`)}
+                                  className="w-full h-full object-cover" />
+                                </div>
+                                <div className="p-5">
+                                  <h3 className="font-bold text-lg">{recipe.title}</h3>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    
             </div>
 
           </div>

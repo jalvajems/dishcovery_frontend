@@ -3,6 +3,8 @@ import { createFoodieProfileApi } from "@/api/foodieApi";
 import { showError, showSuccess } from "@/utils/toast";
 import { MapPin, Phone, User, FileText, Image as ImageIcon, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAwsS3Upload } from "@/components/shared/hooks/useAwsS3Upload";
+import { useUserStore } from "@/store/userStore";
 
 export default function FoodieAddProfile() {
     const navigate=useNavigate()
@@ -10,10 +12,65 @@ export default function FoodieAddProfile() {
     const [location, setLocation] = useState("");
     const [preferences, setPreferences] = useState([]);
     const [bio, setBio] = useState("");
-    const [image, setImage] = useState(null);
+    const [image, setImage] = useState<string|null>(null);
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
+
+ const {uploadToS3}=useAwsS3Upload()
+    
+    
+      const handleImageChange = async(e) => {
+         if (e.target.files) {
+          
+          const Image=e.target.files?.[0]
+          const url=await uploadToS3(Image)
+          console.log(url);
+          
+          setImage(url)
+    
+        }
+      };
+      const validateForm = () => {
+  const newErrors: Record<string, string> = {};
+
+  // Phone
+  if (!phone.trim()) {
+    newErrors.phone = "Phone number is required";
+  } else if (!/^\d{10}$/.test(phone)) {
+    newErrors.phone = "Enter a valid 10-digit phone number";
+  }
+
+  // Location
+  if (!location.trim()) {
+    newErrors.location = "Location is required";
+  } else if (location.length < 2) {
+    newErrors.location = "Location must be at least 2 characters";
+  }
+
+  // Preferences
+  if (!preferences.length) {
+    newErrors.preferences = "Please select a food preference";
+  }
+
+  // Bio
+  if (!bio.trim()) {
+    newErrors.bio = "Bio is required";
+  } else if (bio.length < 10) {
+    newErrors.bio = "Bio must be at least 10 characters";
+  }
+
+  setErrors(newErrors);
+  return Object.keys(newErrors).length === 0;
+};
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!validateForm()) {
+    showError("Ivalid Credentials");
+    return;
+  }
+
         const payload={
       phone: phone,
       location: location,
@@ -22,12 +79,14 @@ export default function FoodieAddProfile() {
       image:image
     }
         try {
+            if(!payload)return;
             await createFoodieProfileApi(payload);
+           
             showSuccess("Profile Created!");
             navigate('/foodie/profile')
 
         } catch (err:any) {
-            showError(err.response?.data?.message);
+            showError(err.response?.data?.messages||'Invalid credential');
         }
     };
 
@@ -44,6 +103,10 @@ export default function FoodieAddProfile() {
                     {/* Phone */}
                     <div>
                         <label className="text-sm font-medium">Phone Number</label>
+                        {errors.phone && (
+  <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+)}
+
                         <div className="flex items-center bg-gray-50 rounded-lg px-3">
                             <Phone className="text-gray-400" size={18} />
                             <input
@@ -58,6 +121,10 @@ export default function FoodieAddProfile() {
                     {/* Location */}
                     <div>
                         <label className="text-sm font-medium">Location</label>
+                        {errors.location && (
+  <p className="text-red-500 text-sm mt-1">{errors.location}</p>
+)}
+
                         <div className="flex items-center bg-gray-50 rounded-lg px-3">
                             <MapPin className="text-gray-400" size={18} />
                             <input
@@ -74,6 +141,10 @@ export default function FoodieAddProfile() {
                         <label className="text-sm font-medium flex items-center gap-1">
                             <Heart size={16} className="text-red-500" /> Food Preferences
                         </label>
+                        {errors.preferences && (
+  <p className="text-red-500 text-sm mt-1">{errors.preferences}</p>
+)}
+
                         <select
                             className="w-full bg-gray-50 p-3 rounded-lg outline-none"
                             onChange={e => setPreferences([e.target.value])}
@@ -90,6 +161,10 @@ export default function FoodieAddProfile() {
                         <label className="text-sm font-medium flex items-center gap-1">
                             <FileText size={16} /> Bio
                         </label>
+                        {errors.bio && (
+  <p className="text-red-500 text-sm mt-1">{errors.bio}</p>
+)}
+
                         <textarea
                             rows={4}
                             placeholder="Tell us something about you..."
@@ -106,8 +181,17 @@ export default function FoodieAddProfile() {
                         <input
                             type="file"
                             className="w-full bg-gray-50 p-3 rounded-lg"
-                            onChange={e => setImage(e.target.files[0])}
+                            onChange={handleImageChange}
                         />
+                                {image && (
+    <div className="mt-4 flex justify-center">
+      <img 
+        src={image} 
+        alt="Preview"
+        className="w-40 h-40 object-cover rounded-xl shadow-md"
+      />
+    </div>
+  )}
                     </div>
 
                     {/* Submit */}

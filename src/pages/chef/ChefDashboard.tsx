@@ -1,14 +1,113 @@
-import { useEffect } from "react";
-import { chefDashboardApi } from "@/api/chefApi";
+import { useEffect, useState } from "react";
+import { chefDashboardApi, getAllRecipeApi, getMyBlogsChefApi } from "@/api/chefApi";
 import { Utensils, Star, Users, BookOpen, Calendar } from "lucide-react";
+import { useUserStore } from "@/store/userStore";
+import { showError } from "@/utils/toast";
+import { useNavigate } from "react-router-dom";
+import Pagination from "@/components/shared/Pagination";
+import ConfirmModal from "@/components/shared/ConfirmModal";
 
 export default function ChefDashboard() {
-  useEffect(() => {
-    chefDashboardApi();
-  }, []);
+  const {name}=useUserStore()
+  const navigate=useNavigate()
   
 
-  // Dummy data (replace with API data later)
+  const [recipes, setRecipes] = useState([])
+  const [currentPageRecipe, setCurrentPageRecipe] = useState(1);
+  const [totalPagesRecipe,setTotalPagesRecipe ]=useState(1);
+  const limit=5;
+const [currentPageBlog, setCurrentPageBlog] = useState(1);
+  const [totalPagesBlog,setTotalPagesBlog ]=useState(1);
+  const [blogs, setBlogs] = useState([]);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
+  const {setIsVerifiedUser,isVerifiedUser}=useUserStore()
+
+
+
+
+
+  //recipes===============
+  const handlePageChangeRecipe = (page: number) => {
+    setCurrentPageRecipe(page)
+  }
+  useEffect(() => {
+    fetchRecipes()
+  }, [currentPageRecipe,limit])
+  
+  async function fetchRecipes() {
+    try {
+      
+      const res = await getAllRecipeApi(currentPageRecipe,limit);
+      setRecipes(res.data.data)
+      
+      setTotalPagesRecipe(res.data.totalPages)
+      console.log(res.data.data)
+      
+    } catch (error: any) {
+      const message = error.response?.data?.message
+      // showError(message)
+    }
+    
+  }
+  
+  async function handleViewButtonRecipe(id:string) {
+    try {
+      navigate(`/recipe-detail/${id}`)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+  
+  //blog=================
+  const handlePageChange = (page: number) => {
+    setCurrentPageBlog(page)
+  }
+  
+  useEffect(() => {
+    fetchBlogs();
+  }, [ currentPageBlog,limit]);
+  
+  async function fetchBlogs() {
+    
+    try {
+      const res = await getMyBlogsChefApi(currentPageBlog, limit);
+        
+      setTotalPagesBlog(res.data.totalCount)
+      setBlogs(res.data.datas);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+  
+  
+  
+  
+  
+  
+  useEffect(() => {
+    checkChefProfile();
+  }, []);
+  
+  async function checkChefProfile() {
+    try {
+      const res = await chefDashboardApi();
+      console.log('isverified',res.data);
+      
+      setIsVerifiedUser(res.data.isVerified)
+      setIsVerified(res.data.isVerified)
+      
+      if (!res.data.hasProfile) {
+        setShowProfileModal(true);
+      }
+      
+    } catch (error:any) {
+      console.error(error);
+      // showError(error.response?.data?.message||'something went wrong')
+    }
+  }
+
+
   const stats = [
     {
       label: "Total Recipes",
@@ -54,28 +153,6 @@ export default function ChefDashboard() {
     },
   ];
 
-  const recipes = [
-    {
-      name: "Creamy Garlic Chicken",
-      image:
-        "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=400",
-    },
-    {
-      name: "Veg Loaded Pizza",
-      image:
-        "https://images.unsplash.com/photo-1548365328-8b2f93d1d93e?w=400",
-    },
-    {
-      name: "Thai Green Curry",
-      image:
-        "https://images.unsplash.com/photo-1604908177824-687d1f9ee866?w=400",
-    },
-    {
-      name: "Sushi Special",
-      image:
-        "https://images.unsplash.com/photo-1553621042-f6e147245754?w=400",
-    },
-  ];
 
   const workshops = [
     {
@@ -96,6 +173,13 @@ export default function ChefDashboard() {
 
   return (
     <main className="flex-1 p-8">
+{!isVerified && (
+  <div className="bg-yellow-100 text-yellow-800 p-3 rounded mb-4">
+    <marquee behavior="scroll" direction="left">
+       Your chef account is not verified yet. You cannot perform actions until admin approval.
+    </marquee>
+  </div>
+)}
 
       {/* ------------------------------------------------------ */}
       {/* HERO SECTION */}
@@ -110,7 +194,7 @@ export default function ChefDashboard() {
 
         <div className="absolute inset-0 flex flex-col justify-end p-10">
           <h1 className="text-5xl font-bold text-white mb-4 drop-shadow-2xl">
-            Welcome back, Chef Jems!
+            Welcome back, Chef {name} !
           </h1>
           <p className="text-gray-200 text-lg">
             Here’s your performance overview and recent activity.
@@ -170,22 +254,64 @@ export default function ChefDashboard() {
       </h2>
 
       <div className="grid grid-cols-4 gap-6 mb-12">
-        {recipes.map((r, i) => (
+        {recipes.map((r:any, i) => (
+          <div
+          key={i}
+          className="bg-white rounded-xl shadow-md overflow-hidden group hover:shadow-2xl transition-all cursor-pointer"
+          >
+            <img
+            onClick={()=>handleViewButtonRecipe(r._id)}
+            src={r.images}
+            alt={r.title}
+            className="h-40 w-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+            <div className="p-4">
+              <h3 className="font-bold text-lg">{r.title}</h3>
+            </div>
+          </div>
+        ))}
+         <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-gray-100">
+
+      </div>
+      </div>
+        <Pagination
+          currentPage={currentPageRecipe}
+          totalPages={totalPagesRecipe}
+          onChange={handlePageChangeRecipe}
+          />
+          {/* ------------------------------------------------------ */}
+          {/* RECENT blog */}
+          {/* ------------------------------------------------------ */}
+      <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-gray-900 to-green-700 bg-clip-text text-transparent">
+        Recent Blogs
+      </h2>
+
+      <div className="grid grid-cols-4 gap-6 mb-12">
+        {blogs.map((b:any, i) => (
           <div
             key={i}
             className="bg-white rounded-xl shadow-md overflow-hidden group hover:shadow-2xl transition-all cursor-pointer"
           >
             <img
-              src={r.image}
-              alt={r.name}
+            onClick={()=>handleViewButtonRecipe(b._id)}
+              src={b.coverImage}
+              alt={b.title}
               className="h-40 w-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
             <div className="p-4">
-              <h3 className="font-bold text-lg">{r.name}</h3>
+              <h3 className="font-bold text-lg">{b.title}</h3>
             </div>
           </div>
         ))}
+         <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-gray-100">
+
       </div>
+      </div>
+        <Pagination
+          currentPage={currentPageBlog}
+          totalPages={totalPagesBlog}
+          onChange={handlePageChange}
+        />
 
       {/* ------------------------------------------------------ */}
       {/* WORKSHOP OVERVIEW */}
@@ -217,6 +343,17 @@ export default function ChefDashboard() {
             </div>
           </div>
         ))}
+        <ConfirmModal
+  isOpen={showProfileModal}
+  title="Complete Your Chef Profile"
+  message="You need to create your chef profile before accessing the dashboard."
+  confirmText="Create Profile"
+  cancelText="Later"
+  confirmVariant="success"
+  onConfirm={() => navigate("/chef/profile-add")}
+  onCancel={() => setShowProfileModal(false)}
+/>
+
       </div>
     </main>
   );

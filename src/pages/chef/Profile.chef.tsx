@@ -9,10 +9,14 @@ import {
 import { showError } from "@/utils/toast";
 import { useAuthStore } from "@/store/authStore";
 import Pagination from "@/components/shared/Pagination";
+import ChefNavbar from "@/components/shared/chef/NavBar.chef";
+import { useUserStore } from "@/store/userStore";
 
 export default function ChefProfilePage() {
   const id=useAuthStore.getState().user?._id
   const navigate=useNavigate()
+  const {setUserStore}=useUserStore()
+
   const [chef, setChef] = useState<any>(null);
   const [recipes, setRecipes] = useState([]);
   const [blogs, setBlogs] = useState([]);
@@ -34,7 +38,7 @@ export default function ChefProfilePage() {
     async function fetchData() {
       try {
         const chefRes = await getChefProfileApi()
-        const recipeRes=await  getAllRecipeApi(id,currentPageRecipe,limit);
+        const recipeRes=await  getAllRecipeApi(currentPageRecipe,limit);
         const blogRes= await  getMyBlogsChefApi(currentPageBlog,limit)
         
 
@@ -46,7 +50,7 @@ export default function ChefProfilePage() {
 setTotalPagesRecipe(recipeRes.data.totalCount)
 setTotalPagesBlog(blogRes.data.totalCount)
       } catch (error: any) {
-        showError(error?.response?.data?.message || "Something went wrong");
+        // showError(error?.response?.data?.message || "Something went wrong");
       } finally {
         setLoading(false);
       }
@@ -54,6 +58,12 @@ setTotalPagesBlog(blogRes.data.totalCount)
 
     fetchData();
   }, [id,currentPageBlog,currentPageRecipe]);
+console.log('chef',chef);
+
+useEffect(()=>{
+     setUserStore(chef?.chefId?.name,chef?.chefId?.email,chef?.image)
+
+  },[chef])
 
   if (loading)
     return (
@@ -68,6 +78,8 @@ setTotalPagesBlog(blogRes.data.totalCount)
         Profile not found!
       </div>
     );
+    console.log('recipes',recipes);
+    
     const handleEditButton=()=>{
       navigate('/chef/profile-edit')
     }
@@ -75,8 +87,7 @@ setTotalPagesBlog(blogRes.data.totalCount)
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50">
 
-      {/* NAVBAR — unchanged */}
-
+<ChefNavbar/>
       <main className="max-w-6xl mx-auto px-8 py-12">
 
         {/* BREADCRUMB */}
@@ -99,18 +110,17 @@ setTotalPagesBlog(blogRes.data.totalCount)
                 {chef.chefId.name}
               </h1>
 
-              <p className="text-green-600 font-semibold text-lg mb-3">
-                Specialty: {chef.specialties || "Not added"}
+              <p className="text-green-600 font-semibold text-lg mb-3 mt-3">
+                Specialty: {chef.specialities?.[0] || "Not added"}
               </p>
 
-              <div className="flex items-center gap-6 mb-4">
+              <div className="flex items-center gap-6 mb-4 ">
               
-                <span className="text-green-600 font-semibold">{chef.followers || 0} followers</span>
                     <button
                     onClick={() => handleEditButton()}
                     className="mt-4 px-5 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-semibold hover:shadow-xl hover:scale-105 transition-all"
                   >
-                    View Recipe
+                    Edit Profile
                   </button>
               </div>
             </div>
@@ -136,7 +146,7 @@ setTotalPagesBlog(blogRes.data.totalCount)
               {recipes.map((recipe: any) => (
                 <div key={recipe._id} className="bg-white rounded-2xl shadow">
                   <div className="h-56 overflow-hidden">
-                    <img src={recipe.image} className="w-full h-full object-cover" />
+                    <img onClick={()=>navigate(`/recipe-detail/${recipe._id}`)} src={recipe.images} className="w-full h-full object-cover" />
                   </div>
                   <div className="p-5">
                     <h3 className="font-bold text-lg">{recipe.title}</h3>
@@ -159,7 +169,7 @@ setTotalPagesBlog(blogRes.data.totalCount)
             <div className="grid grid-cols-3 gap-6 mb-6">
               {blogs.map((blog: any) => (
                 <div key={blog._id} className="bg-white shadow rounded-2xl overflow-hidden">
-                  <img src={blog.image} className="h-48 w-full object-cover" />
+                  <img onClick={()=>navigate(`/blog-detail/${blog._id}`)} src={blog.coverImage} className="h-48 w-full object-cover" />
                   <div className="p-5">
                     <h3 className="font-bold">{blog.title}</h3>
                     <p className="text-sm text-green-600">{blog.author}</p>

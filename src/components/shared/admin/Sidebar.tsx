@@ -12,6 +12,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
 import { logoutApi } from "@/api/authApi";
+import { useUserStore } from "@/store/userStore";
 
 interface SidebarProps {
   activePath: string;
@@ -21,15 +22,16 @@ interface SidebarProps {
 export default function Sidebar({ activePath, onMenuSelect }: SidebarProps) {
   const navigate = useNavigate();
   const { logout } = useAuthStore();
+  const delUserStore=useUserStore().delUserStore
 
   const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/admin-dashboard" },
     { icon: Users, label: "User Management", path: "/admin-dashboard/foodie-management" },
     { icon: ChefHat, label: "Chef Management", path: "/admin-dashboard/chef-management" },
+    { icon: Heart, label: "Recipe Managemnent", path: "/admin-dashboard/recipe-management" },
+    { icon: BookOpen, label: "Blogs Management", path: "/admin-dashboard/blog-management" },
     { icon: Utensils, label: "Workshop Management", path: "/admin-dashboard/workshops" },
-    { icon: BookOpen, label: "Blogs Management", path: "/admin-dashboard/blogs" },
     { icon: MapPin, label: "Food Spot Management", path: "/admin-dashboard/foodspots" },
-    { icon: Heart, label: "Charity & Donations", path: "/admin-dashboard/charity" },
     { icon: BarChart3, label: "Reports & Analytics", path: "/admin-dashboard/reports" },
   ];
 
@@ -37,6 +39,7 @@ export default function Sidebar({ activePath, onMenuSelect }: SidebarProps) {
     try {
       logout();
       await logoutApi()
+      delUserStore()
       navigate("/login");
     } catch (error) {
       
