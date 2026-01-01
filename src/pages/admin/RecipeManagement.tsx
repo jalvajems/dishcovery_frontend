@@ -11,7 +11,6 @@ import {
   adminBlockRecipeApi,
   adminUnblockRecipeApi,
 } from "@/api/adminApi";
-import { data } from "react-router-dom";
 
 type Recipe = {
   _id: string;
@@ -44,7 +43,7 @@ export default function RecipeManagement() {
         page,
         limit,
         search,
-        filters.status // filter: all | active | blocked
+        filters.status
       );
     },
 

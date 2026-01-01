@@ -31,7 +31,7 @@ export default function Sidebar({ activePath, onMenuSelect }: SidebarProps) {
     { icon: Heart, label: "Recipe Managemnent", path: "/admin-dashboard/recipe-management" },
     { icon: BookOpen, label: "Blogs Management", path: "/admin-dashboard/blog-management" },
     { icon: Utensils, label: "Workshop Management", path: "/admin-dashboard/workshops" },
-    { icon: MapPin, label: "Food Spot Management", path: "/admin-dashboard/foodspots" },
+    { icon: MapPin, label: "Food Spot Management", path: "/admin-dashboard/foodspot-management" },
     { icon: BarChart3, label: "Reports & Analytics", path: "/admin-dashboard/reports" },
   ];
 

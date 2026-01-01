@@ -1,238 +1,186 @@
 import React, { useEffect, useState } from 'react';
-import { Search, Bell, Heart, MessageCircle, Bookmark, ChevronRight, Tag } from 'lucide-react';
-import { useParams } from 'react-router-dom';
+import { Heart, Tag, Calendar, User, ArrowRight, Clock } from 'lucide-react';
+import { useParams, Link } from 'react-router-dom';
 import { getFoodieBlogDetailApi, getRelatedBlogsApi } from '@/api/foodieApi';
 import { showError } from '@/utils/toast';
 import ReviewSection from '@/components/shared/ReviewPage';
+import FoodieNavbar from '@/components/shared/foodie/Navbar.foodie';
 
 const BlogDetailPage: React.FC = () => {
   const [blog, setBlog] = useState<any>(null);
   const [relatedBlogs, setRelatedBlogs] = useState([]);
-  const [comments, setComments] = useState([]);
-
-  const [likes, setLikes] = useState(234);
+  const [likes, setLikes] = useState(234); // Mock likes for now as logic wasn't fully connected in original
   const [isLiked, setIsLiked] = useState(false);
   const { blogId } = useParams();
-
-  if (!blogId) throw Error('blog id is missing');
 
   useEffect(() => {
     const fetchBlog = async () => {
       try {
+        if (!blogId) return;
         const res = await getFoodieBlogDetailApi(blogId);
         setBlog(res.data.data);
-        console.log('blogs', res.data.data);
       } catch (error: any) {
         showError(error.response?.data?.message || "Failed to fetch blog details");
       }
     };
-    
     fetchBlog();
+    window.scrollTo(0, 0);
   }, [blogId]);
 
-  useEffect(()=>{
-    const fetchRelatedBlogs=async()=>{
+  useEffect(() => {
+    if (!blog?.tags?.[0]) return;
+    const fetchRelatedBlogs = async () => {
       try {
-        const res=await getRelatedBlogsApi(blog.tags[0])
-        setRelatedBlogs(res.data.relatedDatas)
-      } catch (error:any) {
-        showError(error.response?.data?.message)
+        const res = await getRelatedBlogsApi(blog.tags[0]);
+        const related = res.data.relatedDatas?.filter((b: any) => b._id !== blog._id) || [];
+        setRelatedBlogs(related.slice(0, 3));
+      } catch (error: any) {
+        console.error(error);
       }
-    }
-    fetchRelatedBlogs()
-  },[blogId])
-  
-  console.log('blogs===', blog);
-  console.log('blogsrelated===', relatedBlogs);
+    };
+    fetchRelatedBlogs();
+  }, [blog]);
+
 
   const handleLike = () => {
     setIsLiked(!isLiked);
     setLikes(isLiked ? likes - 1 : likes + 1);
   };
 
+  if (!blog) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-gray-50">
+        <div className="text-xl font-bold text-emerald-600 animate-pulse">Loading amazing content...</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50">
-      {/* Header */}
-      <header className="bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-12">
-            <h1 className="text-2xl font-bold text-gray-900">
-              Dish<span className="text-green-600">c</span>overy
-            </h1>
-            <nav className="hidden md:flex space-x-8">
-              <a href="#" className="text-gray-700 hover:text-green-600 font-medium transition-colors">Home</a>
-              <a href="#" className="text-gray-700 hover:text-green-600 font-medium transition-colors">Chefs</a>
-              <a href="#" className="text-gray-700 hover:text-green-600 font-medium transition-colors">Food Spots</a>
-              <a href="#" className="text-gray-700 hover:text-green-600 font-medium transition-colors">Workshops</a>
-              <a href="#" className="text-gray-700 hover:text-green-600 font-medium transition-colors">Recipes</a>
-            </nav>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Search"
-                className="pl-10 pr-4 py-2 bg-green-50 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-green-500 w-64 text-gray-700"
-              />
-            </div>
-            <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-              <Bell className="w-5 h-5 text-gray-700" />
-            </button>
-            <img
-              src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"
-              alt="Profile"
-              className="w-10 h-10 rounded-full ring-2 ring-green-500"
-            />
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gray-50 font-sans text-gray-800">
+      <FoodieNavbar />
 
-      {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-6 py-8">
-        {/* Breadcrumbs */}
-        <div className="flex items-center gap-2 text-sm mb-6">
-          <a href="#" className="text-gray-600 hover:text-green-600 transition-colors">Home</a>
-          <ChevronRight className="w-4 h-4 text-gray-400" />
-          <a href="#" className="text-gray-600 hover:text-green-600 transition-colors">Food Blog</a>
-          <ChevronRight className="w-4 h-4 text-gray-400" />
-          <span className="text-gray-900 font-medium">The Ultimate Guide to Healthy Meal Prep</span>
-        </div>
+      {/* Hero Header */}
+      <div className="relative h-[500px] w-full bg-gray-900 group">
+        <img
+          src={blog.coverImage}
+          alt={blog.title}
+          className="w-full h-full object-cover opacity-60 group-hover:opacity-50 transition-all duration-700"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent opacity-90"></div>
 
-        {/* Blog Title */}
-        <h1 className="text-4xl font-bold text-gray-900 mb-6">
-          {blog?.title}
-        </h1>
-
-
-        {/* Featured Image */}
-        <div className="rounded-2xl overflow-hidden shadow-2xl mb-8">
-          <img src={blog?.coverImage} className="w-full h-96 object-cover" />
-
-        </div>
-
-  <div className="grid grid-cols-2 gap-6">
-            <DetailItem icon={<Tag />} label="Tags" value={blog?.tags?.join(", ")} />
-          </div>
-        {/* Author & Date */}
-        <div className="flex items-center gap-3 mb-8 text-gray-600 text-sm">
-          <span className="font-medium">By {blog?.chefId?.name}</span>
-          <span>•</span>
-          <span>Published on {new Date(blog?.createdAt).toDateString()}</span>
-
-        </div>
-        {/* Blog Content */}
-        {/* Content */}
-        <div className="px-10 pb-8">
-          <p className="text-lg text-gray-700 leading-relaxed mb-8">
-            {blog?.shortDescription}
-          </p>
-
-          <p className="text-lg text-gray-700 leading-relaxed whitespace-pre-line">
-            {blog?.content}
-          </p>
-        </div>
-
-
-        {/* Engagement Actions */}
-        <div className="flex items-center gap-6 mb-12">
-          <button
-            onClick={handleLike}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${isLiked ? 'bg-green-100 text-green-700' : 'bg-white text-gray-700 hover:bg-gray-100'
-              }`}
-          >
-            <Heart className={`w-5 h-5 ${isLiked ? 'fill-green-700' : ''}`} />
-            <span className="font-medium">{likes}</span>
-          </button>
-          {/* <button className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
-            <Bookmark className="w-5 h-5" />
-            <span className="font-medium">58</span>
-          </button> */}
-        </div>
-
-        {/* Comments Section */}
-        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 shadow-xl mb-12">
-
-          <div className="space-y-6 mb-8">
-        
-                     <ReviewSection reviewableId={blogId} reviewableType="Blog" />
-
-          </div>
-        </div>
-
-        {/* Related Blogs */}
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">Related Blogs</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {relatedBlogs.map((blog:any) => (
-              <div
-                key={blog.id}
-                className="bg-white/90 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 group cursor-pointer"
-              >
-                <div className="h-56 overflow-hidden">
-                  <img
-                    src={blog.image}
-                    alt={blog.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-lg font-bold text-gray-900 group-hover:text-green-700 transition-colors">
-                    {blog.title}
-                  </h3>
-                </div>
-              </div>
+        <div className="absolute bottom-0 left-0 w-full p-8 md:p-16 text-white max-w-7xl mx-auto">
+          {/* Tags */}
+          <div className="flex flex-wrap items-center gap-3 mb-6">
+            {blog.tags?.map((tag: string, idx: number) => (
+              <span key={idx} className="px-3 py-1 bg-emerald-500/20 border border-emerald-500/30 rounded-full backdrop-blur-md flex items-center gap-2 text-emerald-300 text-sm font-medium">
+                <Tag size={14} /> {tag}
+              </span>
             ))}
           </div>
-        </div>
-      </main>
 
-      {/* Footer */}
-      <footer className="bg-white/90 backdrop-blur-sm border-t border-gray-200 mt-20">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="flex justify-center space-x-8 mb-6">
-            <a href="#" className="text-gray-600 hover:text-green-600 text-sm transition-colors">About</a>
-            <a href="#" className="text-gray-600 hover:text-green-600 text-sm transition-colors">Contact</a>
-            <a href="#" className="text-gray-600 hover:text-green-600 text-sm transition-colors">Privacy Policy</a>
-            <a href="#" className="text-gray-600 hover:text-green-600 text-sm transition-colors">Terms of Service</a>
+          <h1 className="text-3xl md:text-5xl font-extrabold mb-6 leading-tight max-w-4xl">
+            {blog.title}
+          </h1>
+
+          <div className="flex items-center gap-6 text-gray-300">
+            <span className="flex items-center gap-2 text-lg">
+              <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold">
+                {blog.chefId?.name?.charAt(0) || <User size={16} />}
+              </div>
+              <span className="text-white font-medium">{blog.chefId?.name}</span>
+            </span>
+            <span className="hidden md:inline-block">•</span>
+            <span className="flex items-center gap-2">
+              <Calendar size={18} />
+              {new Date(blog.createdAt).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' })}
+            </span>
           </div>
-          <div className="flex justify-center space-x-6 mb-6">
-            <a href="#" className="text-green-600 hover:text-green-700 transition-colors">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
-                <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37zm1.5-4.87h.01"></path>
-              </svg>
-            </a>
-            <a href="#" className="text-green-600 hover:text-green-700 transition-colors">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"></path>
-              </svg>
-            </a>
-            <a href="#" className="text-green-600 hover:text-green-700 transition-colors">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10"></circle>
-              </svg>
-            </a>
-          </div>
-          <p className="text-center text-sm text-gray-600">
-            ©2024 Dishcovery. All rights reserved.
-          </p>
         </div>
-      </footer>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+
+          {/* Main Content (Left) */}
+          <div className="lg:col-span-8 space-y-12">
+
+            {/* Content Body */}
+            <div className="bg-white p-8 md:p-10 rounded-2xl shadow-sm border border-gray-100">
+              <p className="text-xl text-gray-600 font-medium leading-relaxed mb-8 italic border-l-4 border-emerald-500 pl-4">
+                {blog.shortDescription}
+              </p>
+              <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed whitespace-pre-line">
+                {blog.content}
+              </div>
+            </div>
+
+            {/* Reviews */}
+            <div className="pt-4">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">Comments & Discussion</h3>
+              <ReviewSection reviewableId={blogId!} reviewableType="Blog" />
+            </div>
+
+          </div>
+
+          {/* Sidebar (Right) */}
+          <div className="lg:col-span-4 space-y-8">
+
+            {/* Actions Card */}
+            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 sticky top-24">
+              <h3 className="text-xl font-bold mb-6">Engage</h3>
+              <button
+                onClick={handleLike}
+                className={`w-full py-4 rounded-xl flex items-center justify-center gap-2 font-bold transition-all transform hover:scale-[1.02] ${isLiked ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'}`}
+              >
+                <Heart size={24} className={isLiked ? "fill-red-600" : ""} />
+                {likes} Likes
+              </button>
+
+              <div className='my-6 border-b border-gray-100'></div>
+
+              <h4 className="font-semibold text-gray-900 mb-4">About the Author</h4>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-xl">
+                  {blog.chefId?.name?.charAt(0)}
+                </div>
+                <div>
+                  <p className="font-bold text-gray-900">{blog.chefId?.name}</p>
+                  <p className="text-sm text-gray-500">Chef & Content Creator</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Related Blogs */}
+            {relatedBlogs.length > 0 && (
+              <div className='space-y-4'>
+                <h3 className="text-xl font-bold text-gray-900 border-l-4 border-emerald-500 pl-3">Related Reads</h3>
+                {relatedBlogs.map((b: any) => (
+                  <Link to={`/foodie/blog/${b._id}`} key={b._id} className="block group">
+                    <div className="flex gap-4 bg-white p-3 rounded-xl shadow-sm border border-transparent hover:border-emerald-200 transition-all hover:bg-emerald-50/30">
+                      <img src={b.coverImage} alt={b.title} className="w-24 h-24 object-cover rounded-lg flex-shrink-0" />
+                      <div className='flex flex-col justify-center gap-1'>
+                        <h4 className="font-bold text-gray-800 line-clamp-2 leading-tight group-hover:text-emerald-700 transition-colors">
+                          {b.title}
+                        </h4>
+                        <div className='flex items-center gap-2 text-xs text-gray-500'>
+                          <Clock size={12} /> {new Date(b.createdAt).toLocaleDateString()}
+                        </div>
+                        <div className='flex items-center gap-1 text-xs font-semibold text-emerald-600 mt-1'>
+                          Read More <ArrowRight size={12} />
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+
+          </div>
+
+        </div>
+      </div>
     </div>
   );
 };
 
 export default BlogDetailPage;
-function DetailItem({ icon, label, value }: any) {
-  return (
-    <div className="flex items-center justify-between py-3 border-b border-gray-200">
-      <span className="text-green-600 font-semibold flex items-center gap-2">
-        {icon}
-        {label}
-      </span>
-      <span className="font-bold text-gray-900">{value}</span>
-    </div>
-  );
-}

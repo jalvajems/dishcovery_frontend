@@ -8,7 +8,7 @@ export default function FoodieNavbar() {
    const { image}=useUserStore()
 
   return (
-    <nav className="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200">
+    <nav className="bg-white shadow-sm sticky top-0  z-50 border-b border-gray-200">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
         <img

@@ -10,7 +10,7 @@ export default function RecipeListing() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const limit = 5
+  const limit = 2
   const [recipes, setRecipes] = useState([]);
 
   const handlePageChange = (page: number) => {

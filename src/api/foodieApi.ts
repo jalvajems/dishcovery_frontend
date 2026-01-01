@@ -1,3 +1,4 @@
+import { useParams } from "react-router-dom"
 import API from "./apiInstance"
 
 export const userDashboardApi=()=>{
@@ -39,4 +40,21 @@ export const updateFoodieProfileApi=(data:object)=>{
 }
 export const getFoodieProfileApi=()=>{
     return API.get('/foodie/profile')
+}
+
+
+export const addFoodSpotApi=(payload:object)=>{
+    return API.post('/foodie/foodspot',payload)
+}
+export const editFoodSpotApi=(id:string,payload:object)=>{
+    return API.put('/foodie/foodspot',{id,payload})
+}
+export const getAllFoodSpotApi=(page:number,limit:number,search?:string)=>{
+    return API.get('/foodie/foodspots',{params:{page,limit,search}})
+}
+export const getAllMyFoodSpotApi=(page:number,limit:number,search?:string)=>{
+    return API.get('/foodie/myfoodspots',{params:{page,limit,search}})
+}
+export const getFoodSpotDetailApi=(spotId:string)=>{
+    return API.get(`/foodie/foodspot/${spotId}`)
 }

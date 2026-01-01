@@ -11,7 +11,8 @@ export default function Otp() {
     handleLogIn,
     handleVerify,
     handleResendOtp,
-    otpError
+    otpError,
+    timer
   } = useOtp()
   return (
     <div className="min-h-screen bg-white">
@@ -62,12 +63,16 @@ export default function Otp() {
             </button>
             <div className="text-center">
               <p className="text-gray-700">Didn’t receive OTP?</p>
-              <button
-                onClick={handleResendOtp}
-                className="text-green-600 font-medium hover:underline"
-              >
-                Resend OTP
-              </button>
+              {timer > 0 ? (
+                <p className="text-gray-500 font-medium">Resend OTP in {timer}s</p>
+              ) : (
+                <button
+                  onClick={handleResendOtp}
+                  className="text-green-600 font-medium hover:underline"
+                >
+                  Resend OTP
+                </button>
+              )}
             </div>
 
 

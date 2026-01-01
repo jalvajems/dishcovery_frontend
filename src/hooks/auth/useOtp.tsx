@@ -1,7 +1,7 @@
 import { resendOtpApi, verifyForgetOtpApi, verifySignupOtpApi } from "@/api/authApi";
 import { useOtpStore } from "@/store/authStore";
 import { showError, showSuccess } from "@/utils/toast";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 export const useOtp = () => {
@@ -9,6 +9,17 @@ export const useOtp = () => {
   const navigate = useNavigate();
   const [otp, setOtp] = useState(['', '', '', '']);
   const [otpError, setOtpError] = useState(false);
+  const [timer, setTimer] = useState(60);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [timer]);
 
   const inputRefs = [
     useRef<HTMLInputElement>(null),
@@ -78,9 +89,11 @@ export const useOtp = () => {
   };
 
   const handleResendOtp = async () => {
+    if (timer > 0) return;
     try {
       const { data } = await resendOtpApi({ email: email })
-      alert(data.message)
+      showSuccess(data.message)
+      setTimer(60);
     } catch (error) {
       console.log(error);
     }
@@ -100,7 +113,8 @@ export const useOtp = () => {
     setOtp,
     useOtp,
     otpError,
-    handleResendOtp
+    handleResendOtp,
+    timer
   }
-
 }
+

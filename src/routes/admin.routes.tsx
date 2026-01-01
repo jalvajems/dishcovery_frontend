@@ -6,9 +6,10 @@ import FoodieManagement from "@/pages/admin/FoodieManagement";
 import ChefManagement from "@/pages/admin/ChefManagement";
 import RecipeManagement from "@/pages/admin/RecipeManagement";
 import BlogManagement from "@/pages/admin/BlogManagement";
+import FoodSpotManagement from "@/pages/admin/FoodSpotManagement";
 
 export default function AdminRoutes() {
-    const  {role}=useAuthStore();
+  const { role } = useAuthStore();
   return (
     <Routes>
       <Route path="/admin-dashboard" element={<AdminLayout />}>
@@ -17,7 +18,8 @@ export default function AdminRoutes() {
         <Route path="chef-management" element={<ChefManagement />} />
         <Route path="recipe-management" element={<RecipeManagement />} />
         <Route path="blog-management" element={<BlogManagement />} />
-        </Route>
+        <Route path="foodspot-management" element={<FoodSpotManagement />} />
+      </Route>
     </Routes>
   );
 }

@@ -12,39 +12,40 @@ interface ReviewSectionProps {
 
 export default function ReviewSection({ reviewableId, reviewableType }: ReviewSectionProps) {
     const [selectedRating, setSelectedRating] = useState<number>(0);
+    const [hoverRating, setHoverRating] = useState<number>(0);
     const [reviewText, setReviewText] = useState<string>("");
     const [reviews, setReviews] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
 
     const loadReviews = async (id?: string) => {
-    if (!id) return;
-    setLoading(true);
+        if (!id) return;
+        setLoading(true);
 
-    try {
-        const res = await getReviewsApi(id, reviewableType);
+        try {
+            const res = await getReviewsApi(id, reviewableType);
 
-        let data = res.data.data;  
+            let data = res.data.data;
 
-        
-        if (Array.isArray(data)) {
-            console.log('1');
-            
-            setReviews(data);
-        } else if (!Array.isArray(data?.review)) {
-            console.log('2');
-            setReviews(data.data);
-        } else {
-            console.log('3');
-            setReviews([]); 
+
+            if (Array.isArray(data)) {
+                console.log('1');
+
+                setReviews(data);
+            } else if (!Array.isArray(data?.review)) {
+                console.log('2');
+                setReviews(data.data);
+            } else {
+                console.log('3');
+                setReviews([]);
+            }
+
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
         }
-        
-    } catch (err) {
-        console.error(err);
-    } finally {
-        setLoading(false);
-    }
-};
-console.log("review raw", reviews);
+    };
+    console.log("review raw", reviews);
 
     useEffect(() => {
         if (reviewableId) loadReviews(reviewableId);
@@ -85,14 +86,23 @@ console.log("review raw", reviews);
             <div className="bg-white p-8 rounded-2xl shadow-md mb-6">
                 <h2 className="text-2xl font-bold mb-4">Share Your Feedback</h2>
 
-                <div className="flex gap-3 mb-4">
-                    {[1, 2, 3, 4, 5].map((s) => (
+                <div className="flex gap-2 mb-4">
+                    {[1, 2, 3, 4, 5].map((star) => (
                         <button
-                            key={s}
-                            onClick={() => setSelectedRating(s)}
-                            className={`px-4 py-2 rounded-md ${selectedRating === s ? "bg-green-600 text-white" : "bg-gray-100"}`}
+                            key={star}
+                            className="transition-transform hover:scale-110 focus:outline-none"
+                            onMouseEnter={() => setHoverRating(star)}
+                            onMouseLeave={() => setHoverRating(0)}
+                            onClick={() => setSelectedRating(star)}
+                            type="button"
                         >
-                            {s} Star{s > 1 ? "s" : ""}
+                            <Star
+                                size={32}
+                                className={`transition-colors duration-200 ${(hoverRating || selectedRating) >= star
+                                        ? "fill-yellow-400 text-yellow-400"
+                                        : "text-gray-300"
+                                    }`}
+                            />
                         </button>
                     ))}
                 </div>

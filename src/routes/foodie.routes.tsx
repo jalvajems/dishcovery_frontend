@@ -9,6 +9,12 @@ import BlogListFoodie from '@/pages/user/BlogList.foodie';
 import ProfileFoodie from '@/pages/user/Profile.foodie';
 import AddFoodieProfile from '@/pages/user/AddProfile.foodie';
 import EditFoodieProfile from '@/pages/user/EditProfile';
+import FoodSpotListing from '@/pages/user/FoodSpotsList.foodie';
+import { FoodSpotDetailPage } from '@/pages/user/FoodSpotDetail.foodie';
+import AddFoodSpot from '@/pages/user/AddFoodSpot.foodie';
+import EditFoodSpot from '@/pages/user/EditFoodSpot';
+import MyFoodSpotList from '@/pages/user/MyFoodSpotsList.foodie';
+import { MyFoodSpotDetailPage } from '@/pages/user/MyFoodSpotDetail.foodie';
 
 function UserRouter() {
   return (
@@ -17,6 +23,8 @@ function UserRouter() {
         <Route path="dashboard" element={<FoodieDashBoard />} />
         <Route path="recipe-listing" element={<RecipeListing />} />
         <Route path="blog-listing" element={<BlogListFoodie />} />
+        <Route path="spot-listing" element={<FoodSpotListing />} /> 
+        <Route path="myspot-listing" element={<MyFoodSpotList />} /> 
       </Route>
 
       <Route path="/foodie/recipe-detail/:id" element={<RecipeDetailFoodie />} />
@@ -26,7 +34,13 @@ function UserRouter() {
 
       <Route path='/foodie/profile' element={<ProfileFoodie/>} />
       <Route path='/foodie/profile-add' element={<AddFoodieProfile/>} />
-      <Route path='/foodie/profile-edit' element={<EditFoodieProfile/>} />
+      <Route path='/foodie/profile-edit/:id' element={<EditFoodieProfile/>} />
+
+      <Route path='/foodie/foodspot/:id' element={<FoodSpotDetailPage/>}/>
+      <Route path='/foodie/myfoodspot/:id' element={<MyFoodSpotDetailPage/>}/>
+      <Route path='/foodie/foodspot-add' element={<AddFoodSpot/>}/>
+      <Route path='/foodie/foodspot-edit/:id' element={<EditFoodSpot/>}/>
+      
 
     </Routes>
   );
