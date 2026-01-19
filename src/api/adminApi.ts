@@ -49,6 +49,10 @@ export const adminFoodSpotListingApi = (page: number, limit: number, search: str
     return API.get(`/admin/foodspot-management`, { params: { page, limit, search, isBlocked, isApproved } });
 };
 
+export const rejectFoodSpotApi = (id: string, reason: string) => {
+    return API.patch(`/admin/foodspot-reject/${id}`, { reason })
+}
+
 export const adminBlockFoodSpotApi = (id: string) => {
     return API.patch(`/admin/foodspot-block/${id}`);
 };

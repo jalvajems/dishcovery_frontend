@@ -14,36 +14,42 @@ import { FoodSpotDetailPage } from '@/pages/user/FoodSpotDetail.foodie';
 import AddFoodSpot from '@/pages/user/AddFoodSpot.foodie';
 import EditFoodSpot from '@/pages/user/EditFoodSpot';
 import MyFoodSpotList from '@/pages/user/MyFoodSpotsList.foodie';
-import { MyFoodSpotDetailPage } from '@/pages/user/MyFoodSpotDetail.foodie';
+import WorkshopDiscovery from '@/pages/user/WorkshopDiscovery.foodie';
+import WorkshopDetailFoodie from '@/pages/user/WorkshopDetail.foodie';
+import MyWorkshopsFoodie from '@/pages/user/MyWorkshops.foodie';
+import LiveSession from '@/pages/shared/LiveSession';
+import WorkshopSummary from '@/pages/shared/WorkshopSummary';
 
 function UserRouter() {
-  return (
-    <Routes>
-      <Route path="/foodie" element={<FoodieLayout />}>
-        <Route path="dashboard" element={<FoodieDashBoard />} />
-        <Route path="recipe-listing" element={<RecipeListing />} />
-        <Route path="blog-listing" element={<BlogListFoodie />} />
-        <Route path="spot-listing" element={<FoodSpotListing />} /> 
-        <Route path="myspot-listing" element={<MyFoodSpotList />} /> 
-      </Route>
+    return (
+        <Routes>
+            <Route path="/foodie" element={<FoodieLayout />}>
+                <Route path="dashboard" element={<FoodieDashBoard />} />
+                <Route path="recipe-listing" element={<RecipeListing />} />
+                <Route path="blog-listing" element={<BlogListFoodie />} />
+                <Route path="spot-listing" element={<FoodSpotListing />} />
+                <Route path="myspot-listing" element={<MyFoodSpotList />} />
+                <Route path="workshop-discovery" element={<WorkshopDiscovery />} />
+                <Route path="my-workshops" element={<MyWorkshopsFoodie />} />
+            </Route>
 
-      <Route path="/foodie/recipe-detail/:id" element={<RecipeDetailFoodie />} />
-      <Route path="/foodie/review/:id" element={<ReviewPage reviewableType="Recipe" />} />
+            <Route path="/foodie/recipe-detail/:id" element={<RecipeDetailFoodie />} />
+            <Route path="/foodie/review/:id" element={<ReviewPage reviewableType="Recipe" />} />
 
-      <Route path="/foodie/blog-detail/:blogId" element={<BlogDetailPage/>} />
+            <Route path="/foodie/blog-detail/:blogId" element={<BlogDetailPage />} />
 
-      <Route path='/foodie/profile' element={<ProfileFoodie/>} />
-      <Route path='/foodie/profile-add' element={<AddFoodieProfile/>} />
-      <Route path='/foodie/profile-edit/:id' element={<EditFoodieProfile/>} />
+            <Route path='/foodie/profile' element={<ProfileFoodie />} />
+            <Route path='/foodie/profile-add' element={<AddFoodieProfile />} />
+            <Route path='/foodie/profile-edit/:id' element={<EditFoodieProfile />} />
 
-      <Route path='/foodie/foodspot/:id' element={<FoodSpotDetailPage/>}/>
-      <Route path='/foodie/myfoodspot/:id' element={<MyFoodSpotDetailPage/>}/>
-      <Route path='/foodie/foodspot-add' element={<AddFoodSpot/>}/>
-      <Route path='/foodie/foodspot-edit/:id' element={<EditFoodSpot/>}/>
-      
-
-    </Routes>
-  );
+            <Route path='/foodie/foodspot/:id' element={<FoodSpotDetailPage />} />
+            <Route path='/foodie/foodspot-add' element={<AddFoodSpot />} />
+            <Route path='/foodie/foodspot-edit/:id' element={<EditFoodSpot />} />
+            <Route path="/foodie/workshop-detail/:id" element={<WorkshopDetailFoodie />} />
+            <Route path="/foodie/live-session/:workshopId" element={<LiveSession />} />
+            <Route path="/foodie/workshop-summary/:workshopId" element={<WorkshopSummary />} />
+        </Routes>
+    );
 }
 
 export default UserRouter;

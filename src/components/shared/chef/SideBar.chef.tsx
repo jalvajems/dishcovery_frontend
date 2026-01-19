@@ -1,7 +1,6 @@
 import {
   Home,
   BookOpen,
-  Utensils,
   FileText,
   MessageCircle,
   User,
@@ -20,18 +19,18 @@ interface SidebarProps {
 export default function ChefSidebar({ activePath, onMenuSelect }: SidebarProps) {
   const navigate = useNavigate();
   const { logout } = useAuthStore();
-    const delUserStore=useUserStore().delUserStore
-    const {isVerifiedUser}=useUserStore()
-  
+  const delUserStore = useUserStore().delUserStore
+  const { isVerifiedUser } = useUserStore()
+
 
   const menuItems = [
-  { icon: Home, label: "Dashboard", path: "/chef/dashboard" },
-  { icon: BookOpen, label: "Recipes", path: "/chef/recipes-listing" },
-  { icon: Utensils, label: "Workshops", path: "/chef/workshops" },
-  { icon: FileText, label: "Blogs", path: "/chef/blog-listing" },
-  { icon: MessageCircle, label: "Chat", path: "/chef/chat" },
-  { icon: User, label: "Profile", path: "/chef/profile" },
-];
+    { icon: Home, label: "Dashboard", path: "/chef/dashboard" },
+    { icon: BookOpen, label: "Recipes", path: "/chef/recipes-listing" },
+    { icon: FileText, label: "Blogs", path: "/chef/blog-listing" },
+    { icon: BookOpen, label: "Workshops", path: "/chef/workshop-listing" },
+    { icon: MessageCircle, label: "Chat", path: "/chef/chat" },
+    { icon: User, label: "Profile", path: "/chef/profile" },
+  ];
 
 
   const handleLogout = async () => {
@@ -52,11 +51,10 @@ export default function ChefSidebar({ activePath, onMenuSelect }: SidebarProps) 
               key={path}
               disabled={!isVerifiedUser}
               onClick={() => onMenuSelect(path)}
-              className={`w-full flex items-center gap-4 px-5 py-4 rounded-xl transition-all ${
-                isActive
-                  ? "bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg font-semibold"
-                  : "text-gray-700 hover:bg-green-50 hover:text-green-700"
-              }`}
+              className={`w-full flex items-center gap-4 px-5 py-4 rounded-xl transition-all ${isActive
+                ? "bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg font-semibold"
+                : "text-gray-700 hover:bg-green-50 hover:text-green-700"
+                }`}
             >
               <Icon className="w-5 h-5" />
               {label}

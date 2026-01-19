@@ -1,6 +1,5 @@
-import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { Home, ChefHat, BookOpen, FileText, MapPin, Heart, MessageCircle, Bot, LogOut } from 'lucide-react';
+import { Home, BookOpen, FileText, MapPin, Heart, MessageCircle, Bot, LogOut } from 'lucide-react';
 import { logoutApi } from "@/api/authApi";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
@@ -8,15 +7,14 @@ import { useUserStore } from "@/store/userStore";
 
 export default function FoodieSidebar() {
   const navigate = useNavigate();
-    const {delUserStore,name,email,image}=useUserStore()
-  
+  const { delUserStore, name, email, image } = useUserStore()
+
 
   const menuItems = [
     { icon: Home, label: 'Home', path: '/foodie/dashboard' },
     // { icon: ChefHat, label: 'Chef', path: '/foodie/chef' },
     { icon: BookOpen, label: 'Recipes', path: '/foodie/recipe-listing' },
     { icon: FileText, label: 'Blogs', path: '/foodie/blog-listing' },
-    { icon: MapPin, label: 'Workshops', path: '/foodie/workshops' },
     { icon: MapPin, label: 'Food Spots', path: '/foodie/spot-listing' },
     { icon: MapPin, label: 'My Food Spots', path: '/foodie/myspot-listing' },
     { icon: Heart, label: 'Donations', path: '/foodie/donations' },
@@ -36,13 +34,13 @@ export default function FoodieSidebar() {
     <aside className="w-64 bg-white/80 p-6 sticky top-20 h-fit shadow-lg rounded-r-3xl">
       <div className="flex items-center gap-3 mb-8 pb-4 border-b border-gray-200">
         <div className="w-12 h-12  rounded-full overflow-hidden shadow-xl ring-4 ring-green-100">
-              <img
-              onClick={()=>navigate('/foodie/profile')}
-                src={image || "/default-avatar.png"}
-                alt="profile"
-                className="w-full h-full object-cover"
-              />
-            </div>
+          <img
+            onClick={() => navigate('/foodie/profile')}
+            src={image || "/default-avatar.png"}
+            alt="profile"
+            className="w-full h-full object-cover"
+          />
+        </div>
 
         <div>
           <p className="font-semibold">{name}</p>
@@ -58,7 +56,7 @@ export default function FoodieSidebar() {
             return (
               <button
                 key={item.label}
-                onClick={()=>handleLogout()}
+                onClick={() => handleLogout()}
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50"
               >
                 <Icon className="w-5 h-5" />

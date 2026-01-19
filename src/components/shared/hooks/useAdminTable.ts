@@ -21,7 +21,7 @@ export function useAdminTable<T>({ fetchApi, filters }: UseAdminTableConfig<T>) 
   const [searchQuery, setSearchQuery] = useState(""); 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const limit = 5;
+  const limit = 3;
 
   const [filterValues, setFilterValues] = useState(() => {
   const obj: Record<string, any> = {};

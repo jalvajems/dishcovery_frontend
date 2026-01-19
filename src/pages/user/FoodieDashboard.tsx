@@ -6,20 +6,20 @@ import { useNavigate } from 'react-router-dom';
 
 export default function FoodieDashboard() {
 
-  const {name}=useUserStore()
+  const { name } = useUserStore()
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const navigate=useNavigate()
-  
+  const navigate = useNavigate()
+
 
   useEffect(() => {
     checkFoodieProfile();
   }, []);
-  
+
   async function checkFoodieProfile() {
     try {
       const res = await userDashboardApi();
-  console.log('has=========',res.data.hasProfile);
-  
+      console.log('has=========', res.data.hasProfile);
+
       if (!res.data.hasProfile) {
         setShowProfileModal(true);
       }
@@ -27,8 +27,8 @@ export default function FoodieDashboard() {
       console.error(error);
     }
   }
-  
-  
+
+
   const featuredRecipes = [
     { id: 1, title: 'Delicious Pasta Carbonara', chef: 'Chef Isabella Rossi', images: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400&h=400&fit=crop' },
     { id: 2, title: 'Spicy Thai Green Curry', chef: 'Chef Ethan Lee', images: 'https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=400&h=400&fit=crop' },
@@ -66,7 +66,7 @@ export default function FoodieDashboard() {
             Find your taste
           </button>
           <p className="text-white/90 mt-4 text-lg">
-            Explore new recipes, workshops, and food spots tailored just for you
+            Explore new recipes and food spots tailored just for you
           </p>
         </div>
       </div>
@@ -107,25 +107,7 @@ export default function FoodieDashboard() {
         </div>
       </section>
 
-      {/* Workshop */}
-      <section className="mb-12">
-        <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-gray-900 to-green-700 bg-clip-text text-transparent">Upcoming Workshops</h2>
-        <div className="bg-white rounded-2xl p-8 shadow-lg">
-          <div className="flex justify-between items-start">
-            <div className="flex-1">
-              <span className="inline-block px-4 py-1 bg-green-100 text-green-700 rounded-full text-sm mb-4">Workshop</span>
-              <h3 className="text-2xl font-bold mb-3 text-gray-900">Sushi Making Masterclass</h3>
-              <p className="text-gray-600 mb-6 max-w-xl">Learn sushi-making with Chef Kenji Tanaka.</p>
-              <button className="px-8 py-3 bg-gray-900 text-white rounded-full font-semibold hover:scale-105 transition-all">
-                Book Now
-              </button>
-            </div>
-            <div className="w-64 h-48 rounded-2xl overflow-hidden shadow-xl">
-              <img src="https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop" alt="Sushi" className="w-full h-full object-cover" />
-            </div>
-          </div>
-        </div>
-      </section>
+
 
       {/* Food Spots */}
       <section className="mb-12">
@@ -164,7 +146,7 @@ export default function FoodieDashboard() {
           </div>
         </div>
       </section>
-       <ConfirmModal
+      <ConfirmModal
         isOpen={showProfileModal}
         title="Complete Your Chef Profile"
         message="You need to create your chef profile before accessing the dashboard."

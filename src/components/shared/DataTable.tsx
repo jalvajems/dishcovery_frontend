@@ -22,7 +22,7 @@ export type ReusableTableProps<T> = {
 
 export default function ReusableTable<T>({
   columns,
-  data,
+  data = [],
   actions,
 }: ReusableTableProps<T>) {
   return (
