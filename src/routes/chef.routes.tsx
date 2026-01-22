@@ -18,6 +18,9 @@ import EditWorkshopChef from "@/pages/chef/EditWorkshop.chef";
 import WorkshopDetailChef from "@/pages/chef/WorkshopDetail.chef";
 import LiveSession from "@/pages/shared/LiveSession";
 import WorkshopSummary from "@/pages/shared/WorkshopSummary";
+import ChefWalletPage from "@/pages/chef/Wallet.chef";
+import FollowersList from "@/pages/chef/FollowersList.chef";
+import FoodieProfileDetail from "@/pages/chef/FoodieProfileDetail.chef";
 
 function ChefRoutes() {
     return (
@@ -45,6 +48,10 @@ function ChefRoutes() {
             <Route path="/chef/workshop-detail/:id" element={<WorkshopDetailChef />} />
             <Route path="/chef/live-session/:workshopId" element={<LiveSession />} />
             <Route path="/chef/workshop-summary/:workshopId" element={<WorkshopSummary />} />
+
+            <Route path="/chef/wallet" element={<ChefWalletPage />} />
+            <Route path="/chef/followers" element={<FollowersList />} />
+            <Route path="/chef/foodie-profile/:id" element={<FoodieProfileDetail />} />
         </Routes>
     )
 }

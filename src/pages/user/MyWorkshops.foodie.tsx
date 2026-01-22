@@ -33,6 +33,7 @@ export default function MyWorkshopsFoodie() {
             setLoading(false);
         }
     };
+    
 
     return (
         <div className="min-h-screen bg-[#fcfcfc] pb-20">
@@ -166,7 +167,7 @@ export default function MyWorkshopsFoodie() {
                                                     </button>
                                                 )}
 
-                                                {isConfirmed && workshop.status !== 'LIVE' && (
+                                                {/* {booking.status === 'CONFIRMED'&&isConfirmed && workshop.status !== 'LIVE' && (
                                                     <button
                                                         onClick={async () => {
                                                             if (window.confirm("Are you sure you want to cancel this booking?")) {
@@ -183,7 +184,7 @@ export default function MyWorkshopsFoodie() {
                                                     >
                                                         Cancel Seat
                                                     </button>
-                                                )}
+                                                )} */}
 
                                                 {workshop.status === 'COMPLETED' && (
                                                     <button className="flex-1 flex items-center justify-center gap-3 py-4 bg-gray-50 text-gray-400 rounded-2xl font-black hover:bg-gray-100 transition-all border border-gray-100">

@@ -5,6 +5,9 @@ import {
   MessageCircle,
   User,
   LogOut,
+  Wallet,
+  Pen,
+  ChefHat,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
@@ -27,7 +30,8 @@ export default function ChefSidebar({ activePath, onMenuSelect }: SidebarProps) 
     { icon: Home, label: "Dashboard", path: "/chef/dashboard" },
     { icon: BookOpen, label: "Recipes", path: "/chef/recipes-listing" },
     { icon: FileText, label: "Blogs", path: "/chef/blog-listing" },
-    { icon: BookOpen, label: "Workshops", path: "/chef/workshop-listing" },
+    { icon: ChefHat , label: "Workshops", path: "/chef/workshop-listing" },
+    { icon: Wallet, label: "Wallet", path: "/chef/wallet" },
     { icon: MessageCircle, label: "Chat", path: "/chef/chat" },
     { icon: User, label: "Profile", path: "/chef/profile" },
   ];

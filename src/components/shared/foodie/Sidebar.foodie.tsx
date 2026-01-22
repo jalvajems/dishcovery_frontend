@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { Home, BookOpen, FileText, MapPin, Heart, MessageCircle, Bot, LogOut } from 'lucide-react';
+import { Home, BookOpen, FileText, MapPin, Heart, MessageCircle, Bot, LogOut, Pen, SpoolIcon, ToolCase, CookingPot, Store, Wallet, ChefHat, UserPlus } from 'lucide-react';
 import { logoutApi } from "@/api/authApi";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
@@ -12,12 +12,16 @@ export default function FoodieSidebar() {
 
   const menuItems = [
     { icon: Home, label: 'Home', path: '/foodie/dashboard' },
-    // { icon: ChefHat, label: 'Chef', path: '/foodie/chef' },
+    { icon: ChefHat, label: 'Chefs', path: '/foodie/chefs' },
+    { icon: UserPlus, label: 'Followings', path: '/foodie/followings' },
+
     { icon: BookOpen, label: 'Recipes', path: '/foodie/recipe-listing' },
     { icon: FileText, label: 'Blogs', path: '/foodie/blog-listing' },
     { icon: MapPin, label: 'Food Spots', path: '/foodie/spot-listing' },
-    { icon: MapPin, label: 'My Food Spots', path: '/foodie/myspot-listing' },
-    { icon: Heart, label: 'Donations', path: '/foodie/donations' },
+    { icon: Store, label: 'My Food Spots', path: '/foodie/myspot-listing' },
+    { icon: ToolCase , label: 'Workshops', path: "/foodie/workshop-discovery" },
+    { icon: Pen, label: 'My Workshops', path: "/foodie/my-workshops" },
+    { icon: Wallet, label: 'Wallet', path: "/foodie/wallet" },
     { icon: MessageCircle, label: 'Chat', path: '/foodie/chat' },
     { icon: Bot, label: 'AI Chef', path: '/foodie/aichef' },
     { icon: LogOut, label: 'Logout', path: '/logout' },

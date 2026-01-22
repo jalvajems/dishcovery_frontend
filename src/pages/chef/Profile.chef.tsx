@@ -1,54 +1,38 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { Star, Mail, Wallet, Plus, ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Star, ChevronRight, Award, Trophy, Lightbulb, MessageSquare, UserCircle, Users } from "lucide-react";
 import {
-  getAllRecipeApi,
   getChefProfileApi,
-  getMyBlogsChefApi
 } from "@/api/chefApi";
-import { showError } from "@/utils/toast";
 import { useAuthStore } from "@/store/authStore";
-import Pagination from "@/components/shared/Pagination";
 import ChefNavbar from "@/components/shared/chef/NavBar.chef";
 import { useUserStore } from "@/store/userStore";
+import ChefReviewSection from "@/components/shared/ChefReviewSection";
+import { getFollowersApi } from "@/api/followApi";
 
 export default function ChefProfilePage() {
-  const id=useAuthStore.getState().user?._id
-  const navigate=useNavigate()
-  const {setUserStore}=useUserStore()
+  const id = useAuthStore.getState().user?._id
+  const navigate = useNavigate()
+  const { setUserStore } = useUserStore()
 
   const [chef, setChef] = useState<any>(null);
-  const [recipes, setRecipes] = useState([]);
-  const [blogs, setBlogs] = useState([]);
+  const [followers, setFollowers] = useState<any>(null);
+  const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const limit=4
-    const [currentPageRecipe, setCurrentPageRecipe] = useState(1);
-  const [totalPagesRecipe,setTotalPagesRecipe ]=useState(1);
-    const [currentPageBlog, setCurrentPageBlog] = useState(1);
-  const [totalPagesBlog,setTotalPagesBlog ]=useState(1);
 
-  const handlePageChangeRecipe=(page:number)=>{
-    setCurrentPageRecipe(page)
-  }
-  const handlePageChangeBlog=(page:number)=>{
-    setCurrentPageBlog(page)
-  }
+
 
   useEffect(() => {
     async function fetchData() {
       try {
         const chefRes = await getChefProfileApi()
-        const recipeRes=await  getAllRecipeApi(currentPageRecipe,limit);
-        const blogRes= await  getMyBlogsChefApi(currentPageBlog,limit)
+        const followers= await getFollowersApi()
+        console.log("--------fff",followers);
+        setFollowers(followers.data.datas)
         
 
         setChef(chefRes.data.datas);
-        setRecipes(recipeRes.data.data||[]);
-              console.log('recpe',chefRes.data.data);
-
-        setBlogs(blogRes.data.datas||[]);
-setTotalPagesRecipe(recipeRes.data.totalCount)
-setTotalPagesBlog(blogRes.data.totalCount)
+        setReviews(chefRes.data.reviews || []);
       } catch (error: any) {
         // showError(error?.response?.data?.message || "Something went wrong");
       } finally {
@@ -57,13 +41,13 @@ setTotalPagesBlog(blogRes.data.totalCount)
     }
 
     fetchData();
-  }, [id,currentPageBlog,currentPageRecipe]);
-console.log('chef',chef);
+  }, [id]);
+  console.log('chef', chef);
 
-useEffect(()=>{
-     setUserStore(chef?.chefId?.name,chef?.chefId?.email,chef?.image)
+  useEffect(() => {
+    setUserStore(chef?.chefId?.name, chef?.chefId?.email, chef?.image)
 
-  },[chef])
+  }, [chef])
 
   if (loading)
     return (
@@ -78,23 +62,23 @@ useEffect(()=>{
         Profile not found!
       </div>
     );
-    console.log('recipes',recipes);
-    
-    const handleEditButton=()=>{
-      navigate('/chef/profile-edit')
-    }
+
+  const handleEditButton = () => {
+    navigate('/chef/profile-edit')
+  }
+  console.log('------', chef);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50">
 
-<ChefNavbar/>
+      <ChefNavbar />
       <main className="max-w-6xl mx-auto px-8 py-12">
 
         {/* BREADCRUMB */}
         <div className="flex items-center gap-2 text-sm mb-8">
           <a href="/chef/dashboard" className="text-green-600 font-semibold hover:underline">Home</a>
           <ChevronRight className="w-4 h-4 text-gray-400" />
-         
+
           <span className="text-gray-800 font-medium">{chef.chefId.name}</span>
         </div>
 
@@ -114,14 +98,27 @@ useEffect(()=>{
                 Specialty: {chef.specialities?.[0] || "Not added"}
               </p>
 
-              <div className="flex items-center gap-6 mb-4 ">
-              
-                    <button
+              <div className="flex items-center gap-8 mb-4">
+                <div
+                  onClick={() => navigate('/chef/followers')}
+                  className="cursor-pointer group hover:bg-green-50 p-2 rounded-xl transition-all"
+                >
+                  <div className="text-2xl font-black text-gray-900 flex items-center gap-2">
+                    <Users className="text-green-600" size={24} />
+                    {/* {stats.followers} */}
+                    {followers.length||0}
+                  </div>
+                  <div className="text-sm font-bold text-gray-400 uppercase tracking-widest group-hover:text-green-600">Followers</div>
+                </div>
+
+                <div className="flex items-center gap-6">
+                  <button
                     onClick={() => handleEditButton()}
-                    className="mt-4 px-5 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-semibold hover:shadow-xl hover:scale-105 transition-all"
+                    className="px-6 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-bold hover:shadow-xl hover:scale-105 transition-all shadow-md"
                   >
                     Edit Profile
                   </button>
+                </div>
               </div>
             </div>
           </div>
@@ -129,57 +126,75 @@ useEffect(()=>{
 
         {/* ABOUT SECTION */}
         <div className="bg-white/90 rounded-2xl p-8 shadow-xl mb-12">
-          <h2 className="text-3xl font-bold mb-4">About {chef.chefId.name}</h2>
-          <p className="text-gray-700 text-lg leading-relaxed">
+          <h2 className="text-3xl font-bold mb-4 flex items-center gap-2">
+            <UserCircle className="w-8 h-8 text-green-600" /> About {chef.chefId.name}
+          </h2>
+          <p className="text-gray-700 text-lg leading-relaxed mb-6">
             {chef.bio || "This chef has not added a bio yet."}
           </p>
-        </div>
 
-        {/* RECIPES */}
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold mb-6">Recipes</h2>
-
-          {recipes.length === 0 ? (
-            <p className="text-gray-600 italic">No recipes yet.</p>
-          ) : (
-            <div className="grid grid-cols-3 gap-6 mb-6">
-              {recipes.map((recipe: any) => (
-                <div key={recipe._id} className="bg-white rounded-2xl shadow">
-                  <div className="h-56 overflow-hidden">
-                    <img onClick={()=>navigate(`/recipe-detail/${recipe._id}`)} src={recipe.images} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="p-5">
-                    <h3 className="font-bold text-lg">{recipe.title}</h3>
-                  </div>
-                </div>
-              ))}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8 border-t pt-8">
+            {/* Certificates */}
+            <div>
+              <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-green-700">
+                <Award className="w-6 h-6" /> Certificates
+              </h3>
+              {chef.certificates && chef.certificates.length > 0 ? (
+                <ul className="list-disc list-inside space-y-2 text-gray-700">
+                  {chef.certificates.map((cert: string, index: number) => (
+                    <li key={index}>{cert}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-500 italic">No certificates added.</p>
+              )}
             </div>
-          )}
-        </div>
-        <Pagination totalPages={totalPagesRecipe} currentPage={currentPageRecipe} onChange={handlePageChangeRecipe} />
 
-      
-        {/* BLOGS */}
-        <div>
-          <h2 className="text-3xl font-bold mb-6">Blogs</h2>
-
-          {blogs.length === 0 ? (
-            <p className="text-gray-600 italic">No blogs yet.</p>
-          ) : (
-            <div className="grid grid-cols-3 gap-6 mb-6">
-              {blogs.map((blog: any) => (
-                <div key={blog._id} className="bg-white shadow rounded-2xl overflow-hidden">
-                  <img onClick={()=>navigate(`/blog-detail/${blog._id}`)} src={blog.coverImage} className="h-48 w-full object-cover" />
-                  <div className="p-5">
-                    <h3 className="font-bold">{blog.title}</h3>
-                    <p className="text-sm text-green-600">{blog.author}</p>
-                  </div>
-                </div>
-              ))}
+            {/* Achievements */}
+            <div>
+              <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-green-700">
+                <Trophy className="w-6 h-6" /> Achievements
+              </h3>
+              {chef.achievements && chef.achievements.length > 0 ? (
+                <ul className="list-disc list-inside space-y-2 text-gray-700">
+                  {chef.achievements.map((ach: string, index: number) => (
+                    <li key={index}>{ach}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-500 italic">No achievements added.</p>
+              )}
             </div>
-          )}
+
+            {/* Skills */}
+            <div>
+              <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-green-700">
+                <Lightbulb className="w-6 h-6" /> Skills
+              </h3>
+              {chef.skills && chef.skills.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {chef.skills.map((skill: string, index: number) => (
+                    <span key={index} className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 italic">No skills added.</p>
+              )}
+            </div>
+          </div>
         </div>
-          <Pagination totalPages={totalPagesBlog} currentPage={currentPageBlog} onChange={handlePageChangeBlog} />
+
+        {/* REVIEWS SECTION */}
+        <div className="bg-white/90 rounded-2xl p-8 shadow-xl mb-12">
+          <h2 className="text-3xl font-bold mb-6 flex items-center gap-2">
+            <MessageSquare className="w-8 h-8 text-green-600" /> Reviews & Ratings
+          </h2>
+
+
+          <ChefReviewSection reviewableId={chef.chefId._id} reviewableType="Chef" />
+        </div>
       </main>
     </div>
   );

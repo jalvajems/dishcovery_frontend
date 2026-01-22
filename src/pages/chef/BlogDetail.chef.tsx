@@ -20,7 +20,6 @@ export default function BlogDetailPage() {
   useEffect(() => {
     fetchBlog();
   }, [blogId]);
-  console.log('blogid',blogId);
   
   async function fetchBlog() {
     try {

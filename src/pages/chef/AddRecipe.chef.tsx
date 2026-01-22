@@ -51,7 +51,6 @@ const [errors, setErrors] = useState<FormErrors>({});
       
       const Image=e.target.files?.[0]
       const url=await uploadToS3(Image)
-      console.log(url);
       
       setUploadedImages(url)
 
@@ -139,7 +138,6 @@ const [errors, setErrors] = useState<FormErrors>({});
   };
 
   const handleCancel = () => {
-    console.log('Cancel clicked');
   };
 
   return (

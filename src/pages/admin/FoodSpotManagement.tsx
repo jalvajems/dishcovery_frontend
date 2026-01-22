@@ -50,7 +50,6 @@ export default function FoodSpotManagement() {
             { key: "approved", defaultValue: "all" },
         ],
     });
-console.log('dataaaaa',foodSpots[0]);
 
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedSpot, setSelectedSpot] = useState<FoodSpot | null>(null);

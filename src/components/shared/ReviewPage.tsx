@@ -28,14 +28,11 @@ export default function ReviewSection({ reviewableId, reviewableType }: ReviewSe
 
 
             if (Array.isArray(data)) {
-                console.log('1');
 
                 setReviews(data);
             } else if (!Array.isArray(data?.review)) {
-                console.log('2');
                 setReviews(data.data);
             } else {
-                console.log('3');
                 setReviews([]);
             }
 
@@ -45,7 +42,6 @@ export default function ReviewSection({ reviewableId, reviewableType }: ReviewSe
             setLoading(false);
         }
     };
-    console.log("review raw", reviews);
 
     useEffect(() => {
         if (reviewableId) loadReviews(reviewableId);

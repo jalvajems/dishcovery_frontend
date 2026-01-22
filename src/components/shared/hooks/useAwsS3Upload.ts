@@ -22,11 +22,9 @@ export const useAwsS3Upload=():UploadResult=>{
                     fileName: file.name,
                     fileType: file.type,
                 });
-                console.log('datafetch',data.data);
                 
 
             const  {uploadUrl,fileUrl}=data.data;
-            console.log("upload url",uploadUrl);
             
             const s3Response=await fetch(uploadUrl,{
                 method:"PUT",
@@ -35,8 +33,6 @@ export const useAwsS3Upload=():UploadResult=>{
                     "Content-Type":file.type,
                 },
             });
-            console.log("jhereeeeeeee");
-            console.log(s3Response);
             
             
             if(!s3Response)throw new Error("s3 upload failed")

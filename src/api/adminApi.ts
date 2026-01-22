@@ -1,70 +1,71 @@
+import { ADMIN_ROUTES } from "@/components/shared/constants/routes/admin.routes"
 import API from "./apiInstance"
 
 export const adminDashboardApi = () => {
-    return API.get('/admin/admin-dashboard')
+    return API.get(ADMIN_ROUTES.DASHBOARD)
 }
 export const adminFoodieListingApi = (page: number, limit: number, search: string, isBlocked?: string) => {
-    return API.get('/admin/foodie-management', { params: { page, limit, search, isBlocked } })
+    return API.get(ADMIN_ROUTES.FOODIE_LIST, { params: { page, limit, search, isBlocked } })
 }
 export const adminChefListingApi = (page: number, limit: number, search: string, isBlocked?: string, isVerified?: string) => {
-    return API.get('/admin/chef-management', { params: { page, limit, search, isBlocked, isVerified } })
+    return API.get(ADMIN_ROUTES.CHEF_LIST, { params: { page, limit, search, isBlocked, isVerified } })
 }
 export const AdminBlockApi = (id: string) => {
-    return API.patch(`/admin/toggle-block/${id}`)
+    return API.patch(ADMIN_ROUTES.BLOCK(id))
 }
 export const AdminUnBlockApi = (id: string) => {
-    return API.patch(`/admin/toggle-unblock/${id}`)
+    return API.patch(ADMIN_ROUTES.UNBLOCK(id))
 }
 
 export const adminVerifyChefApi = (id: string) => {
-    return API.patch(`/admin/toggle-verify/${id}`)
+    return API.patch(ADMIN_ROUTES.CHEF_VERIFY(id))
 }
 export const adminUnverifyChefApi = (id: string) => {
-    return API.patch(`/admin/toggle-unVerify/${id}`)
+    return API.patch(ADMIN_ROUTES.CHEF_UNVERIFY(id))
 }
 
 export const adminRecipeListingApi = (page: number, limit: number, search: string, isBlocked: string) => {
-    return API.get(`/admin/recipe-management`, { params: { page, limit, search, isBlocked } })
+    return API.get(ADMIN_ROUTES.RECIPE_LIST, { params: { page, limit, search, isBlocked } })
 }
 export const adminBlockRecipeApi = (id: string) => {
-    return API.patch(`/admin/recipe-block/${id}`);
+    return API.patch(ADMIN_ROUTES.RECIPE_BLOCK(id));
 };
 
 export const adminUnblockRecipeApi = (id: string) => {
-    return API.patch(`/admin/recipe-unblock/${id}`);
+    return API.patch(ADMIN_ROUTES.RECIPE_UNBLOCK(id));
 };
 
 
 export const adminBlogListingApi = (page: number, limit: number, search: string, isBlocked: string) => {
-    return API.get(`/admin/blog-management`, { params: { page, limit, search, isBlocked } })
+    return API.get(ADMIN_ROUTES.BLOG_LIST, { params: { page, limit, search, isBlocked } })
 }
 export const adminBlockBlogApi = (id: string) => {
-    return API.patch(`/admin/blog-block/${id}`)
+    return API.patch(ADMIN_ROUTES.BLOG_BLOCK(id))
 }
 export const adminUnblockBlogApi = (id: string) => {
-    return API.patch(`/admin/blog-unblock/${id}`)
+    return API.patch(ADMIN_ROUTES.BLOG_UNBLOCK(id))
 }
 
 export const adminFoodSpotListingApi = (page: number, limit: number, search: string, isBlocked: string, isApproved: string) => {
-    return API.get(`/admin/foodspot-management`, { params: { page, limit, search, isBlocked, isApproved } });
+    return API.get(ADMIN_ROUTES.FOODIE_LIST, { params: { page, limit, search, isBlocked, isApproved } });
 };
 
 export const rejectFoodSpotApi = (id: string, reason: string) => {
-    return API.patch(`/admin/foodspot-reject/${id}`, { reason })
+    return API.patch(ADMIN_ROUTES.FOODSPOT_REJECT(id), { reason })
 }
 
 export const adminBlockFoodSpotApi = (id: string) => {
-    return API.patch(`/admin/foodspot-block/${id}`);
+    return API.patch(ADMIN_ROUTES.FOODSPOT_BLOCK(id));
 };
 
 export const adminUnblockFoodSpotApi = (id: string) => {
-    return API.patch(`/admin/foodspot-unblock/${id}`);
+    return API.patch(ADMIN_ROUTES.FOODSPOT_UNBLOCK(id));
 };
 
 export const adminApproveFoodSpotApi = (id: string) => {
-    return API.patch(`/admin/foodspot-approve/${id}`);
+    return API.patch(ADMIN_ROUTES.FOODSPOT_APPROVE(id));
 };
 
 export const adminUnapproveFoodSpotApi = (id: string) => {
-    return API.patch(`/admin/foodspot-unapprove/${id}`);
+    return API.patch(ADMIN_ROUTES.FOODSPOT_UNAPPROVE(id));
 };

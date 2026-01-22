@@ -1,59 +1,153 @@
-import API from "./apiInstance"
+import { FOODIE_ROUTES } from "@/components/shared/constants/routes/foodie.routes";
+import API from "./apiInstance";
 
 export const userDashboardApi = () => {
-    return API.get('/foodie/dashboard')
-}
+  return API.get(FOODIE_ROUTES.DASHBOARD);
+};
+//==========
+export const getAllRecipesFoodieApi = (
+    page: number,
+    limit: number,
+    search?: string,
+    filter?: string
+) => {
+    return API.get(FOODIE_ROUTES.RECIPE_LIST, {
+        params: { page, limit, search, filter },
+    });
+};
 
-
-export const getAllRecipesFoodieApi = (page: number, limit: number, search?: string) => {
-    return API.get('/foodie/recipe-listing', { params: { page, limit, search } })
-}
 export const getRecipeDetailFoodieApi = (id: string) => {
-    return API.get(`/foodie/recipe-detail/${id}`)
-}
+    return API.get(FOODIE_ROUTES.RECIPE_DETAIL(id));
+};
+
 export const getRelatedRecipesApi = (cuisine: string) => {
-    return API.get(`/foodie/related-recipes/${cuisine}`)
-}
+    return API.get(FOODIE_ROUTES.RELATED_RECIPES(cuisine));
+};
 
 export const getSavedRecipeApi = () => {
-    return API.get(`/foodie/saved-recipes`)
-}
+    return API.get(FOODIE_ROUTES.SAVED_RECIPES);
+};
 
+//==========
+export const getBlogsFoodieApi = (
+    page: number,
+    limit: number,
+    search?: string,
+    filter?: string
+) => {
+    return API.get(FOODIE_ROUTES.BLOG_LIST, {
+        params: { page, limit, search, filter },
+    });
+};
 
-export const getBlogsFoodieApi = (page: number, limit: number, search: string) => {
-    return API.get(`/foodie/blog-listing`, { params: { page, limit, search } })
-}
 export const getFoodieBlogDetailApi = (blogId: string) => {
-    return API.get(`/foodie/blog-detail/${blogId}`)
-}
+  return API.get(FOODIE_ROUTES.BLOG_DETAIL(blogId));
+};
+
 export const getRelatedBlogsApi = (tag: string) => {
-    return API.get(`/foodie/blog-relate-blogs/${tag}`)
-}
+    return API.get(FOODIE_ROUTES.RELATED_BLOGS(tag));
+};
 
-
+//==========
 export const createFoodieProfileApi = (data: object) => {
-    return API.post('/foodie/profile', data)
-}
+    return API.post(FOODIE_ROUTES.PROFILE_CREATE, data);
+};
+
 export const updateFoodieProfileApi = (data: object) => {
-    return API.put('/foodie/profile', data)
-}
+    return API.put(FOODIE_ROUTES.PROFILE_UPDATE, data);
+};
+
 export const getFoodieProfileApi = () => {
-    return API.get('/foodie/profile')
-}
+    return API.get(FOODIE_ROUTES.PROFILE_GET);
+};
 
-
+//==========
 export const addFoodSpotApi = (payload: object) => {
-    return API.post('/foodie/foodspot', payload)
-}
+    return API.post(FOODIE_ROUTES.FOODSPOT_CREATE, payload);
+};
+
 export const editFoodSpotApi = (id: string, payload: object) => {
-    return API.put('/foodie/foodspot', { id, payload })
-}
-export const getAllFoodSpotApi = (page: number, limit: number, search?: string) => {
-    return API.get('/foodie/foodspots', { params: { page, limit, search } })
-}
-export const getAllMyFoodSpotApi = (page: number, limit: number, search?: string) => {
-    return API.get('/foodie/myfoodspots', { params: { page, limit, search } })
-}
+    return API.put(FOODIE_ROUTES.FOODSPOT_EDIT, {
+        id,
+        payload,
+    });
+};
+
+export const getAllFoodSpotApi = (
+    page: number,
+    limit: number,
+    search?: string,
+    filter?: string
+) => {
+    return API.get(FOODIE_ROUTES.FOODSPOT_LIST, {
+        params: { page, limit, search, filter },
+    });
+};
+
+export const getAllMyFoodSpotApi = (
+    page: number,
+    limit: number,
+    search?: string
+) => {
+    return API.get(FOODIE_ROUTES.MY_FOODSPOTS, {
+        params: { page, limit, search },
+    });
+};
+
 export const getFoodSpotDetailApi = (spotId: string) => {
-    return API.get(`/foodie/foodspot/${spotId}`)
-}
+    return API.get(FOODIE_ROUTES.FOODSPOT_DETAIL(spotId));
+};
+
+//==========
+export const getFoodieWalletApi = () => {
+    return API.get(FOODIE_ROUTES.WALLET);
+};
+
+//==========
+export const getChefsApi = (
+    page: number,
+    limit: number,
+    search?: string,
+    filter?: string
+) => {
+    return API.get(FOODIE_ROUTES.CHEF_LIST, {
+        params: { page, limit, search, filter },
+    });
+};
+
+export const getChefDetailApi = (id: string) => {
+    return API.get(FOODIE_ROUTES.CHEF_DETAIL(id));
+};
+
+export const getChefRecipesApi = (
+    chefId: string,
+    page: number,
+    limit: number,
+    search: string
+) => {
+    return API.get(FOODIE_ROUTES.CHEF_RECIPES(chefId), {
+        params: { page, limit, search },
+    });
+};
+
+export const getChefBlogsApi = (
+    chefId: string,
+    page: number,
+    limit: number,
+    search: string
+) => {
+    return API.get(FOODIE_ROUTES.CHEF_BLOGS(chefId), {
+        params: { page, limit, search },
+    });
+};
+
+export const getChefWorkshopsApi = (
+    chefId: string,
+    page: number,
+    limit: number
+) => {
+    return API.get(FOODIE_ROUTES.CHEF_WORKSHOPS(chefId), {
+        params: { page, limit },
+    });
+};
+//==========

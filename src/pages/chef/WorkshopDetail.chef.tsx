@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { toast } from "react-toastify";
 import { getWorkshopParticipantsApi } from "@/api/bookingApi";
+import ChefReviewSection from "@/components/shared/ChefReviewSection";
 
 export default function WorkshopDetailChef() {
     const { id } = useParams<{ id: string }>();
@@ -378,6 +379,7 @@ export default function WorkshopDetailChef() {
                     </div>
                 </div>
             </div >
+            <ChefReviewSection reviewableId={workshop._id} reviewableType="Workshop"/>
         </div >
     );
 }

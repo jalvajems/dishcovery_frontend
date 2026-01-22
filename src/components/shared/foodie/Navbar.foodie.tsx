@@ -19,26 +19,7 @@ export default function FoodieNavbar() {
         </div>
 
 
-        <div className="flex items-center gap-10">
-          <button
-            onClick={() => navigate("/foodie/dashboard")}
-            className="text-sm font-bold text-gray-600 hover:text-green-600 transition-colors"
-          >
-            Dashboard
-          </button>
-          <button
-            onClick={() => navigate("/foodie/workshop-discovery")}
-            className="text-sm font-bold text-gray-600 hover:text-green-600 transition-colors"
-          >
-            Browse Workshops
-          </button>
-          <button
-            onClick={() => navigate("/foodie/my-workshops")}
-            className="text-sm font-bold text-gray-600 hover:text-green-600 transition-colors"
-          >
-            My Workshops
-          </button>
-        </div>
+      
 
         <div className="flex items-center gap-4 px-5 py-3">
           <div className="w-12 h-12 rounded-full overflow-hidden shadow-xl ring-4 ring-green-100 cursor-pointer hover:scale-105 transition-transform">

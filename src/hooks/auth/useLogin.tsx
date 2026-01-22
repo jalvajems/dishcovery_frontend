@@ -104,7 +104,6 @@ export const useLogin = () => {
 
 
   const handleGoogleLogin = () => {
-    console.log('Continue with Google');
     alert('Google login initiated');
   };
 

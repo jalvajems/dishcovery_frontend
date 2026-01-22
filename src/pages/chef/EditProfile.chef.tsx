@@ -1,7 +1,7 @@
 // Updated ChefProfileEdit component without shadcn imports and with dropdown for specialities
 
 import { useState, useEffect } from "react";
-import axios from "axios";
+
 import { Upload, MapPin, Phone, BookOpen, UserCircle } from "lucide-react";
 import { getChefProfileApi, updateChefProfileApi } from "@/api/chefApi";
 import { showError, showSuccess } from "@/utils/toast";
@@ -20,19 +20,22 @@ export default function ChefProfileEdit() {
     bio: "",
     image: "",
     imagePreview: "",
+    certificates: "",
+    achievements: "",
+    skills: "",
   });
 
   type ProfileErrors = {
-  name?: string;
-  email?: string;
-  phone?: string;
-  location?: string;
-  specialities?: string;
-  bio?: string;
-  image?: string;
-};
+    name?: string;
+    email?: string;
+    phone?: string;
+    location?: string;
+    specialities?: string;
+    bio?: string;
+    image?: string;
+  };
 
-const [errors, setErrors] = useState<ProfileErrors>({});
+  const [errors, setErrors] = useState<ProfileErrors>({});
 
 
   const specialityOptions = [
@@ -46,7 +49,7 @@ const [errors, setErrors] = useState<ProfileErrors>({});
   const { uploadToS3 } = useAwsS3Upload()
 
 
-  const handleImageChange = async (e) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
 
       const Image = e.target.files?.[0]
@@ -73,6 +76,9 @@ const [errors, setErrors] = useState<ProfileErrors>({});
           bio: profile.bio || "",
           image: profile.image || "",
           imagePreview: "",
+          certificates: profile.certificates?.join(", ") || "",
+          achievements: profile.achievements?.join(", ") || "",
+          skills: profile.skills?.join(", ") || "",
         });
 
         setImagePreview(profile.image || null);
@@ -84,56 +90,56 @@ const [errors, setErrors] = useState<ProfileErrors>({});
     fetchProfile();
   }, []);
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const validateProfile = () => {
-  const newErrors: ProfileErrors = {};
+    const newErrors: ProfileErrors = {};
 
-  if (!form.name.trim()) {
-    newErrors.name = "Name is required";
-  }
+    if (!form.name.trim()) {
+      newErrors.name = "Name is required";
+    }
 
-  if (!form.email.trim()) {
-    newErrors.email = "Email is required";
-  } else if (!/^\S+@\S+\.\S+$/.test(form.email)) {
-    newErrors.email = "Enter a valid email address";
-  }
+    if (!form.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/^\S+@\S+\.\S+$/.test(form.email)) {
+      newErrors.email = "Enter a valid email address";
+    }
 
-  if (!form.phone.trim()) {
-    newErrors.phone = "Phone number is required";
-  } else if (!/^[6-9]\d{9}$/.test(form.phone)) {
-    newErrors.phone = "Enter a valid 10-digit phone number";
-  }
+    if (!form.phone.trim()) {
+      newErrors.phone = "Phone number is required";
+    } else if (!/^[6-9]\d{9}$/.test(form.phone)) {
+      newErrors.phone = "Enter a valid 10-digit phone number";
+    }
 
-  if (!form.location.trim()) {
-    newErrors.location = "Location is required";
-  }
+    if (!form.location.trim()) {
+      newErrors.location = "Location is required";
+    }
 
-  if (!form.specialities) {
-    newErrors.specialities = "Please select a speciality";
-  }
+    if (!form.specialities) {
+      newErrors.specialities = "Please select a speciality";
+    }
 
-  if (!form.bio.trim()) {
-    newErrors.bio = "Bio is required";
-  } else if (form.bio.length < 30) {
-    newErrors.bio = "Bio must be at least 30 characters";
-  }
+    if (!form.bio.trim()) {
+      newErrors.bio = "Bio is required";
+    } else if (form.bio.length < 30) {
+      newErrors.bio = "Bio must be at least 30 characters";
+    }
 
-  if (!imagePreview && !form.image) {
-    newErrors.image = "Profile image is required";
-  }
+    if (!imagePreview && !form.image) {
+      newErrors.image = "Profile image is required";
+    }
 
-  setErrors(newErrors);
-  return Object.keys(newErrors).length === 0;
-};
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-  
-  const handleSubmit = async (e) => {
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-      if (!validateProfile()) return;
+    if (!validateProfile()) return;
 
     try {
       const payload = {
@@ -144,9 +150,12 @@ const [errors, setErrors] = useState<ProfileErrors>({});
         specialities: [form.specialities],
         bio: form.bio,
         image: imagePreview || form.image,
+        certificates: form.certificates ? form.certificates.split(",").map(s => s.trim()).filter(Boolean) : [],
+        achievements: form.achievements ? form.achievements.split(",").map(s => s.trim()).filter(Boolean) : [],
+        skills: form.skills ? form.skills.split(",").map(s => s.trim()).filter(Boolean) : [],
       };
-      
-      console.log('formbio=======',payload);
+
+      console.log('formbio=======', payload);
 
       const res = await updateChefProfileApi(payload)
       showSuccess(res.data.message || 'updated successfully')
@@ -169,10 +178,10 @@ const [errors, setErrors] = useState<ProfileErrors>({});
           <div>
             <label className="font-semibold mb-1">Name</label>
             {errors.name && (
-  <p className="text-red-500 text-sm mb-1 font-medium">
-    {errors.name}
-  </p>
-)}
+              <p className="text-red-500 text-sm mb-1 font-medium">
+                {errors.name}
+              </p>
+            )}
             <input
               type="text"
               name="name"
@@ -188,10 +197,10 @@ const [errors, setErrors] = useState<ProfileErrors>({});
           <div>
             <label className="font-semibold mb-1">Email</label>
             {errors.email && (
-  <p className="text-red-500 text-sm mb-1 font-medium">
-    {errors.email}
-  </p>
-)}
+              <p className="text-red-500 text-sm mb-1 font-medium">
+                {errors.email}
+              </p>
+            )}
 
             <input
               type="email"
@@ -210,10 +219,10 @@ const [errors, setErrors] = useState<ProfileErrors>({});
               <Phone size={18} /> Phone Number
             </label>
             {errors.phone && (
-  <p className="text-red-500 text-sm mb-1 font-medium">
-    {errors.phone}
-  </p>
-)}
+              <p className="text-red-500 text-sm mb-1 font-medium">
+                {errors.phone}
+              </p>
+            )}
             <input
               name="phone"
               value={form.phone}
@@ -230,10 +239,10 @@ const [errors, setErrors] = useState<ProfileErrors>({});
               <MapPin size={18} /> Location
             </label>
             {errors.location && (
-  <p className="text-red-500 text-sm mb-1 font-medium">
-    {errors.location}
-  </p>
-)}
+              <p className="text-red-500 text-sm mb-1 font-medium">
+                {errors.location}
+              </p>
+            )}
 
             <input
               name="location"
@@ -251,10 +260,10 @@ const [errors, setErrors] = useState<ProfileErrors>({});
               <BookOpen size={18} /> Specialities
             </label>
             {errors.specialities && (
-  <p className="text-red-500 text-sm mb-1 font-medium">
-    {errors.specialities}
-  </p>
-)}
+              <p className="text-red-500 text-sm mb-1 font-medium">
+                {errors.specialities}
+              </p>
+            )}
 
             <select
               name="specialities"
@@ -275,10 +284,10 @@ const [errors, setErrors] = useState<ProfileErrors>({});
           <div>
             <label className="font-semibold mb-1">Bio</label>
             {errors.bio && (
-  <p className="text-red-500 text-sm mb-1 font-medium">
-    {errors.bio}
-  </p>
-)}
+              <p className="text-red-500 text-sm mb-1 font-medium">
+                {errors.bio}
+              </p>
+            )}
             <textarea
               name="bio"
               value={form.bio}
@@ -288,16 +297,55 @@ const [errors, setErrors] = useState<ProfileErrors>({});
             ></textarea>
           </div>
 
+          {/* Certificates */}
+          <div>
+            <label className="font-semibold mb-1">Certificates (Comma separated)</label>
+            <input
+              type="text"
+              name="certificates"
+              value={form.certificates}
+              onChange={handleChange}
+              className="w-full p-3 rounded-xl border border-gray-300"
+              placeholder="e.g. Michelin Star, Culinary Arts Degree"
+            />
+          </div>
+
+          {/* Achievements */}
+          <div>
+            <label className="font-semibold mb-1">Achievements (Comma separated)</label>
+            <input
+              type="text"
+              name="achievements"
+              value={form.achievements}
+              onChange={handleChange}
+              className="w-full p-3 rounded-xl border border-gray-300"
+              placeholder="e.g. Best Chef 2023, Winner of Food Network Star"
+            />
+          </div>
+
+          {/* Skills */}
+          <div>
+            <label className="font-semibold mb-1">Skills (Comma separated)</label>
+            <input
+              type="text"
+              name="skills"
+              value={form.skills}
+              onChange={handleChange}
+              className="w-full p-3 rounded-xl border border-gray-300"
+              placeholder="e.g. Knife skills, Pastry, Molecular Gastronomy"
+            />
+          </div>
+
           {/* Image Upload */}
           <div>
             <label className="font-semibold mb-2 flex items-center gap-2">
               <Upload size={18} /> Profile Image
             </label>
             {errors.image && (
-  <p className="text-red-500 text-sm mb-2 font-medium">
-    {errors.image}
-  </p>
-)}
+              <p className="text-red-500 text-sm mb-2 font-medium">
+                {errors.image}
+              </p>
+            )}
 
             <input
               type="file"

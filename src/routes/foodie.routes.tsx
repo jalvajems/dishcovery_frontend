@@ -1,5 +1,7 @@
 import RecipeListing from '@/pages/user/RecipeListing.foodie';
 import FoodieDashBoard from '@/pages/user/FoodieDashboard';
+import ChefList from '@/pages/user/ChefList.foodie';
+import ChefDetail from '@/pages/user/ChefDetail.foodie';
 import FoodieLayout from '@/pages/user/FoodieLayout';
 import { Route, Routes } from 'react-router-dom';
 import RecipeDetailFoodie from '@/pages/user/RecipeDetail.foodie';
@@ -19,6 +21,8 @@ import WorkshopDetailFoodie from '@/pages/user/WorkshopDetail.foodie';
 import MyWorkshopsFoodie from '@/pages/user/MyWorkshops.foodie';
 import LiveSession from '@/pages/shared/LiveSession';
 import WorkshopSummary from '@/pages/shared/WorkshopSummary';
+import FoodieWalletPage from '@/pages/user/Wallet.foodie';
+import FollowingList from '@/pages/user/FollowingList.foodie';
 
 function UserRouter() {
     return (
@@ -31,6 +35,8 @@ function UserRouter() {
                 <Route path="myspot-listing" element={<MyFoodSpotList />} />
                 <Route path="workshop-discovery" element={<WorkshopDiscovery />} />
                 <Route path="my-workshops" element={<MyWorkshopsFoodie />} />
+                <Route path="chefs" element={<ChefList />} />
+                <Route path="followings" element={<FollowingList />} />
             </Route>
 
             <Route path="/foodie/recipe-detail/:id" element={<RecipeDetailFoodie />} />
@@ -42,12 +48,16 @@ function UserRouter() {
             <Route path='/foodie/profile-add' element={<AddFoodieProfile />} />
             <Route path='/foodie/profile-edit/:id' element={<EditFoodieProfile />} />
 
-            <Route path='/foodie/foodspot/:id' element={<FoodSpotDetailPage />} />
+            <Route path='/foodie/myfoodspot/:id' element={<FoodSpotDetailPage />} />
             <Route path='/foodie/foodspot-add' element={<AddFoodSpot />} />
             <Route path='/foodie/foodspot-edit/:id' element={<EditFoodSpot />} />
+
             <Route path="/foodie/workshop-detail/:id" element={<WorkshopDetailFoodie />} />
             <Route path="/foodie/live-session/:workshopId" element={<LiveSession />} />
             <Route path="/foodie/workshop-summary/:workshopId" element={<WorkshopSummary />} />
+            <Route path="/foodie/chef/:id" element={<ChefDetail />} />
+            <Route path="/foodie/wallet" element={<FoodieWalletPage />} />
+
         </Routes>
     );
 }

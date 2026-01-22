@@ -1,54 +1,66 @@
 import { useEffect, useState } from "react";
-import { ChevronRight, LogOut, Pencil } from "lucide-react";
+import { LogOut, Pencil, Heart, Users, MapPin, Mail, Phone, Settings } from "lucide-react";
 import { getFoodieProfileApi, getSavedRecipeApi } from "@/api/foodieApi";
+import { getFollowingApi, getFollowStatsApi } from "@/api/followApi";
 import { showError } from "@/utils/toast";
 import { useNavigate } from "react-router-dom";
 import { useUserStore } from "@/store/userStore";
 import { useAuthStore } from "@/store/authStore";
 import { logoutApi } from "@/api/authApi";
-import Pagination from "@/components/shared/Pagination";
+import FoodieNavbar from "@/components/shared/foodie/Navbar.foodie";
 
 export default function ProfileFoodie() {
   const [profile, setProfile] = useState<any>(null);
-  const [savedRecipe,setSavedRecipe]=useState([])
+  const [followedChefs, setFollowedChefs] = useState<any[]>([]);
+
+  const [savedRecipe, setSavedRecipe] = useState<any>(null);
+  const [stats, setStats] = useState({ followers: 0, following: 0 });
+  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
-  const {setUserStore}=useUserStore();
-    const { logout } = useAuthStore();
-  
-  const {delUserStore}=useUserStore()
+  const { setUserStore } = useUserStore();
+  const { logout } = useAuthStore();
 
-  
-  
+  const { delUserStore } = useUserStore()
 
   useEffect(() => {
     (async () => {
       try {
-        const res = await getFoodieProfileApi();
-        const recipe=await getSavedRecipeApi()
-        setProfile(res.data.data.data);
-        setSavedRecipe(recipe.data.data)
-        
-        console.log('res====',recipe.data.data);
+        const [profileRes, recipeRes] = await Promise.all([
+          getFoodieProfileApi(),
+          getSavedRecipeApi()
+        ]);
+
+        const profileData = profileRes.data.data.data;
+        setProfile(profileData);
+        setSavedRecipe(recipeRes.data.data);
+        const response = await getFollowingApi();
+        setFollowedChefs(response.data.datas);
+        if (profileData.userId?._id) {
+          const statsRes = await getFollowStatsApi(profileData.userId._id);
+          setStats(statsRes.data.datas);
+        }
       } catch (error: any) {
         showError(error.response?.data?.message || "Failed to load profile");
+      } finally {
+        setLoading(false);
       }
     })();
   }, []);
-  useEffect(()=>{
-     setUserStore(profile?.userId?.name,profile?.userId?.email,profile?.image)
 
-  },[profile])
-  console.log('profile====',profile);
+  useEffect(() => {
+    setUserStore(profile?.userId?.name, profile?.userId?.email, profile?.image)
 
-  if (!profile)
+  }, [profile])
+
+  if (loading || !profile)
     return (
-      <p className="p-10 text-center text-green-700 font-semibold">
-        Loading profile...
-      </p>
+      <div className="flex h-screen items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+      </div>
     );
 
-  const handleLogout = async() => {
+  const handleLogout = async () => {
 
     localStorage.removeItem("token");
     await logoutApi();
@@ -58,153 +70,193 @@ export default function ProfileFoodie() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50">
-      {/* Top Navbar */}
-      <nav className="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-40 border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" className="text-green-600">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2.5" />
-              <path d="M8 12h8M12 8v8" stroke="currentColor" strokeWidth="2.5" />
-            </svg>
-            <span className="text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-              Dishcovery
-            </span>
-          </div>
+    <div className="min-h-screen bg-slate-50 pb-20">
+      <FoodieNavbar />
 
-          {/* Right Side */}
-          <div className="flex items-center gap-6">
+      {/* Hero Header */}
+      <div className="relative h-64 bg-emerald-600 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-teal-500 opacity-90"></div>
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1543353071-873f17a7a088?w=1600&h=400&fit=crop')] bg-cover bg-center opacity-20"></div>
+      </div>
+
+      <div className="max-w-5xl mx-auto px-4 -mt-32 relative z-10">
+        <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-emerald-900/10 border border-gray-100 overflow-hidden">
+          {/* Action Buttons (Floating Top Right) */}
+          <div className="absolute top-6 right-6 flex gap-3">
             <button
               onClick={() => navigate("/foodie/profile-edit")}
-              className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl shadow transition flex items-center gap-2"
+              className="p-3 bg-white/90 backdrop-blur-md text-gray-700 hover:text-emerald-600 rounded-2xl shadow-lg border border-gray-100 transition-all hover:scale-110 active:scale-95 group"
+              title="Edit Profile"
             >
-              <Pencil size={18} /> Edit Profile
+              <Pencil size={20} className="group-hover:rotate-12 transition-transform" />
             </button>
-
             <button
               onClick={handleLogout}
-              className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl shadow transition flex items-center gap-2"
+              className="p-3 bg-white/90 backdrop-blur-md text-red-500 hover:bg-red-50 rounded-2xl shadow-lg border border-gray-100 transition-all hover:scale-110 active:scale-95"
+              title="Logout"
             >
-              <LogOut size={18} /> Logout
+              <LogOut size={20} />
             </button>
           </div>
-        </div>
-      </nav>
 
-      {/* Main Section */}
-      <main className="max-w-4xl mx-auto px-6 py-12">
-        {/* Breadcrumb */}
-        <div className="mb-6 flex items-center gap-2 text-gray-600">
-          <span className="text-green-700 font-semibold hover:underline cursor-pointer">
-            Foodie Profile
-          </span>
-          <ChevronRight className="w-4 h-4 text-gray-500" />
-          <span className="font-medium">User Details</span>
-        </div>
+          <div className="p-8 md:p-12">
+            <div className="flex flex-col md:flex-row gap-8 items-center md:items-start text-center md:text-left">
+              {/* Profile Image */}
+              <div className="relative group">
+                <div className="w-40 h-40 md:w-48 md:h-48 rounded-[2rem] overflow-hidden shadow-2xl ring-8 ring-emerald-50 transition-transform group-hover:scale-[1.02]">
+                  <img
+                    src={profile.image || "/default-avatar.png"}
+                    alt="profile"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 md:left-auto md:right-0 md:translate-x-0 px-4 py-2 bg-emerald-500 text-white rounded-2xl shadow-lg border-2 border-white font-bold text-sm">
+                  Foodie
+                </div>
+              </div>
 
-        {/* Profile Card */}
-        <div className="bg-white shadow-xl rounded-3xl p-10 border border-gray-100">
-          <div className="flex flex-col items-center gap-6 text-center">
+              {/* Basic Info */}
+              <div className="flex-1 space-y-4 py-2">
+                <div>
+                  <h1 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight">
+                    {profile.userId?.name}
+                  </h1>
+                  <p className="text-lg text-gray-500 font-medium flex items-center justify-center md:justify-start gap-2 mt-2">
+                    <Mail size={18} className="text-emerald-500" />
+                    {profile.userId?.email}
+                  </p>
+                </div>
 
-            {/* Avatar */}
-            <div className="w-40 h-40 rounded-full overflow-hidden shadow-xl ring-8 ring-green-100">
-              <img
-                src={profile.image || "/default-avatar.png"}
-                alt="profile"
-                className="w-full h-full object-cover"
-              />
-            </div>
+                <p className="text-gray-600 text-lg leading-relaxed max-w-2xl italic">
+                  "{profile.bio || "Crafting a culinary journey, one dish at a time."}"
+                </p>
 
-            {/* Name + Email */}
-            <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-green-700 to-emerald-700 bg-clip-text text-transparent">
-                {profile.userId?.name || "User"}
-              </h1>
-              <p className="text-gray-600 text-lg mt-1">{profile.userId?.email}</p>
+                {/* Stats Row */}
+                <div className="flex flex-wrap justify-center md:justify-start gap-8 pt-4">
+                  <div className="text-center md:text-left">
+                    <span className="block text-2xl font-black text-gray-900">{savedRecipe?.savedRecipes?.length || 0}</span>
+                    <span className="text-sm font-bold text-gray-400 uppercase tracking-widest">Saved Recipes</span>
+                  </div>
+                  <div
+                    onClick={() => navigate("/foodie/followings")}
+                    className="text-center md:text-left cursor-pointer group hover:opacity-80 transition-all"
+                  >
+                    <span className="block text-2xl font-black text-gray-900 group-hover:text-emerald-600 transition-colors">{followedChefs.length}</span>
+                    <span className="text-sm font-bold text-gray-400 uppercase tracking-widest group-hover:text-emerald-500 transition-colors">Following Chefs</span>
+                  </div>
+                  <div className="text-center md:text-left">
+                    <span className="block text-2xl font-black text-gray-900">{profile.preferences?.length || 0}</span>
+                    <span className="text-sm font-bold text-gray-400 uppercase tracking-widest">Preferences</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Divider */}
-            <div className="w-full h-px bg-gradient-to-r from-transparent via-green-300 to-transparent my-6"></div>
+            <hr className="my-12 border-gray-100" />
 
-            {/* Info Section */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full text-left">
-              <div>
-                <p className="text-gray-500 text-sm">Phone Number</p>
-                <p className="text-lg font-semibold text-gray-700">
-                  {profile.phone || "Not provided"}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-gray-500 text-sm">Location</p>
-                <p className="text-lg font-semibold text-gray-700">
+            {/* Details Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+              <div className="bg-slate-50 p-6 rounded-3xl border border-gray-100 group hover:border-emerald-200 transition-colors">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center">
+                    <MapPin size={20} />
+                  </div>
+                  <h3 className="font-bold text-gray-900 text-lg">Location</h3>
+                </div>
+                <p className="text-gray-600 font-semibold pl-14">
                   {profile.location || "Not provided"}
                 </p>
               </div>
 
-              <div className="md:col-span-2">
-                <p className="text-gray-500 text-sm">Bio</p>
-                <p className="text-lg font-medium text-gray-700 whitespace-pre-line">
-                  {profile.bio || "No bio added yet."}
+              <div className="bg-slate-50 p-6 rounded-3xl border border-gray-100 group hover:border-emerald-200 transition-colors">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center">
+                    <Phone size={20} />
+                  </div>
+                  <h3 className="font-bold text-gray-900 text-lg">Contact</h3>
+                </div>
+                <p className="text-gray-600 font-semibold pl-14">
+                  {profile.phone || "Not provided"}
                 </p>
               </div>
-
-              {/* Preferences */}
-              <div className="md:col-span-2">
-                <p className="text-gray-500 text-sm mb-2">Preferences</p>
-
-                {profile.preferences?.length > 0 ? (
-                  <div className="flex flex-wrap gap-3">
-                    {profile.preferences.map((pref: string, idx: number) => (
-                      <span
-                        key={idx}
-                        className="px-4 py-2 bg-green-100 text-green-800 font-semibold rounded-xl text-sm shadow"
-                      >
-                        {pref}
-                      </span>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 italic">No preferences added.</p>
-                )}
-              </div>
-
-              <div className="mb-12">
-                        <h2 className="text-3xl font-bold mb-6">Saved  Recipes</h2>
-              
-                        {savedRecipe.length === 0 ? (
-                          <p className="text-gray-600 italic">No recipes yet.</p>
-                        ) : (
-                          <div className="grid grid-cols-2 gap-6 mb-6">
-                            {savedRecipe?.savedRecipes.map((recipe: any) => (
-                              <div key={recipe._id} className="bg-white rounded-2xl shadow">
-                                <div className="h-40 overflow-hidden">
-                                  <img src={recipe.images}
-                                  onClick={()=>navigate(`/foodie/recipe-detail/${recipe._id}`)}
-                                  className="w-full h-full object-cover" />
-                                </div>
-                                <div className="p-5">
-                                  <h3 className="font-bold text-lg">{recipe.title}</h3>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    
             </div>
 
+            {/* Preferences Section */}
+            <div className="mb-16">
+              <h2 className="text-2xl font-black text-gray-900 mb-6 flex items-center gap-2">
+                <Settings className="text-emerald-600" size={24} /> My Food Preferences
+              </h2>
+              {profile.preferences?.length > 0 ? (
+                <div className="flex flex-wrap gap-3">
+                  {profile.preferences.map((pref: string, idx: number) => (
+                    <span
+                      key={idx}
+                      className="px-6 py-2.5 bg-white border-2 border-emerald-100 text-emerald-700 font-bold rounded-2xl text-sm shadow-sm hover:shadow-md hover:border-emerald-400 transition-all cursor-default"
+                    >
+                      {pref}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-slate-50 p-8 rounded-[2rem] text-center border-2 border-dashed border-gray-200 text-gray-400">
+                  No preferences added yet. Edit profile to add some!
+                </div>
+              )}
+            </div>
+
+            {/* Saved Recipes Section */}
+            <div>
+              <h2 className="text-2xl font-black text-gray-900 mb-8 flex items-center gap-3">
+                <Heart className="text-red-500 fill-red-500" size={24} /> Favorite Recipes
+              </h2>
+
+              {!savedRecipe || savedRecipe.savedRecipes.length === 0 ? (
+                <div className="bg-slate-50 p-12 rounded-[2rem] text-center border-2 border-dashed border-gray-200">
+                  <Heart className="w-12 h-12 text-gray-200 mx-auto mb-4" />
+                  <p className="text-gray-500 font-medium">You haven't saved any recipes yet.</p>
+                  <button
+                    onClick={() => navigate("/foodie/recipes")}
+                    className="mt-4 text-emerald-600 font-bold hover:underline"
+                  >
+                    Explore recipes
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {savedRecipe.savedRecipes.map((recipe: any) => (
+                    <div
+                      key={recipe._id}
+                      className="group bg-white rounded-[2rem] shadow-sm hover:shadow-xl border border-gray-100 overflow-hidden transition-all duration-300"
+                    >
+                      <div className="h-48 overflow-hidden relative">
+                        <img
+                          src={recipe.images}
+                          onClick={() => navigate(`/foodie/recipe-detail/${recipe._id}`)}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 cursor-pointer"
+                          alt={recipe.title}
+                        />
+                        <div className="absolute top-4 right-4 p-2 bg-white/90 backdrop-blur text-red-500 rounded-xl shadow-md">
+                          <Heart size={18} fill="currentColor" />
+                        </div>
+                      </div>
+                      <div className="p-6">
+                        <h3 className="font-bold text-lg text-gray-900 line-clamp-1 group-hover:text-emerald-600 transition-colors">
+                          {recipe.title}
+                        </h3>
+                        <div className="flex items-center gap-2 mt-2 text-sm text-gray-500 font-medium">
+                          <Users size={14} />
+                          <span>By Chef {recipe.chefId?.name || "Expert"}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </main>
-
-      {/* Footer */}
-      <footer className="bg-white/70 backdrop-blur-sm border-t border-gray-200 py-8 mt-16">
-        <p className="text-center text-gray-600 text-sm">
-          © 2024 Dishcovery — All Rights Reserved
-        </p>
-      </footer>
+      </div>
     </div>
   );
 }

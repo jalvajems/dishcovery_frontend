@@ -1,47 +1,59 @@
+import { WORKSHOP_ROUTES } from "@/components/shared/constants/routes/workshop.routes";
 import API from "./apiInstance";
 
+
 export const createWorkshopApi = (data: any) => {
-    return API.post("/workshop/chef", data);
+  return API.post(WORKSHOP_ROUTES.CHEF_CREATE, data);
 };
 
 export const updateWorkshopApi = (id: string, data: any) => {
-    return API.put(`/workshop/chef/${id}`, data);
+  return API.put(WORKSHOP_ROUTES.CHEF_UPDATE(id), data);
 };
 
 export const getChefWorkshopsApi = () => {
-    return API.get("/workshop/chef");
+  return API.get(WORKSHOP_ROUTES.CHEF_LIST);
 };
 
 export const submitWorkshopForApprovalApi = (id: string) => {
-    return API.patch(`/workshop/chef/${id}/submit`);
+  return API.patch(WORKSHOP_ROUTES.CHEF_SUBMIT(id));
 };
 
 export const startWorkshopApi = (id: string) => {
-    return API.post(`/workshop/chef/${id}/start`);
+  return API.post(WORKSHOP_ROUTES.CHEF_START(id));
 };
 
 export const endWorkshopApi = (id: string) => {
-    return API.post(`/workshop/chef/${id}/end`);
+  return API.post(WORKSHOP_ROUTES.CHEF_END(id));
 };
 
-// Admin APIs
+
 export const getAllWorkshopsAdminApi = () => {
-    return API.get("/workshop/admin");
+  return API.get(WORKSHOP_ROUTES.ADMIN_LIST);
 };
 
 export const approveWorkshopApi = (id: string) => {
-    return API.patch(`/workshop/admin/${id}/approve`);
+  return API.patch(WORKSHOP_ROUTES.ADMIN_APPROVE(id));
 };
 
-export const rejectWorkshopApi = (id: string, data: { rejectionReason: string }) => {
-    return API.patch(`/workshop/admin/${id}/reject`, data);
+export const rejectWorkshopApi = (
+  id: string,
+  data: { rejectionReason: string }
+) => {
+  return API.patch(WORKSHOP_ROUTES.ADMIN_REJECT(id), data);
 };
 
-// Shared/Public/Foodie APIs
-export const getApprovedWorkshopsApi = () => {
-    return API.get("/workshop/approved");
+
+export const getApprovedWorkshopsApi = (
+  page: number,
+  limit: number,
+  search?: string,
+  filter?: string
+) => {
+  return API.get(WORKSHOP_ROUTES.APPROVED_LIST, {
+    params: { page, limit, search, filter },
+  });
 };
 
 export const getWorkshopByIdApi = (id: string) => {
-    return API.get(`/workshop/${id}`);
+  return API.get(WORKSHOP_ROUTES.GET_BY_ID(id));
 };

@@ -41,7 +41,6 @@ export default function ChefDashboard() {
       setRecipes(res.data.data)
 
       setTotalPagesRecipe(res.data.totalPages)
-      console.log(res.data.data)
 
     } catch (error: any) {
       // Handle error
@@ -90,7 +89,6 @@ export default function ChefDashboard() {
   async function checkChefProfile() {
     try {
       const res = await chefDashboardApi();
-      console.log('isverified', res.data);
 
       setIsVerifiedUser(res.data.isVerified)
       setIsVerified(res.data.isVerified)

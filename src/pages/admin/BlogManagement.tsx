@@ -44,7 +44,7 @@ export default function BlogManagement() {
     },
     filters: [{ key: "status", defaultValue: "all" }],
   });
-  console.log('blogs:',blogs);
+  ('blogs:',blogs);
   
 
   const [modalOpen, setModalOpen] = useState(false);

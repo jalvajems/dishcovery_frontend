@@ -27,7 +27,6 @@ export default function MyFoodSpotList() {
   const handleFetchSpots=async()=>{
     try {
       const res=await getAllMyFoodSpotApi(currentPage,limit,searchQuery);
-      console.log('res----',res.data);
       setTotalPages(res.data.totalCount)
       setFoodSpots(res.data.data)
     } catch (error:any) {

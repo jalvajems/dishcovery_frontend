@@ -72,6 +72,8 @@ export const useOtp = () => {
         navigate('/login');
 
       } else if (type === 'forgotPassword') {
+        console.log('ss1');
+        
         await verifyForgetOtpApi({ otp: OtptoSend, email });
         showSuccess("Forget password OTP verified successfully!!");
         clearOtpData();
@@ -79,7 +81,6 @@ export const useOtp = () => {
       }
 
     } catch (error: any) {
-      console.log(error);
 
       setOtpError(true);
 

@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import CheckoutForm from '@/components/shared/CheckoutForm';
+import ReviewSection from '@/components/shared/ReviewPage';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
@@ -215,6 +216,10 @@ export default function WorkshopDetailFoodie() {
                                         </div>
                                         <p className="font-black text-green-600">{workshop.participantLimit - (workshop.participantsCount || 0)} Available</p>
                                     </div>
+                                     <p className="text-[10px] font-black text-400 uppercase tracking-widest mb-1">
+                                        {workshop.isFree?'IT IS FREE!!':'REFUND IS NOT AVAILABLE!!'}
+                                    </p>
+
                                 </div>
 
                                 <div className="mb-10 text-center bg-gray-50 p-6 rounded-3xl border border-gray-100">
@@ -222,6 +227,7 @@ export default function WorkshopDetailFoodie() {
                                     <p className="text-4xl font-black text-gray-900">
                                         {workshop.isFree ? 'Join Free' : `₹${workshop.price}`}
                                     </p>
+                                   
                                 </div>
 
                                 <button
@@ -249,6 +255,7 @@ export default function WorkshopDetailFoodie() {
                 </div>
             </div>
 
+            <ReviewSection reviewableId={workshop._id} reviewableType='Workshop' />
             {/* Checkout Modal */}
             {showCheckout && clientSecret && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
@@ -262,6 +269,7 @@ export default function WorkshopDetailFoodie() {
 
                         <div className="mb-8">
                             <h2 className="text-3xl font-black text-gray-900 mb-2">Checkout</h2>
+                            <p className="text-500 font-medium">REFUND IS NOT AVAILABLE!</p>
                             <p className="text-gray-500 font-medium">Complete your payment for <span className="text-gray-900 font-bold">{workshop.title}</span></p>
                         </div>
 
@@ -293,4 +301,5 @@ function HighlightCard({ icon: Icon, label, value }: any) {
             <p className="text-xl font-black text-gray-900">{value}</p>
         </div>
     );
+
 }

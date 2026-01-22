@@ -32,11 +32,9 @@ export default function BlogListChef() {
       setLoading(true);
       const filter = activeTab === "Published" ? "published" : "draft";
       const res = await getMyBlogsChefApi(currentPage, limit,searchQuery);
-      console.log('blog00', res.data);
       setTotalPages(res.data.totalCount)
       setBlogs(res.data.datas);
     } catch (err) {
-      console.log(err);
     } finally {
       setLoading(false);
     }

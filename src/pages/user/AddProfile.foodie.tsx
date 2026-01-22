@@ -24,7 +24,6 @@ export default function FoodieAddProfile() {
           
           const Image=e.target.files?.[0]
           const url=await uploadToS3(Image)
-          console.log(url);
           
           setImage(url)
     

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Search, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { getAllRecipesFoodieApi } from '@/api/foodieApi';
 import { useNavigate } from 'react-router-dom';
 import Pagination from '@/components/shared/Pagination';
@@ -8,6 +8,7 @@ import SearchBar from '@/components/shared/SearchBar';
 export default function RecipeListing() {
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState('');
+  const [filter, setFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const limit = 2
@@ -20,11 +21,10 @@ export default function RecipeListing() {
 
   useEffect(() => {
     fetchRecipes()
-  }, [currentPage, limit, searchQuery])
+  }, [currentPage, limit, searchQuery, filter])
   async function fetchRecipes() {
-    console.log('reach');
 
-    const result = await getAllRecipesFoodieApi(currentPage, limit, searchQuery)
+    const result = await getAllRecipesFoodieApi(currentPage, limit, searchQuery, filter)
 
     setRecipes(result.data.datas)
     setTotalPages(result.data.total)
@@ -32,12 +32,9 @@ export default function RecipeListing() {
 
   }
   const handleViewButton = async (id: any) => {
-    console.log('id is', id);
 
     navigate(`/foodie/recipe-detail/${id}`)
   }
-
-
 
 
   return (
@@ -80,6 +77,25 @@ export default function RecipeListing() {
           <p className="text-green-600 font-medium mb-8">
             Discover stories, tips, and culinary adventures.
           </p>
+
+          {/* Filter Buttons */}
+          <div className="flex gap-4 mb-8">
+            {['', 'italian', 'indian', 'chinese'].map((cuisine) => (
+              <button
+                key={cuisine}
+                onClick={() => {
+                  setFilter(cuisine);
+                  setCurrentPage(1);
+                }}
+                className={`px-6 py-2 rounded-xl font-bold transition-all ${filter === cuisine
+                  ? 'bg-green-600 text-white shadow-lg'
+                  : 'bg-white text-gray-700 hover:bg-green-50'
+                  }`}
+              >
+                {cuisine || 'All'}
+              </button>
+            ))}
+          </div>
 
           {/* Recipe Cards */}
           <div className="space-y-8">

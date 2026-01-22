@@ -18,7 +18,6 @@ export default function FoodieDashboard() {
   async function checkFoodieProfile() {
     try {
       const res = await userDashboardApi();
-      console.log('has=========', res.data.hasProfile);
 
       if (!res.data.hasProfile) {
         setShowProfileModal(true);

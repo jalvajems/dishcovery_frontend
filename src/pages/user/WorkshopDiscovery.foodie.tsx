@@ -22,23 +22,11 @@ export default function WorkshopDiscovery() {
     const fetchWorkshops = async () => {
         try {
             setLoading(true);
-            const res = await getApprovedWorkshopsApi();
-            let data = res.data.data;
+            const res = await getApprovedWorkshopsApi(currentPage, limit, searchQuery, modeFilter);
+            const { data, totalCount } = res.data;
 
-            if (searchQuery) {
-                data = data.filter((w: any) =>
-                    w.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    w.chefId?.name?.toLowerCase().includes(searchQuery.toLowerCase())
-                );
-            }
-
-            if (modeFilter !== 'all') {
-                data = data.filter((w: any) => w.mode === modeFilter);
-            }
-
-            setTotalPages(Math.ceil(data.length / limit));
-            const paginated = data.slice((currentPage - 1) * limit, currentPage * limit);
-            setWorkshops(paginated);
+            setWorkshops(data);
+            setTotalPages(Math.ceil(totalCount / limit));
         } catch (error) {
             console.error("Failed to fetch workshops");
         } finally {

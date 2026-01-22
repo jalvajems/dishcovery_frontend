@@ -52,7 +52,7 @@ export default function RecipeManagement() {
     ],
   });
 
-  console.log('data',recipes);
+  ('data',recipes);
   
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
@@ -66,7 +66,6 @@ export default function RecipeManagement() {
 
   const handleConfirm = async () => {
     if (!selectedRecipe || !actionType) return;
-console.log('se;ectedid',selectedRecipe);
 
     if (actionType === "BLOCK") await adminBlockRecipeApi(selectedRecipe._id);
     if (actionType === "UNBLOCK") await adminUnblockRecipeApi(selectedRecipe._id);
@@ -74,7 +73,6 @@ console.log('se;ectedid',selectedRecipe);
     setModalOpen(false);
     refetch()
   };
-console.log(recipes);
 
   const columns: ITableColumn<Recipe>[] = [
   { key: "title", label: "Recipe Name" },
