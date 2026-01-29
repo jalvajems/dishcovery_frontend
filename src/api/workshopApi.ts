@@ -10,8 +10,8 @@ export const updateWorkshopApi = (id: string, data: any) => {
   return API.put(WORKSHOP_ROUTES.CHEF_UPDATE(id), data);
 };
 
-export const getChefWorkshopsApi = () => {
-  return API.get(WORKSHOP_ROUTES.CHEF_LIST);
+export const getChefWorkshopsApi = (page = 1, limit = 6, search = "", status = "") => {
+  return API.get(`${WORKSHOP_ROUTES.CHEF_LIST}?page=${page}&limit=${limit}&search=${search}&status=${status}`);
 };
 
 export const submitWorkshopForApprovalApi = (id: string) => {
@@ -24,6 +24,10 @@ export const startWorkshopApi = (id: string) => {
 
 export const endWorkshopApi = (id: string) => {
   return API.post(WORKSHOP_ROUTES.CHEF_END(id));
+};
+
+export const cancelWorkshopApi = (id: string, reason: string) => {
+  return API.patch(WORKSHOP_ROUTES.CHECK_CANCEL(id), { reason });
 };
 
 

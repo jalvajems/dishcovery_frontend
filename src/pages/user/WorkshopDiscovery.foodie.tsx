@@ -103,7 +103,7 @@ export default function WorkshopDiscovery() {
                             >
                                 <div className="relative h-56 overflow-hidden">
                                     <img
-                                        src={w.images || `https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800&q=80`}
+                                        src={w.banner || `https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800&q=80`}
                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                         alt={w.title}
                                     />
@@ -153,10 +153,32 @@ export default function WorkshopDiscovery() {
 
                                     <button
                                         onClick={() => navigate(`/foodie/workshop-detail/${w._id}`)}
-                                        className="mt-auto w-full flex items-center justify-center gap-2 py-4 bg-gray-900 text-white rounded-2xl font-black hover:bg-green-600 transition-all group/btn shadow-xl shadow-gray-200"
+                                        disabled={w.isBooked || w.status === 'LIVE' || w.status === 'COMPLETED' || w.status === 'CANCELLED'}
+                                        className={`mt-auto w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-black transition-all group/btn shadow-xl ${w.isBooked
+                                            ? 'bg-green-100 text-green-700 cursor-not-allowed shadow-none'
+                                            : w.status === 'LIVE'
+                                                ? 'bg-red-50 text-red-600 cursor-not-allowed shadow-none'
+                                                : w.status === 'COMPLETED'
+                                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none'
+                                                    : w.status === 'CANCELLED'
+                                                        ? 'bg-red-50 text-red-400 cursor-not-allowed shadow-none'
+                                                        : 'bg-gray-900 text-white hover:bg-green-600 shadow-gray-200'
+                                            }`}
                                     >
-                                        Reserve Spot
-                                        <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
+                                        {w.isBooked ? (
+                                            <>Already Booked</>
+                                        ) : w.status === 'LIVE' ? (
+                                            <>Live Now</>
+                                        ) : w.status === 'COMPLETED' ? (
+                                            <>Workshop Completed</>
+                                        ) : w.status === 'CANCELLED' ? (
+                                            <>Cancelled</>
+                                        ) : (
+                                            <>
+                                                Reserve Spot
+                                                <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
+                                            </>
+                                        )}
                                     </button>
                                 </div>
                             </div>

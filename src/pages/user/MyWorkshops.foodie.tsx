@@ -3,7 +3,8 @@ import { Calendar, Clock, MapPin, Video, ArrowRight, Play, CheckCircle2 } from '
 import { getMyBookingsApi, cancelBookingApi } from '@/api/bookingApi';
 import { useNavigate } from 'react-router-dom';
 import Pagination from '@/components/shared/Pagination';
-import FoodieNavbar from '@/components/shared/foodie/Navbar.foodie';
+
+import ConfirmModal from '@/components/shared/ConfirmModal';
 import { toast } from 'react-toastify';
 
 export default function MyWorkshopsFoodie() {
@@ -13,27 +14,72 @@ export default function MyWorkshopsFoodie() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const limit = 4;
+    const [activeTab, setActiveTab] = useState('All');
+    const [allWorkshops, setAllWorkshops] = useState([]);
 
     useEffect(() => {
         fetchMyWorkshops();
-    }, [currentPage]);
+    }, []);
+
+    useEffect(() => {
+        filterAndPaginate();
+    }, [currentPage, activeTab, allWorkshops]);
 
     const fetchMyWorkshops = async () => {
         try {
             setLoading(true);
             const res = await getMyBookingsApi();
-            const data = res.data.data;
-
-            setTotalPages(Math.ceil(data.length / limit));
-            const paginated = data.slice((currentPage - 1) * limit, currentPage * limit);
-            setWorkshops(paginated);
+            setAllWorkshops(res.data.data || []);
         } catch (error) {
             console.error("Failed to fetch my workshops");
         } finally {
             setLoading(false);
         }
     };
-    
+
+    const filterAndPaginate = () => {
+        let filtered = [...allWorkshops];
+
+        if (activeTab === 'Upcoming') {
+            filtered = filtered.filter((booking: any) => {
+                const w = booking.workshopId;
+                return w && (w.status === 'APPROVED' || w.status === 'LIVE' || w.status === 'UPCOMING') && booking.status !== 'CANCELLED';
+            });
+        } else if (activeTab === 'Past') {
+            filtered = filtered.filter((booking: any) => {
+                const w = booking.workshopId;
+                return w && (w.status === 'COMPLETED' || w.status === 'CANCELLED' || booking.status === 'CANCELLED');
+            });
+        }
+
+        setTotalPages(Math.ceil(filtered.length / limit) || 1);
+        const paginated = filtered.slice((currentPage - 1) * limit, currentPage * limit);
+        setWorkshops(paginated);
+    };
+
+    const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+    const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+
+    const handleCancelClick = (bookingId: string) => {
+        setSelectedBookingId(bookingId);
+        setIsCancelModalOpen(true);
+    };
+
+    const handleConfirmCancel = async () => {
+        if (!selectedBookingId) return;
+
+        try {
+            await cancelBookingApi(selectedBookingId);
+            toast.success("Booking cancelled successfully");
+            fetchMyWorkshops(); // Refresh list
+        } catch (err: any) {
+            toast.error(err.response?.data?.message || "Failed to cancel");
+        } finally {
+            setIsCancelModalOpen(false);
+            setSelectedBookingId(null);
+        }
+    };
+
 
     return (
         <div className="min-h-screen bg-[#fcfcfc] pb-20">
@@ -47,9 +93,18 @@ export default function MyWorkshopsFoodie() {
                     </div>
 
                     <div className="flex gap-4 p-1.5 bg-gray-100 rounded-2xl">
-                        <button className="px-6 py-2.5 bg-white text-gray-900 rounded-xl font-black text-xs uppercase tracking-wider shadow-sm">All Bookings</button>
-                        <button className="px-6 py-2.5 text-gray-400 font-black text-xs uppercase tracking-wider hover:text-gray-600 transition-all">Upcoming</button>
-                        <button className="px-6 py-2.5 text-gray-400 font-black text-xs uppercase tracking-wider hover:text-gray-600 transition-all">Past</button>
+                        {['All', 'Upcoming', 'Past'].map((tab) => (
+                            <button
+                                key={tab}
+                                onClick={() => { setActiveTab(tab); setCurrentPage(1); }}
+                                className={`px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all ${activeTab === tab
+                                    ? "bg-white text-gray-900 shadow-sm"
+                                    : "text-gray-400 hover:text-gray-600"
+                                    }`}
+                            >
+                                {tab === 'All' ? 'All Bookings' : tab}
+                            </button>
+                        ))}
                     </div>
                 </div>
 
@@ -79,7 +134,7 @@ export default function MyWorkshopsFoodie() {
 
                             const isCancelled = booking.status === 'CANCELLED';
                             const isConfirmed = booking.status === 'CONFIRMED';
-                            const isPending = booking.status === 'PENDING';
+
                             const isCompleted = workshop.status === 'COMPLETED';
 
                             return (
@@ -167,24 +222,14 @@ export default function MyWorkshopsFoodie() {
                                                     </button>
                                                 )}
 
-                                                {/* {booking.status === 'CONFIRMED'&&isConfirmed && workshop.status !== 'LIVE' && (
+                                                {booking.status === 'CONFIRMED' && isConfirmed && workshop.status !== 'LIVE' && (
                                                     <button
-                                                        onClick={async () => {
-                                                            if (window.confirm("Are you sure you want to cancel this booking?")) {
-                                                                try {
-                                                                    await cancelBookingApi(booking._id);
-                                                                    toast.success("Booking cancelled successfully");
-                                                                    fetchMyWorkshops();
-                                                                } catch (err: any) {
-                                                                    toast.error(err.response?.data?.message || "Failed to cancel");
-                                                                }
-                                                            }
-                                                        }}
+                                                        onClick={() => handleCancelClick(booking._id)}
                                                         className="flex-1 flex items-center justify-center gap-3 py-4 bg-red-50 text-red-600 rounded-2xl font-black hover:bg-red-100 transition-all border border-red-100"
                                                     >
                                                         Cancel Seat
                                                     </button>
-                                                )} */}
+                                                )}
 
                                                 {workshop.status === 'COMPLETED' && (
                                                     <button className="flex-1 flex items-center justify-center gap-3 py-4 bg-gray-50 text-gray-400 rounded-2xl font-black hover:bg-gray-100 transition-all border border-gray-100">
@@ -211,6 +256,17 @@ export default function MyWorkshopsFoodie() {
                     </div>
                 )}
             </div>
+
+            <ConfirmModal
+                isOpen={isCancelModalOpen}
+                title="Cancel Booking"
+                message="Are you sure you want to cancel this booking? This action cannot be undone."
+                confirmText="Yes, Cancel"
+                cancelText="No, Keep it"
+                confirmVariant="danger"
+                onConfirm={handleConfirmCancel}
+                onCancel={() => setIsCancelModalOpen(false)}
+            />
         </div>
     );
 }

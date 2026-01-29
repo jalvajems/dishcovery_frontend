@@ -52,6 +52,6 @@ export const createChefProfileApi = (payload: object) => {
     return API.post(CHEF_ROUTES.PROFILE_CREATE, payload)
 }
 
-export const getChefWalletApi=()=>{
-    return API.get(CHEF_ROUTES.WALLET)
+export const getChefWalletApi = (page = 1, limit = 10) => {
+    return API.get(CHEF_ROUTES.WALLET, { params: { page, limit } })
 }

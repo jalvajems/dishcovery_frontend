@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Plus, Search, Calendar, Video, MapPin, ArrowRight, Edit3, Send } from 'lucide-react';
-import { getChefWorkshopsApi, submitWorkshopForApprovalApi } from '@/api/workshopApi';
+import { Plus, Search, Calendar, Video, MapPin, ArrowRight, Edit3, Send, XCircle } from 'lucide-react';
+import { getChefWorkshopsApi, submitWorkshopForApprovalApi, cancelWorkshopApi } from '@/api/workshopApi';
 import { useUserStore } from '@/store/userStore';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -15,31 +15,33 @@ export default function WorkshopListChef() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const limit = 6;
+    const [activeTab, setActiveTab] = useState("All");
+
+    const tabs = ["All", "DRAFT", "PENDING_APPROVAL", "APPROVED", "LIVE", "COMPLETED", "CANCELLED", "REJECTED"];
+
+    // Modal State
+    const [showCancelModal, setShowCancelModal] = useState(false);
+    const [cancellationReason, setCancellationReason] = useState("");
+    const [selectedWorkshopId, setSelectedWorkshopId] = useState<string | null>(null);
 
     useEffect(() => {
         fetchWorkshops();
-    }, [currentPage, searchQuery]);
+    }, [currentPage, searchQuery, activeTab]);
 
     const fetchWorkshops = async () => {
         try {
             setLoading(true);
-            const res = await getChefWorkshopsApi();
-            let data = res.data.data;
-
-            // Client-side filtering for simplicity as per previous component pattern
-            if (searchQuery) {
-                data = data.filter((w: any) => w.title.toLowerCase().includes(searchQuery.toLowerCase()));
-            }
-
-            setTotalPages(Math.ceil(data.length / limit));
-            const paginated = data.slice((currentPage - 1) * limit, currentPage * limit);
-            setWorkshops(paginated);
+            const res = await getChefWorkshopsApi(currentPage, limit, searchQuery, activeTab);
+            setWorkshops(res.data.datas || []);
+            setTotalPages(res.data.totalPages || 1);
         } catch (error) {
             toast.error("Failed to load workshops");
         } finally {
             setLoading(false);
         }
     };
+    console.log('workshoppppppppppp',workshops);
+    
 
     const handleSubmitForApproval = async (id: string) => {
         try {
@@ -48,6 +50,31 @@ export default function WorkshopListChef() {
             fetchWorkshops();
         } catch (error) {
             toast.error("Failed to submit workshop");
+        }
+    };
+
+    const handleOpenCancelModal = (e: React.MouseEvent, workshopId: string) => {
+        e.stopPropagation();
+        setSelectedWorkshopId(workshopId);
+        setCancellationReason("");
+        setShowCancelModal(true);
+    };
+
+    const handleConfirmCancellation = async () => {
+        if (!selectedWorkshopId) return;
+        if (!cancellationReason.trim()) {
+            toast.error("Please enter a reason for cancellation");
+            return;
+        }
+
+        try {
+            await cancelWorkshopApi(selectedWorkshopId, cancellationReason);
+            toast.success("Workshop cancelled successfully");
+            fetchWorkshops();
+            setShowCancelModal(false);
+            setSelectedWorkshopId(null);
+        } catch (err: any) {
+            toast.error(err.response?.data?.message || "Failed to cancel workshop");
         }
     };
 
@@ -80,8 +107,8 @@ export default function WorkshopListChef() {
                         disabled={!isVerifiedUser}
                         onClick={() => navigate('/chef/workshop-add')}
                         className={`flex items-center gap-2 px-8 py-4 rounded-2xl font-bold shadow-2xl transition-all duration-300 ${isVerifiedUser
-                                ? "bg-black text-white hover:bg-green-600 hover:-translate-y-1"
-                                : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                            ? "bg-black text-white hover:bg-green-600 hover:-translate-y-1"
+                            : "bg-gray-200 text-gray-400 cursor-not-allowed"
                             }`}
                     >
                         <Plus className="w-5 h-5" />
@@ -90,7 +117,7 @@ export default function WorkshopListChef() {
                 </div>
 
                 {/* Search Bar */}
-                <div className="relative max-w-2xl transform transition-all focus-within:scale-[1.01]">
+                <div className="relative max-w-2xl transform transition-all focus-within:scale-[1.01] mb-8">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                         <Search className="h-5 w-5 text-gray-400" />
                     </div>
@@ -102,11 +129,27 @@ export default function WorkshopListChef() {
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
+
+                {/* Filter Tabs */}
+                <div className="flex flex-wrap gap-3">
+                    {tabs.map((tab) => (
+                        <button
+                            key={tab}
+                            onClick={() => { setActiveTab(tab); setCurrentPage(1); }}
+                            className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 ${activeTab === tab
+                                ? "bg-black text-white shadow-lg shadow-gray-200 scale-105"
+                                : "bg-white text-gray-500 hover:bg-green-50 hover:text-green-600 shadow-sm"
+                                }`}
+                        >
+                            {tab.replace('_', ' ')}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             {loading ? (
                 <div className="flex justify-center items-center h-64"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div></div>
-            ) : workshops.length === 0 ? (
+            ) : workshops?.length === 0 ? (
                 <div className="bg-white rounded-3xl p-20 text-center shadow-xl border border-gray-50">
                     <div className="w-20 h-20 bg-green-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
                         <Plus className="w-10 h-10 text-green-500" />
@@ -124,8 +167,15 @@ export default function WorkshopListChef() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
                     {workshops.map((w: any) => (
                         <div key={w._id} className="group bg-white rounded-[2.5rem] p-4 shadow-xl hover:shadow-2xl transition-all duration-500 border border-gray-50 flex flex-col h-full relative overflow-hidden">
-                            {/* Decorative background element on hover */}
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-green-50 rounded-full -mr-16 -mt-16 group-hover:bg-green-100 transition-colors duration-500"></div>
+                            {/* Banner or Decorative background */}
+                            {w.banner ? (
+                                <div className="h-48 rounded-[2rem] overflow-hidden mb-4 relative">
+                                    <img src={w.banner} alt={w.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                                </div>
+                            ) : (
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-green-50 rounded-full -mr-16 -mt-16 group-hover:bg-green-100 transition-colors duration-500"></div>
+                            )}
 
                             <div className="relative z-10 flex flex-col h-full">
                                 <div className="flex justify-between items-start mb-4 p-2">
@@ -177,6 +227,15 @@ export default function WorkshopListChef() {
                                                 </button>
                                             </>
                                         )}
+                                        {(w.status === 'APPROVED' || w.status === 'UPCOMING') && (
+                                            <button
+                                                onClick={(e) => handleOpenCancelModal(e, w._id)}
+                                                className="p-3 bg-red-50 text-red-600 rounded-2xl hover:bg-red-100 transition-all border border-red-100"
+                                                title="Cancel Workshop"
+                                            >
+                                                Cancel
+                                            </button>
+                                        )}
                                         <button
                                             onClick={() => navigate(`/chef/workshop-detail/${w._id}`)}
                                             className="p-3 bg-black text-white rounded-2xl hover:bg-green-600 transition-all group/btn"
@@ -184,6 +243,7 @@ export default function WorkshopListChef() {
                                         >
                                             <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
                                         </button>
+
                                     </div>
                                 </div>
                             </div>
@@ -199,6 +259,43 @@ export default function WorkshopListChef() {
                         totalPages={totalPages}
                         onChange={(page) => setCurrentPage(page)}
                     />
+                </div>
+            )}
+
+
+            {/* Cancellation Modal */}
+            {showCancelModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                    <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl animate-in fade-in zoom-in duration-300">
+                        <div className="flex items-center gap-3 mb-2 text-red-600">
+                            <XCircle className="w-8 h-8" />
+                            <h2 className="text-2xl font-black text-gray-900">Cancel Workshop</h2>
+                        </div>
+                        <p className="text-gray-500 mb-6">Are you sure? This will refund all enrolled foodies. Please provide a reason.</p>
+
+                        <textarea
+                            className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl h-32 focus:ring-2 focus:ring-red-500 outline-none transition-all resize-none mb-6"
+                            placeholder="e.g., Unforeseen personal emergency..."
+                            value={cancellationReason}
+                            onChange={(e) => setCancellationReason(e.target.value)}
+                            autoFocus
+                        ></textarea>
+
+                        <div className="flex gap-4">
+                            <button
+                                onClick={() => setShowCancelModal(false)}
+                                className="flex-1 px-6 py-3 border border-gray-200 rounded-xl font-bold text-gray-600 hover:bg-gray-50 transition-all"
+                            >
+                                Back
+                            </button>
+                            <button
+                                onClick={handleConfirmCancellation}
+                                className="flex-1 px-6 py-3 bg-red-600 text-white rounded-xl font-bold shadow-lg shadow-red-200 hover:bg-red-700 transition-all"
+                            >
+                                Confirm Cancel
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

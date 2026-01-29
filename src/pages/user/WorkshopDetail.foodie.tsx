@@ -75,10 +75,19 @@ export default function WorkshopDetailFoodie() {
         <div className="min-h-screen bg-[#fcfcfc]">
             <FoodieNavbar />
 
+            {workshop.status === 'CANCELLED' && (
+                <div className="bg-red-50 border-b border-red-100 p-4 sticky top-[72px] z-40">
+                    <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 text-red-700 font-medium animate-pulse">
+                        <X className="w-5 h-5" />
+                        <span>This workshop has been cancelled by the Chef. Reason: {workshop.cancellationReason || "Unforseen circumstances"}</span>
+                    </div>
+                </div>
+            )}
+
             {/* Hero Section */}
             <div className="relative h-[600px] w-full group overflow-hidden">
                 <img
-                    src={workshop.images || "https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=1600&h=800&fit=crop"}
+                    src={workshop.banner || "https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=1600&h=800&fit=crop"}
                     alt={workshop.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]"
                 />
@@ -216,8 +225,8 @@ export default function WorkshopDetailFoodie() {
                                         </div>
                                         <p className="font-black text-green-600">{workshop.participantLimit - (workshop.participantsCount || 0)} Available</p>
                                     </div>
-                                     <p className="text-[10px] font-black text-400 uppercase tracking-widest mb-1">
-                                        {workshop.isFree?'IT IS FREE!!':'REFUND IS NOT AVAILABLE!!'}
+                                    <p className="text-[10px] font-black text-400 uppercase tracking-widest mb-1">
+                                        {workshop.isFree ? 'IT IS FREE!!' : 'REFUND IS NOT AVAILABLE!!'}
                                     </p>
 
                                 </div>
@@ -227,20 +236,31 @@ export default function WorkshopDetailFoodie() {
                                     <p className="text-4xl font-black text-gray-900">
                                         {workshop.isFree ? 'Join Free' : `₹${workshop.price}`}
                                     </p>
-                                   
+
                                 </div>
 
                                 <button
                                     onClick={handleBooking}
-                                    disabled={bookingLoading}
-                                    className="w-full flex items-center justify-center gap-3 py-6 bg-gray-900 text-white rounded-[2rem] font-black shadow-2xl shadow-gray-200 hover:bg-green-600 hover:-translate-y-1 transition-all active:scale-95 group mb-6 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled={bookingLoading || workshop.isBooked || workshop.status === 'LIVE' || workshop.status === 'COMPLETED' || workshop.status === 'CANCELLED'}
+                                    className={`w-full flex items-center justify-center gap-3 py-6 rounded-[2rem] font-black shadow-2xl transition-all active:scale-95 group mb-6 disabled:opacity-50 disabled:cursor-not-allowed ${workshop.isBooked
+                                        ? 'bg-green-100 text-green-700 shadow-none'
+                                        : workshop.status === 'LIVE' || workshop.status === 'CANCELLED'
+                                            ? 'bg-red-50 text-red-600 shadow-none'
+                                            : workshop.status === 'COMPLETED'
+                                                ? 'bg-gray-100 text-gray-400 shadow-none'
+                                                : 'bg-gray-900 text-white shadow-gray-200 hover:bg-green-600 hover:-translate-y-1'
+                                        }`}
                                 >
                                     {bookingLoading ? (
                                         <Loader2 className="animate-spin" />
                                     ) : (
                                         <>
-                                            Reserve My Seat
-                                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                            {workshop.isBooked ? 'Already Booked' :
+                                                workshop.status === 'LIVE' ? 'Live Session Started' :
+                                                    workshop.status === 'COMPLETED' ? 'Workshop Completed' :
+                                                        workshop.status === 'CANCELLED' ? 'Workshop Cancelled' :
+                                                            'Reserve My Seat'}
+                                            {!workshop.isBooked && workshop.status === 'APPROVED' && <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
                                         </>
                                     )}
                                 </button>

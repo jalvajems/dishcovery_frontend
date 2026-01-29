@@ -4,6 +4,7 @@ import { getChefWalletApi } from "@/api/chefApi";
 import Pagination from "@/components/shared/Pagination";
 import ChefNavbar from "@/components/shared/chef/NavBar.chef";
 import Footer from "@/components/shared/chef/Footer";
+import ReusableTable, { type ITableColumn } from "@/components/shared/DataTable";
 
 // ---------------- TYPES ----------------
 interface ChefWalletTransaction {
@@ -13,29 +14,124 @@ interface ChefWalletTransaction {
   workshopId: {
     title: string;
   };
+  bookingId?: {
+    foodieId?: {
+      name: string;
+      email: string;
+    }
+  };
+  type?: string;
+  status: string;
 }
 
 interface ChefWalletResponse {
   balance: number;
   pendingBalance: number;
   transactions: ChefWalletTransaction[];
+  stats?: {
+    totalCredit: number;
+    totalDebit: number;
+    totalRefund: number;
+  };
+  totalPages?: number;
+  currentPage?: number;
 }
 
 export default function ChefWalletPage() {
   const [wallet, setWallet] = useState<ChefWalletResponse | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const itemsPerPage = 8;
 
-  const handleGetChefWallet=async()=>{
-   const res= await getChefWalletApi()
-    console.log('res',res.data.data);
-    setWallet(res.data.data)
-    
+  const handleGetChefWallet = async (page: number) => {
+    try {
+      const res = await getChefWalletApi(page, itemsPerPage)
+      // Assuming backend returns pagination metadata in the response root or data
+      // Adjust based on actual backend response structure. 
+      // For now trusting basic structure + manual pagination handling if needed
+      setWallet(res.data.data)
+      // If backend provides totalPages directly:
+      setTotalPages(res.data.totalPages || 1);
+      setCurrentPage(page);
+    } catch (error) {
+      console.error("Failed to fetch wallet", error);
+    }
   }
 
   useEffect(() => {
-    handleGetChefWallet()
-}, []);
+    handleGetChefWallet(currentPage)
+  }, [currentPage]);
 
-  const totalEarnings = wallet?.transactions?.reduce((sum, t) => sum + t.amount, 0) || 0;
+  const columns: ITableColumn<ChefWalletTransaction>[] = [
+    {
+      key: "workshopId",
+      label: "Workshop",
+      render: (row: any) => (
+        <div className="flex items-center gap-3">
+          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${row.type === 'REFUND' || row.type === 'DEBIT' ? 'bg-indigo-100' : 'bg-emerald-100'}`}>
+            <DollarSign className={`w-5 h-5 ${row.type === 'REFUND' || row.type === 'DEBIT' ? 'text-indigo-600' : 'text-emerald-600'}`} />
+          </div>
+          <div>
+            <div className="font-semibold text-gray-900">{row.workshopId?.title || 'Unknown Workshop'}</div>
+            <div className="text-xs text-gray-500">ID: {row._id.slice(0, 8)}...</div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "userId",
+      label: "User",
+      render: (row: any) => (
+        <div className="flex flex-col">
+          <span className="font-medium text-gray-900">
+            {row.bookingId?.foodieId?.name || 'Unknown User'}
+          </span>
+          <span className="text-xs text-gray-500">
+            {row.bookingId?.foodieId?.email}
+          </span>
+        </div>
+      )
+    },
+    {
+      key: "amount",
+      label: "Amount",
+      render: (row) => (
+        <span className={`text-lg font-bold ${row.type === 'REFUND' || row.type === 'DEBIT' ? 'text-red-600' : 'text-emerald-600'}`}>
+          ₹{row.amount.toLocaleString()}
+        </span>
+      ),
+    },
+    {
+      key: 'type',
+      label: 'Type',
+      render: (row: any) => (
+        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${row.type === 'CREDIT' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
+          {row.type}
+        </span>
+      )
+    },
+    {
+      key: "createdAt",
+      label: "Date",
+      render: (row) => (
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <Calendar className="w-4 h-4" />
+          {new Date(row.createdAt).toLocaleDateString()}
+        </div>
+      ),
+    },
+    {
+      key: "status",
+      label: "Status",
+      render: (row) => (
+        <span className={`px-3 py-1 rounded-full text-xs font-medium ${row.status === "SUCCESS" ? "bg-green-100 text-green-700" :
+          row.status === "PENDING" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"
+          }`}>
+          {row.status}
+        </span>
+      ),
+    },
+  ];
 
   if (!wallet) {
     return (
@@ -47,7 +143,7 @@ export default function ChefWalletPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 ">
-      <ChefNavbar/>
+      <ChefNavbar />
       <div className="p-4 md:p-8">
         {/* Page Header */}
         <div className="mb-8">
@@ -56,7 +152,7 @@ export default function ChefWalletPage() {
         </div>
 
         {/* Wallet Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {/* Available Balance - Large Card */}
           <div className="lg:col-span-2 bg-gradient-to-br from-emerald-600 to-teal-600 text-white rounded-2xl p-8 shadow-xl relative overflow-hidden">
             <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20"></div>
@@ -106,15 +202,32 @@ export default function ChefWalletPage() {
             <div className="flex items-baseline gap-1 mb-2">
               <span className="text-gray-600">₹</span>
               <h2 className="text-3xl font-bold text-gray-900">
-                {totalEarnings?.toLocaleString()}
+                {wallet?.stats?.totalCredit?.toLocaleString() || 0}
               </h2>
             </div>
-            <p className="text-xs text-gray-500">All time</p>
+            <p className="text-xs text-gray-500">Gross Income</p>
+          </div>
+
+          {/* Refunds Given Card */}
+          <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 bg-indigo-50 rounded-xl">
+                <ArrowDownToLine className="w-5 h-5 text-indigo-600" />
+              </div>
+              <p className="text-sm text-gray-600 font-semibold">Refunds Given</p>
+            </div>
+            <div className="flex items-baseline gap-1 mb-2">
+              <span className="text-gray-600">₹</span>
+              <h2 className="text-3xl font-bold text-gray-900">
+                {wallet?.stats?.totalRefund?.toLocaleString() || 0}
+              </h2>
+            </div>
+            <p className="text-xs text-gray-500">Deducted from earnings</p>
           </div>
         </div>
 
         {/* Withdraw Section */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <h3 className="text-lg font-bold text-gray-900 mb-1">Ready to withdraw?</h3>
@@ -135,73 +248,8 @@ export default function ChefWalletPage() {
             <h2 className="text-xl font-bold text-gray-900">Earnings History</h2>
             <p className="text-sm text-gray-600 mt-1">View all your workshop earnings</p>
           </div>
-          
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-100">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-                    Workshop
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-                    Earnings
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-                    Date
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {wallet?.transactions?.map((transaction) => (
-                  <tr 
-                    key={transaction._id} 
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
-                          <DollarSign className="w-5 h-5 text-emerald-600" />
-                        </div>
-                        <div>
-                          <div className="font-semibold text-gray-900">
-                            {transaction?.workshopId?.title}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            ID: {transaction?._id.slice(0, 8)}...
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-1">
-                        <span className="text-lg font-bold text-emerald-600">
-                          ₹{transaction?.amount?.toLocaleString()}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Calendar className="w-4 h-4" />
-                        {new Date(transaction.createdAt)?.toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric'
-                        })}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">
-                        {transaction?.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+
+          <ReusableTable columns={columns} data={wallet.transactions} />
 
           {/* Empty State */}
           {wallet?.transactions?.length === 0 && (
@@ -214,12 +262,13 @@ export default function ChefWalletPage() {
             </div>
           )}
 
-          {/* Pagination (if needed) */}
-         <Pagination
-         
-         />
-         <Footer/>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onChange={(page) => setCurrentPage(page)}
+          />
         </div>
+        <Footer />
       </div>
     </div>
   );

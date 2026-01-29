@@ -25,6 +25,7 @@ import {
 import { toast } from "react-toastify";
 import { getWorkshopParticipantsApi } from "@/api/bookingApi";
 import ChefReviewSection from "@/components/shared/ChefReviewSection";
+import ChefNavbar from "@/components/shared/chef/NavBar.chef";
 
 export default function WorkshopDetailChef() {
     const { id } = useParams<{ id: string }>();
@@ -95,10 +96,22 @@ export default function WorkshopDetailChef() {
     if (!workshop) return <div className="p-8 text-center text-gray-500">Workshop not found</div>;
 
     const canEdit = workshop.status === 'DRAFT' || workshop.status === 'REJECTED';
-    const canStart = workshop.mode === 'ONLINE' && (workshop.status === 'APPROVED' || workshop.status === 'UPCOMING');
+
+    // Check if workshop can be started (only if online, approved/upcoming, and time has arrived)
+    const canStart = (() => {
+        if (workshop.mode !== 'ONLINE') return false;
+        if (workshop.status !== 'APPROVED' && workshop.status !== 'UPCOMING') return false;
+
+        const workshopDate = new Date(workshop.date);
+        const [hours, minutes] = workshop.startTime.split(':').map(Number);
+        workshopDate.setHours(hours, minutes, 0, 0);
+
+        return new Date() >= workshopDate;
+    })();
 
     return (
         <div className="p-8 max-w-5xl mx-auto pb-20 bg-gray-50/30 min-h-screen">
+            <ChefNavbar/>
             <button
                 onClick={() => navigate(-1)}
                 className="flex items-center gap-2 text-gray-600 hover:text-green-600 mb-8 transition-all font-semibold group"
@@ -108,49 +121,63 @@ export default function WorkshopDetailChef() {
             </button>
 
             <div className="bg-white rounded-[3rem] shadow-2xl border border-gray-100 overflow-hidden">
-                {/* Header Hero Area */}
-                <div className="bg-white p-10 border-b border-gray-50 relative overflow-hidden">
-                    {/* Decorative Element */}
-                    <div className="absolute -top-24 -right-24 w-64 h-64 bg-green-50 rounded-full blur-3xl opacity-50"></div>
-
-                    <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                        <div>
-                            <div className="flex items-center gap-3 mb-4">
-                                <span className={`px-4 py-1 rounded-full text-[10px] font-black tracking-widest uppercase border ${workshop.status === 'APPROVED' ? 'bg-green-100 text-green-700 border-green-200' :
-                                    workshop.status === 'LIVE' ? 'bg-purple-100 text-purple-700 border-purple-200 animate-pulse' :
-                                        workshop.status === 'PENDING_APPROVAL' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' : 'bg-gray-100 text-gray-700 border-gray-200'
-                                    }`}>
-                                    {workshop.status.replace('_', ' ')}
-                                </span>
-                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{workshop.mode} Session</span>
-                            </div>
-                            <h1 className="text-5xl font-black text-gray-900 leading-tight mb-2">{workshop.title}</h1>
-                            <div className="flex items-center gap-2 text-gray-400 font-medium">
-                                <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-bold">{workshop.category}</span>
-                                <span>•</span>
-                                <span>Created {new Date(workshop.createdAt).toLocaleDateString()}</span>
-                            </div>
+                <div className="relative overflow-hidden">
+                    {workshop.banner && (
+                        <div className="absolute inset-0 z-0">
+                            <img
+                                src={workshop.banner}
+                                alt="Workshop Banner"
+                                className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-white/40 to-white/90"></div>
                         </div>
+                    )}
 
-                        <div className="flex gap-3">
-                            {canEdit && (
-                                <button
-                                    onClick={() => navigate(`/chef/workshop-edit/${workshop._id}`)}
-                                    className="flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-2xl font-bold hover:bg-gray-800 transition-all shadow-xl"
-                                >
-                                    <Edit2 className="w-4 h-4" />
-                                    Edit
-                                </button>
-                            )}
-                            {canEdit && workshop.status !== 'PENDING_APPROVAL' && (
-                                <button
-                                    onClick={handleSubmit}
-                                    className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-2xl font-bold hover:bg-green-700 transition-all shadow-xl"
-                                >
-                                    <CheckCircle className="w-4 h-4" />
-                                    Submit for Approval
-                                </button>
-                            )}
+                    <div className={`bg-white/80 backdrop-blur-sm p-10 border-b border-gray-50 relative z-10 ${!workshop.banner ? 'bg-white' : ''}`}>
+                        {/* Decorative Element (only if no banner) */}
+                        {!workshop.banner && (
+                            <div className="absolute -top-24 -right-24 w-64 h-64 bg-green-50 rounded-full blur-3xl opacity-50"></div>
+                        )}
+
+                        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                            <div>
+                                <div className="flex items-center gap-3 mb-4">
+                                    <span className={`px-4 py-1 rounded-full text-[10px] font-black tracking-widest uppercase border ${workshop.status === 'APPROVED' ? 'bg-green-100 text-green-700 border-green-200' :
+                                        workshop.status === 'LIVE' ? 'bg-purple-100 text-purple-700 border-purple-200 animate-pulse' :
+                                            workshop.status === 'PENDING_APPROVAL' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' : 'bg-gray-100 text-gray-700 border-gray-200'
+                                        }`}>
+                                        {workshop.status.replace('_', ' ')}
+                                    </span>
+                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{workshop.mode} Session</span>
+                                </div>
+                                <h1 className="text-5xl font-black text-gray-900 leading-tight mb-2">{workshop.title}</h1>
+                                <div className="flex items-center gap-2 text-gray-400 font-medium">
+                                    <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-bold">{workshop.category}</span>
+                                    <span>•</span>
+                                    <span>Created {new Date(workshop.createdAt).toLocaleDateString()}</span>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3">
+                                {canEdit && (
+                                    <button
+                                        onClick={() => navigate(`/chef/workshop-edit/${workshop._id}`)}
+                                        className="flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-2xl font-bold hover:bg-gray-800 transition-all shadow-xl"
+                                    >
+                                        <Edit2 className="w-4 h-4" />
+                                        Edit
+                                    </button>
+                                )}
+                                {canEdit && workshop.status !== 'PENDING_APPROVAL' && (
+                                    <button
+                                        onClick={handleSubmit}
+                                        className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-2xl font-bold hover:bg-green-700 transition-all shadow-xl"
+                                    >
+                                        <CheckCircle className="w-4 h-4" />
+                                        Submit for Approval
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -355,9 +382,28 @@ export default function WorkshopDetailChef() {
                                         ) : (
                                             <div className="text-center py-6 text-gray-400">
                                                 <Video className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                                                <p className="text-sm font-bold uppercase tracking-widest leading-relaxed">
-                                                    Session controls will appear<br />after admin approval
-                                                </p>
+                                                {(workshop.status === 'APPROVED' || workshop.status === 'UPCOMING') ? (
+                                                    <div className="space-y-2">
+                                                        <p className="text-sm font-bold uppercase tracking-widest leading-relaxed">
+                                                            Session Scheduled For
+                                                        </p>
+                                                        <p className="text-lg font-black text-gray-900">
+                                                            {new Date(workshop.date).toLocaleDateString()} <span className="text-green-600">@ {workshop.startTime}</span>
+                                                        </p>
+                                                        <p className="text-[10px] font-bold text-gray-400 uppercase">
+                                                            Button will activate at start time
+                                                        </p>
+                                                    </div>
+                                                ) : workshop.status === 'PENDING_APPROVAL' ? (
+                                                    <p className="text-sm font-bold uppercase tracking-widest leading-relaxed">
+                                                        Session controls will appear<br />after admin approval
+                                                    </p>
+                                                ) : (
+                                                    <p className="text-sm font-bold uppercase tracking-widest leading-relaxed">
+                                                        Session controls unavailable<br />
+                                                        <span className="text-xs opacity-60">Status: {workshop.status}</span>
+                                                    </p>
+                                                )}
                                             </div>
                                         )}
                                     </div>
@@ -379,7 +425,7 @@ export default function WorkshopDetailChef() {
                     </div>
                 </div>
             </div >
-            <ChefReviewSection reviewableId={workshop._id} reviewableType="Workshop"/>
+            <ChefReviewSection reviewableId={workshop._id} reviewableType="Workshop" />
         </div >
     );
 }

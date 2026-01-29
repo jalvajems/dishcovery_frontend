@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Users, MapPin, Video, DollarSign, ChevronLeft, Save } from 'lucide-react';
+import { Users, MapPin, Video, DollarSign, ChevronLeft, Save, Upload, X } from 'lucide-react';
 import { getWorkshopByIdApi, updateWorkshopApi } from '@/api/workshopApi';
 import { toast } from 'react-toastify';
 import ChefNavbar from '@/components/shared/chef/NavBar.chef';
+import { useAwsS3Upload } from '@/components/shared/hooks/useAwsS3Upload';
 
 export default function EditWorkshopChef() {
     const { id } = useParams<{ id: string }>();
@@ -25,8 +26,12 @@ export default function EditWorkshopChef() {
         address: '',
         city: '',
         latitude: 0,
-        longitude: 0
+        longitude: 0,
+        banner: ''
     });
+
+    const { uploadToS3, loading: uploadLoading } = useAwsS3Upload();
+    const [uploadedBanner, setUploadedBanner] = useState<string | null>(null);
 
     const [errors, setErrors] = useState<any>({});
 
@@ -53,8 +58,10 @@ export default function EditWorkshopChef() {
                 address: w.location?.address || '',
                 city: w.location?.city || '',
                 latitude: w.location?.latitude || 0,
-                longitude: w.location?.longitude || 0
+                longitude: w.location?.longitude || 0,
+                banner: w.banner || ''
             });
+            if (w.banner) setUploadedBanner(w.banner);
         } catch (error) {
             toast.error("Failed to fetch workshop");
             navigate('/chef/workshop-listing');
@@ -70,6 +77,27 @@ export default function EditWorkshopChef() {
             [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked :
                 type === 'number' ? Number(value) : value
         }));
+    };
+
+    const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            try {
+                const url = await uploadToS3(file);
+                if (url) {
+                    setUploadedBanner(url);
+                    setFormData(prev => ({ ...prev, banner: url }));
+                }
+            } catch (error) {
+                console.error("Banner upload failed", error);
+                toast.error("Failed to upload banner");
+            }
+        }
+    };
+
+    const removeBanner = () => {
+        setUploadedBanner(null);
+        setFormData(prev => ({ ...prev, banner: '' }));
     };
 
     const validate = () => {
@@ -107,6 +135,7 @@ export default function EditWorkshopChef() {
                 mode: formData.mode,
                 isFree: formData.isFree,
                 price: formData.isFree ? 0 : formData.price,
+                banner: formData.banner
             };
 
             if (formData.mode === 'OFFLINE') {
@@ -197,6 +226,45 @@ export default function EditWorkshopChef() {
                                         <option value="Desserts">Desserts</option>
                                     </select>
                                 </div>
+                            </div>
+                        </section>
+
+                        {/* Banner Upload */}
+                        <section className="space-y-6">
+                            <h2 className="text-2xl font-black text-gray-900 flex items-center gap-3">
+                                <div className="w-2 h-8 bg-green-500 rounded-full"></div>
+                                Workshop Banner
+                            </h2>
+                            <div className="bg-gray-50 border border-dashed border-gray-300 rounded-3xl p-8 text-center relative hover:bg-gray-100 transition-colors group">
+                                {uploadedBanner ? (
+                                    <div className="relative w-full h-64 rounded-2xl overflow-hidden shadow-lg">
+                                        <img src={uploadedBanner} alt="Banner Preview" className="w-full h-full object-cover" />
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <button
+                                                type="button"
+                                                onClick={removeBanner}
+                                                className="bg-white text-red-600 p-3 rounded-full shadow-xl hover:bg-red-50 hover:scale-110 transition-transform"
+                                            >
+                                                <X className="w-6 h-6" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <label className="cursor-pointer flex flex-col items-center justify-center h-48 w-full">
+                                        {uploadLoading ? (
+                                            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-green-600 mb-4"></div>
+                                        ) : (
+                                            <>
+                                                <div className="w-16 h-16 bg-white rounded-full shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 transition-transform text-green-600">
+                                                    <Upload className="w-8 h-8" />
+                                                </div>
+                                                <p className="text-gray-900 font-bold text-lg mb-1">Upload Workshop Banner</p>
+                                                <p className="text-gray-500 text-sm">Supports JPG, PNG (Max 5MB)</p>
+                                            </>
+                                        )}
+                                        <input type="file" className="hidden" accept="image/*" onChange={handleBannerUpload} disabled={uploadLoading} />
+                                    </label>
+                                )}
                             </div>
                         </section>
 

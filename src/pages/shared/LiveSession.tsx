@@ -195,7 +195,7 @@ const LiveSession = () => {
                     
                     // In mesh, we wait for the newcomer to initiate the call (createPeer above)
                     // We only log here to know they joined.
-                    toast.info(`${data.role} joined the session`);
+                    // toast.info(`${data.role} joined the session`);
                 });
                 
                 socketRef.current.on('webrtc-signal', (data: { from: string, signal: any }) => {
@@ -216,7 +216,7 @@ const LiveSession = () => {
                             setChefPeer({ peerId: fromId, peer });
                             if (!checkIsHost()) {
                                 setPinnedId(fromId);
-                                toast.info("Chef joined. Pinning to stage.");
+                                // toast.info("Chef joined. Pinning to stage.");
                             }
                         }
                     }
@@ -236,7 +236,7 @@ const LiveSession = () => {
                 });
                 
                 socketRef.current.on('session-ended', () => {
-                    toast.warning("Host has ended the session");
+                    // toast.warning("Host has ended the session");
                     const rolePath = user?.role === 'chef' ? 'chef' : 'foodie';
                     navigate(`/${rolePath}/workshop-summary/${workshopId}`);
                 });
@@ -250,7 +250,7 @@ const LiveSession = () => {
                         toast.warning("You have been muted by the host");
                     } else if (data.action === 'remove') {
                         toast.error("You have been removed from the session");
-                        navigate('/dashboard');
+                        navigate('/foodie/dashboard');
                     }
                 });
                 

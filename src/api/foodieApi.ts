@@ -2,7 +2,7 @@ import { FOODIE_ROUTES } from "@/components/shared/constants/routes/foodie.route
 import API from "./apiInstance";
 
 export const userDashboardApi = () => {
-  return API.get(FOODIE_ROUTES.DASHBOARD);
+    return API.get(FOODIE_ROUTES.DASHBOARD);
 };
 //==========
 export const getAllRecipesFoodieApi = (
@@ -41,7 +41,7 @@ export const getBlogsFoodieApi = (
 };
 
 export const getFoodieBlogDetailApi = (blogId: string) => {
-  return API.get(FOODIE_ROUTES.BLOG_DETAIL(blogId));
+    return API.get(FOODIE_ROUTES.BLOG_DETAIL(blogId));
 };
 
 export const getRelatedBlogsApi = (tag: string) => {
@@ -99,8 +99,8 @@ export const getFoodSpotDetailApi = (spotId: string) => {
 };
 
 //==========
-export const getFoodieWalletApi = () => {
-    return API.get(FOODIE_ROUTES.WALLET);
+export const getFoodieWalletApi = (page = 1, limit = 10) => {
+    return API.get(FOODIE_ROUTES.WALLET, { params: { page, limit } });
 };
 
 //==========
