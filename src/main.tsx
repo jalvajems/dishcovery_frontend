@@ -3,10 +3,13 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { SocketProvider } from './context/SocketProvider.tsx';
 
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
-  </StrictMode>, 
+    <SocketProvider>
+      <App />
+    </SocketProvider>
+  </StrictMode>,
 )

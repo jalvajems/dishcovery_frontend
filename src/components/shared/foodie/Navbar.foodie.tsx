@@ -1,6 +1,7 @@
 import logo from "../../../assets/logo.png"
 import { useNavigate } from "react-router-dom";
 import { useUserStore } from "@/store/userStore";
+import { NotificationBell } from "../NotificationBell";
 
 export default function FoodieNavbar() {
 
@@ -19,9 +20,10 @@ export default function FoodieNavbar() {
         </div>
 
 
-      
+
 
         <div className="flex items-center gap-4 px-5 py-3">
+          <NotificationBell />
           <div className="w-12 h-12 rounded-full overflow-hidden shadow-xl ring-4 ring-green-100 cursor-pointer hover:scale-105 transition-transform">
             <img
               onClick={() => navigate("/foodie/profile")}

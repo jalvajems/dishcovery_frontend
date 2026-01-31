@@ -1,0 +1,106 @@
+import { create } from 'zustand';
+import {
+    getUserNotificationsApi,
+    markNotificationAsReadApi,
+    markAllNotificationsAsReadApi,
+    getUnreadNotificationCountApi
+} from '../api/notificationApi';
+
+export interface INotification {
+    _id: string;
+    recipientId: string;
+    recipientRole: string;
+    title: string;
+    message: string;
+    type: string;
+    workshopId?: string;
+    sessionId?: string;
+    isRead: boolean;
+    createdAt: string;
+}
+
+interface INotificationStore {
+    notifications: INotification[];
+    unreadCount: number;
+    isLoading: boolean;
+
+    fetchNotifications: (limit?: number, skip?: number) => Promise<void>;
+    fetchUnreadCount: () => Promise<void>;
+    addNotification: (notification: INotification) => void;
+    markAsRead: (id: string) => Promise<void>;
+    markAllAsRead: () => Promise<void>;
+    clearAll: () => Promise<void>;
+}
+
+export const useNotificationStore = create<INotificationStore>((set, get) => ({
+    notifications: [],
+    unreadCount: 0,
+    isLoading: false,
+
+    fetchNotifications: async (limit = 20, skip = 0) => {
+        set({ isLoading: true });
+        try {
+            const response = await getUserNotificationsApi(limit, skip);
+            set({ notifications: response.data.data });
+        } catch (error) {
+            console.error("Failed to fetch notifications", error);
+        } finally {
+            set({ isLoading: false });
+        }
+    },
+
+    fetchUnreadCount: async () => {
+        try {
+            const response = await getUnreadNotificationCountApi();
+            set({ unreadCount: response.data.data.count });
+        } catch (error) {
+            console.error("Failed to fetch unread count", error);
+        }
+    },
+
+    addNotification: (notification: INotification) => {
+        set((state) => ({
+            notifications: [notification, ...state.notifications],
+            unreadCount: state.unreadCount + 1
+        }));
+    },
+
+    markAsRead: async (id: string) => {
+        try {
+            // Optimistic update
+            const notification = get().notifications.find(n => n._id === id);
+            if (notification && !notification.isRead) {
+                set((state) => ({
+                    notifications: state.notifications.map(n => n._id === id ? { ...n, isRead: true } : n),
+                    unreadCount: Math.max(0, state.unreadCount - 1)
+                }));
+                await markNotificationAsReadApi(id);
+            }
+        } catch (error) {
+            console.error("Failed to mark notification as read", error);
+            // Revert on failure? For now simpler to just log
+        }
+    },
+
+    markAllAsRead: async () => {
+        try {
+            set((state) => ({
+                notifications: state.notifications.map(n => ({ ...n, isRead: true })),
+                unreadCount: 0
+            }));
+            await markAllNotificationsAsReadApi();
+        } catch (error) {
+            console.error("Failed to mark all as read", error);
+        }
+    },
+
+    clearAll: async () => {
+        try {
+            set({ notifications: [], unreadCount: 0 });
+            // Import this function at top of file
+            await clearAllNotificationsApi();
+        } catch (error) {
+            console.error("Failed to clear all notifications", error);
+        }
+    }
+}));
