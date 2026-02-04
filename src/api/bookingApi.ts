@@ -16,3 +16,7 @@ export const cancelBookingApi = (bookingId: string) => {
 export const getWorkshopParticipantsApi = (workshopId: string) => {
     return API.get(BOOKING_ROUTES.WORKSHOP_PARTICIPANTS(workshopId));
 };
+
+export const markAttendanceApi = (bookingId: string, status: string) => {
+    return API.patch(BOOKING_ROUTES.MARK_ATTENDANCE(bookingId), { status });
+};

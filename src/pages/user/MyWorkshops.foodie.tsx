@@ -145,7 +145,7 @@ export default function MyWorkshopsFoodie() {
                                     <div className="flex flex-col md:flex-row items-stretch">
                                         <div className="md:w-64 h-48 md:h-auto overflow-hidden relative">
                                             <img
-                                                src={workshop.images || "https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=400&h=400&fit=crop"}
+                                                src={workshop.banner || workshop.images?.[0] || "https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=400&h=400&fit=crop"}
                                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                                 alt={workshop.title}
                                             />
@@ -222,7 +222,7 @@ export default function MyWorkshopsFoodie() {
                                                     </button>
                                                 )}
 
-                                                {booking.status === 'CONFIRMED' && isConfirmed && workshop.status !== 'LIVE' && (
+                                                {booking.status === 'CONFIRMED' && isConfirmed && workshop.status !== 'LIVE' && workshop.status !== 'COMPLETED' && (
                                                     <button
                                                         onClick={() => handleCancelClick(booking._id)}
                                                         className="flex-1 flex items-center justify-center gap-3 py-4 bg-red-50 text-red-600 rounded-2xl font-black hover:bg-red-100 transition-all border border-red-100"

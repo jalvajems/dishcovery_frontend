@@ -5,6 +5,7 @@ import { getWorkshopByIdApi, updateWorkshopApi } from '@/api/workshopApi';
 import { toast } from 'react-toastify';
 import ChefNavbar from '@/components/shared/chef/NavBar.chef';
 import { useAwsS3Upload } from '@/components/shared/hooks/useAwsS3Upload';
+import MapLocationPicker from '@/utils/MapLocationPicker';
 
 export default function EditWorkshopChef() {
     const { id } = useParams<{ id: string }>();
@@ -345,13 +346,31 @@ export default function EditWorkshopChef() {
                                             className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-green-500 outline-none transition-all font-bold"
                                         />
                                     </div>
+                                    <div className="md:col-span-2">
+                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Location on Map</label>
+                                        <div className="rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+                                            <MapLocationPicker
+                                                initialLat={formData.latitude}
+                                                initialLng={formData.longitude}
+                                                onSelect={(data) => {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        address: data.fullAddress,
+                                                        city: data.city || data.state,
+                                                        latitude: data.lat,
+                                                        longitude: data.lng
+                                                    }));
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
                                     <div>
                                         <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Address</label>
                                         <input
                                             name="address"
                                             value={formData.address}
-                                            onChange={handleInputChange}
-                                            className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-green-500 outline-none transition-all font-bold"
+                                            readOnly
+                                            className="w-full p-4 bg-gray-100 border border-gray-100 rounded-2xl outline-none text-gray-600 font-medium cursor-not-allowed"
                                         />
                                     </div>
                                     <div>
@@ -359,8 +378,8 @@ export default function EditWorkshopChef() {
                                         <input
                                             name="city"
                                             value={formData.city}
-                                            onChange={handleInputChange}
-                                            className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-green-500 outline-none transition-all font-bold"
+                                            readOnly
+                                            className="w-full p-4 bg-gray-100 border border-gray-100 rounded-2xl outline-none text-gray-600 font-medium cursor-not-allowed"
                                         />
                                     </div>
                                 </div>

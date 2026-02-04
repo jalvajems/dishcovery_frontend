@@ -9,6 +9,11 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import CheckoutForm from '@/components/shared/CheckoutForm';
 import ReviewSection from '@/components/shared/ReviewPage';
+import Map, { Marker } from 'react-map-gl/mapbox';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
+
+mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
@@ -164,18 +169,34 @@ export default function WorkshopDetailFoodie() {
                         {workshop.mode === 'OFFLINE' && workshop.location && (
                             <section>
                                 <h2 className="text-3xl font-black text-gray-900 mb-8">The Venue</h2>
-                                <div className="bg-orange-50 rounded-[3rem] p-10 border border-orange-100 flex flex-col md:flex-row gap-8 items-center overflow-hidden relative">
-                                    <MapPin className="absolute -bottom-10 -right-10 w-64 h-64 text-orange-200/30 rotate-12" />
-                                    <div className="w-20 h-20 bg-white rounded-[2rem] shadow-xl flex items-center justify-center text-orange-600 flex-shrink-0">
-                                        <MapPin size={40} />
+                                <div className="space-y-6">
+                                    <div className="bg-orange-50 rounded-[3rem] p-10 border border-orange-100 flex flex-col md:flex-row gap-8 items-center overflow-hidden relative">
+                                        <MapPin className="absolute -bottom-10 -right-10 w-64 h-64 text-orange-200/30 rotate-12" />
+                                        <div className="w-20 h-20 bg-white rounded-[2rem] shadow-xl flex items-center justify-center text-orange-600 flex-shrink-0">
+                                            <MapPin size={40} />
+                                        </div>
+                                        <div className="relative z-10 text-center md:text-left">
+                                            <h3 className="text-3xl font-black text-orange-950 mb-2">{workshop.location.venueName}</h3>
+                                            <p className="text-orange-900/70 text-lg font-bold">{workshop.location.address}, {workshop.location.city}</p>
+                                        </div>
                                     </div>
-                                    <div className="relative z-10 text-center md:text-left">
-                                        <h3 className="text-3xl font-black text-orange-950 mb-2">{workshop.location.venueName}</h3>
-                                        <p className="text-orange-900/70 text-lg font-bold">{workshop.location.address}, {workshop.location.city}</p>
-                                        <button className="mt-6 flex items-center gap-2 text-orange-600 font-black text-sm uppercase tracking-widest hover:gap-4 transition-all">
-                                            Open in Maps <ArrowRight size={16} />
-                                        </button>
-                                    </div>
+
+                                    {workshop.location.latitude && workshop.location.longitude && (
+                                        <div className="h-80 w-full rounded-[3rem] overflow-hidden border border-gray-100 shadow-lg relative bg-gray-100">
+                                            <Map
+                                                initialViewState={{
+                                                    longitude: workshop.location.longitude,
+                                                    latitude: workshop.location.latitude,
+                                                    zoom: 14
+                                                }}
+                                                style={{ width: '100%', height: '100%' }}
+                                                mapStyle="mapbox://styles/mapbox/streets-v11"
+                                                accessToken={mapboxgl.accessToken || ""}
+                                            >
+                                                <Marker longitude={workshop.location.longitude} latitude={workshop.location.latitude} color="#ea580c" />
+                                            </Map>
+                                        </div>
+                                    )}
                                 </div>
                             </section>
                         )}
@@ -232,7 +253,19 @@ export default function WorkshopDetailFoodie() {
                                 </div>
 
                                 <div className="mb-10 text-center bg-gray-50 p-6 rounded-3xl border border-gray-100">
-                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Session Invitation</p>
+                                    <div className="flex items-center justify-center gap-2 mb-1">
+                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{workshop.mode} Session</span>
+                                        {workshop.myBooking?.attendanceStatus === 'PRESENT' && (
+                                            <span className="px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase border bg-green-100 text-green-700 border-green-200">
+                                                Attended
+                                            </span>
+                                        )}
+                                        {workshop.myBooking?.attendanceStatus === 'ABSENT' && (
+                                            <span className="px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase border bg-red-100 text-red-700 border-red-200">
+                                                Absent
+                                            </span>
+                                        )}
+                                    </div>
                                     <p className="text-4xl font-black text-gray-900">
                                         {workshop.isFree ? 'Join Free' : `₹${workshop.price}`}
                                     </p>

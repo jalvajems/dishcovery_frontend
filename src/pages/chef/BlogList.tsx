@@ -92,7 +92,7 @@ export default function BlogListChef() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-4 mb-6">
+      {/* <div className="flex gap-4 mb-6">
       
         <button
       disabled={!isVerifiedUser}
@@ -101,7 +101,7 @@ export default function BlogListChef() {
         >
           Draft
         </button>
-      </div>
+      </div> */}
 
       {/* Blog List */}
       {loading ? (
@@ -114,9 +114,9 @@ export default function BlogListChef() {
                 <img src={blog.coverImage} className="w-64 h-48 rounded-xl object-cover" />
 
                 <div className="flex-1">
-                  <span className={`px-4 py-1.5 rounded-lg text-sm ${blog.isDraft ? "bg-gray-100" : "bg-green-100 text-green-700"}`}>
+                  {/* <span className={`px-4 py-1.5 rounded-lg text-sm ${blog.isDraft ? "bg-gray-100" : "bg-green-100 text-green-700"}`}>
                     {blog.isDraft ? "Draft" : "Published"}
-                  </span>
+                  </span> */}
 
                   <h3 className="text-2xl font-bold mt-2">{blog.title}</h3>
                   <p className="text-gray-600 mt-2">{blog.shortDescription}</p>

@@ -4,7 +4,8 @@ import {
     getWorkshopByIdApi,
     submitWorkshopForApprovalApi,
     startWorkshopApi,
-    endWorkshopApi
+    endWorkshopApi,
+    cancelWorkshopApi
 } from "@/api/workshopApi";
 import {
     ChevronLeft,
@@ -23,9 +24,15 @@ import {
     XCircle
 } from "lucide-react";
 import { toast } from "react-toastify";
-import { getWorkshopParticipantsApi } from "@/api/bookingApi";
+import { getWorkshopParticipantsApi, markAttendanceApi } from "@/api/bookingApi";
 import ChefReviewSection from "@/components/shared/ChefReviewSection";
 import ChefNavbar from "@/components/shared/chef/NavBar.chef";
+import ConfirmModal from "@/components/shared/ConfirmModal";
+import Map, { Marker } from 'react-map-gl/mapbox';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
+
+mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
 export default function WorkshopDetailChef() {
     const { id } = useParams<{ id: string }>();
@@ -33,6 +40,12 @@ export default function WorkshopDetailChef() {
     const [workshop, setWorkshop] = useState<any>(null);
     const [participants, setParticipants] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [modalAction, setModalAction] = useState<'COMPLETE' | null>(null);
+
+    const [cancelModalOpen, setCancelModalOpen] = useState(false);
+    const [cancelReason, setCancelReason] = useState("");
 
     useEffect(() => {
         if (id) {
@@ -92,6 +105,39 @@ export default function WorkshopDetailChef() {
         }
     };
 
+    const handleComplete = async () => {
+        try {
+            await endWorkshopApi(id!); // Reusing endWorkshopApi which now supports offline completion
+            toast.success("Workshop marked as completed");
+            fetchWorkshop();
+            setShowConfirmModal(false);
+        } catch (error) {
+            toast.error("Failed to complete workshop");
+        }
+    };
+
+    const handleCancelWorkshop = async () => {
+        try {
+            if (!id) return;
+            await cancelWorkshopApi(id, cancelReason);
+            toast.success("Workshop cancelled successfully");
+            setCancelModalOpen(false);
+            fetchWorkshop();
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || "Failed to cancel workshop");
+        }
+    };
+
+    const handleAttendance = async (bookingId: string, status: 'PRESENT' | 'ABSENT') => {
+        try {
+            await markAttendanceApi(bookingId, status);
+            toast.success(`Marked as ${status}`);
+            fetchParticipants(); // Refresh to show updated status
+        } catch (error) {
+            toast.error("Failed to update attendance");
+        }
+    };
+
     if (loading) return <div className="flex justify-center items-center h-full"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div></div>;
     if (!workshop) return <div className="p-8 text-center text-gray-500">Workshop not found</div>;
 
@@ -111,7 +157,7 @@ export default function WorkshopDetailChef() {
 
     return (
         <div className="p-8 max-w-5xl mx-auto pb-20 bg-gray-50/30 min-h-screen">
-            <ChefNavbar/>
+            <ChefNavbar />
             <button
                 onClick={() => navigate(-1)}
                 className="flex items-center gap-2 text-gray-600 hover:text-green-600 mb-8 transition-all font-semibold group"
@@ -144,7 +190,8 @@ export default function WorkshopDetailChef() {
                                 <div className="flex items-center gap-3 mb-4">
                                     <span className={`px-4 py-1 rounded-full text-[10px] font-black tracking-widest uppercase border ${workshop.status === 'APPROVED' ? 'bg-green-100 text-green-700 border-green-200' :
                                         workshop.status === 'LIVE' ? 'bg-purple-100 text-purple-700 border-purple-200 animate-pulse' :
-                                            workshop.status === 'PENDING_APPROVAL' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' : 'bg-gray-100 text-gray-700 border-gray-200'
+                                            workshop.status === 'COMPLETED' ? 'bg-blue-100 text-blue-700 border-blue-200' :
+                                                workshop.status === 'PENDING_APPROVAL' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' : 'bg-gray-100 text-gray-700 border-gray-200'
                                         }`}>
                                         {workshop.status.replace('_', ' ')}
                                     </span>
@@ -272,7 +319,11 @@ export default function WorkshopDetailChef() {
                                                     {booking.foodieId?.name?.charAt(0) || 'F'}
                                                 </div>
                                                 <div>
-                                                    <p className="font-black text-gray-900">{booking.foodieId?.name || 'Anonymous Foodie'}</p>
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="font-black text-gray-900">{booking.foodieId?.name || 'Anonymous Foodie'}</p>
+                                                        {booking.attendanceStatus === 'PRESENT' && <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-[0.4rem] text-[9px] font-black uppercase tracking-wider border border-green-200">Present</span>}
+                                                        {booking.attendanceStatus === 'ABSENT' && <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded-[0.4rem] text-[9px] font-black uppercase tracking-wider border border-red-200">Absent</span>}
+                                                    </div>
                                                     <div className="flex items-center gap-3 mt-1">
                                                         <span className="flex items-center gap-1 text-[10px] font-black text-gray-400 uppercase tracking-widest">
                                                             <Mail size={10} />
@@ -285,14 +336,32 @@ export default function WorkshopDetailChef() {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="text-right">
-                                                <div className={`flex items-center justify-end gap-1.5 font-black text-[10px] uppercase tracking-widest ${booking.status === 'CONFIRMED' ? 'text-green-600' :
-                                                    booking.status === 'CANCELLED' ? 'text-red-500' : 'text-yellow-600'
-                                                    }`}>
-                                                    {booking.status === 'CONFIRMED' ? <UserCheck size={14} /> : <XCircle size={14} />}
-                                                    {booking.status}
+                                            <div className="text-right flex items-center gap-4">
+                                                {workshop.status === 'COMPLETED' && booking.status === 'CONFIRMED' && (
+                                                    <div className="flex gap-2">
+                                                        <button
+                                                            onClick={() => handleAttendance(booking._id, 'PRESENT')}
+                                                            className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${booking.attendanceStatus === 'PRESENT' ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-400 border-gray-200 hover:border-green-300 hover:text-green-600'}`}
+                                                        >
+                                                            Present
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleAttendance(booking._id, 'ABSENT')}
+                                                            className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${booking.attendanceStatus === 'ABSENT' ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-400 border-gray-200 hover:border-red-300 hover:text-red-600'}`}
+                                                        >
+                                                            Absent
+                                                        </button>
+                                                    </div>
+                                                )}
+                                                <div>
+                                                    <div className={`flex items-center justify-end gap-1.5 font-black text-[10px] uppercase tracking-widest ${booking.status === 'CONFIRMED' ? 'text-green-600' :
+                                                        booking.status === 'CANCELLED' ? 'text-red-500' : 'text-yellow-600'
+                                                        }`}>
+                                                        {booking.status === 'CONFIRMED' ? <UserCheck size={14} /> : <XCircle size={14} />}
+                                                        {booking.status}
+                                                    </div>
+                                                    <p className="text-[10px] font-bold text-gray-400 mt-1">{new Date(booking.bookedAt).toLocaleDateString()}</p>
                                                 </div>
-                                                <p className="text-[10px] font-bold text-gray-400 mt-1">{new Date(booking.bookedAt).toLocaleDateString()}</p>
                                             </div>
                                         </div>
                                     ))}
@@ -303,17 +372,36 @@ export default function WorkshopDetailChef() {
                         {workshop.mode === 'OFFLINE' && workshop.location && (
                             <section>
                                 <h3 className="text-xl font-black text-gray-900 mb-4 uppercase tracking-tight">Location</h3>
-                                <div className="bg-orange-50/50 p-8 rounded-[2.5rem] border border-orange-100/50 relative overflow-hidden group">
-                                    <MapPin className="absolute top-4 right-4 w-32 h-32 text-orange-200/40 -mr-8 -mt-8" />
-                                    <div className="relative z-10 flex items-start gap-4">
-                                        <div className="w-14 h-14 bg-white rounded-2xl shadow-sm flex items-center justify-center text-orange-600 flex-shrink-0">
-                                            <MapPin className="w-7 h-7" />
-                                        </div>
-                                        <div>
-                                            <p className="font-black text-2xl text-orange-950 mb-1">{workshop.location.venueName}</p>
-                                            <p className="text-orange-900 font-semibold opacity-80">{workshop.location.address}, {workshop.location.city}</p>
+                                <div className="space-y-6">
+                                    <div className="bg-orange-50/50 p-8 rounded-[2.5rem] border border-orange-100/50 relative overflow-hidden group">
+                                        <MapPin className="absolute top-4 right-4 w-32 h-32 text-orange-200/40 -mr-8 -mt-8" />
+                                        <div className="relative z-10 flex items-start gap-4">
+                                            <div className="w-14 h-14 bg-white rounded-2xl shadow-sm flex items-center justify-center text-orange-600 flex-shrink-0">
+                                                <MapPin className="w-7 h-7" />
+                                            </div>
+                                            <div>
+                                                <p className="font-black text-2xl text-orange-950 mb-1">{workshop.location.venueName}</p>
+                                                <p className="text-orange-900 font-semibold opacity-80">{workshop.location.address}, {workshop.location.city}</p>
+                                            </div>
                                         </div>
                                     </div>
+
+                                    {workshop.location.latitude && workshop.location.longitude && (
+                                        <div className="h-80 w-full rounded-[2.5rem] overflow-hidden border border-gray-100 shadow-lg relative bg-gray-100">
+                                            <Map
+                                                initialViewState={{
+                                                    longitude: workshop.location.longitude,
+                                                    latitude: workshop.location.latitude,
+                                                    zoom: 14
+                                                }}
+                                                style={{ width: '100%', height: '100%' }}
+                                                mapStyle="mapbox://styles/mapbox/streets-v11"
+                                                accessToken={mapboxgl.accessToken || ""}
+                                            >
+                                                <Marker longitude={workshop.location.longitude} latitude={workshop.location.latitude} color="#ea580c" />
+                                            </Map>
+                                        </div>
+                                    )}
                                 </div>
                             </section>
                         )}
@@ -390,6 +478,13 @@ export default function WorkshopDetailChef() {
                                                         <p className="text-lg font-black text-gray-900">
                                                             {new Date(workshop.date).toLocaleDateString()} <span className="text-green-600">@ {workshop.startTime}</span>
                                                         </p>
+                                                        <button
+                                                            onClick={() => setCancelModalOpen(true)}
+                                                            className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-red-50 text-red-600 rounded-2xl font-bold hover:bg-red-100 transition-all mt-6"
+                                                        >
+                                                            <XCircle className="w-5 h-5" />
+                                                            Cancel Workshop
+                                                        </button>
                                                         <p className="text-[10px] font-bold text-gray-400 uppercase">
                                                             Button will activate at start time
                                                         </p>
@@ -408,9 +503,38 @@ export default function WorkshopDetailChef() {
                                         )}
                                     </div>
                                 ) : (
-                                    <div className="p-8 bg-white rounded-[2.5rem] border border-gray-100 text-center text-gray-400 shadow-sm">
+                                    // OFFLINE MODE
+                                    <div className="p-8 bg-white rounded-[2.5rem] border border-gray-100 text-center shadow-xl">
                                         <MapPin className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                                        <p className="text-sm font-bold uppercase tracking-widest">In-person session</p>
+                                        <p className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6">In-person session</p>
+
+                                        {(workshop.status === 'APPROVED' || workshop.status === 'UPCOMING') && (
+                                            <button
+                                                onClick={() => setCancelModalOpen(true)}
+                                                className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-red-50 text-red-600 rounded-2xl font-bold hover:bg-red-100 transition-all mb-4"
+                                            >
+                                                <XCircle className="w-5 h-5" />
+                                                Cancel Workshop
+                                            </button>
+                                        )}
+
+                                        {(workshop.status === 'APPROVED' || workshop.status === 'UPCOMING' || workshop.status === 'LIVE') && (
+                                            <button
+                                                onClick={() => {
+                                                    setModalAction('COMPLETE');
+                                                    setShowConfirmModal(true);
+                                                }}
+                                                className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-green-600 text-white rounded-2xl font-black shadow-lg shadow-green-100 hover:bg-green-700 transition-all group"
+                                            >
+                                                <CheckCircle className="w-5 h-5" />
+                                                Mark as Completed
+                                            </button>
+                                        )}
+                                        {workshop.status === 'COMPLETED' && (
+                                            <div className="py-2 bg-green-50 rounded-2xl border border-green-100">
+                                                <p className="text-green-700 font-bold uppercase tracking-widest text-xs">Session Completed</p>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </section>
@@ -426,6 +550,58 @@ export default function WorkshopDetailChef() {
                 </div>
             </div >
             <ChefReviewSection reviewableId={workshop._id} reviewableType="Workshop" />
-        </div >
+
+
+
+            {/* Existing Validations or Modals */}
+            <ConfirmModal
+                isOpen={showConfirmModal}
+                onCancel={() => {
+                    setShowConfirmModal(false);
+                    setModalAction(null);
+                }}
+                onConfirm={handleComplete} // Since we only use it for completion now
+                title="Complete Workshop"
+                message="Are you sure you want to mark this workshop as completed? You will be able to mark attendance after this."
+                confirmText="Yes, Complete"
+            />
+
+            {/* Cancel Workshop Modal */}
+            {cancelModalOpen && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white p-8 rounded-3xl w-full max-w-md">
+                        <h2 className="text-2xl font-bold mb-4">Cancel Workshop</h2>
+                        <p className="text-gray-500 mb-6">Please provide a reason for cancelling this workshop. This will notify all enrolled participants.</p>
+
+                        <textarea
+                            value={cancelReason}
+                            onChange={(e) => setCancelReason(e.target.value)}
+                            placeholder="Reason for cancellation..."
+                            className="w-full p-4 border border-gray-200 rounded-xl mb-6 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
+                            rows={4}
+                        />
+
+                        <div className="flex gap-4">
+                            <button
+                                onClick={() => {
+                                    setCancelModalOpen(false);
+                                    setCancelReason("");
+                                }}
+                                className="flex-1 py-3 text-gray-600 font-bold hover:bg-gray-50 rounded-xl transition-colors"
+                            >
+                                Keep it
+                            </button>
+                            <button
+                                onClick={handleCancelWorkshop}
+                                disabled={!cancelReason.trim()}
+                                className="flex-1 py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Cancel Workshop
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }

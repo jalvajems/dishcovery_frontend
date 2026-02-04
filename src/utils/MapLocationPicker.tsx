@@ -15,15 +15,17 @@ interface Props {
     country: string;
     fullAddress: string;
   }) => void;
+  initialLat?: number;
+  initialLng?: number;
 }
 
-export default function MapLocationPicker({ onSelect }: Props) {
+export default function MapLocationPicker({ onSelect, initialLat, initialLng }: Props) {
   const mapRef = useRef<any>(null);
   const geocoderRef = useRef<HTMLDivElement>(null);
 
   const [marker, setMarker] = useState({
-    lng: 77.5946,
-    lat: 12.9716,
+    lng: initialLng || 77.5946,
+    lat: initialLat || 12.9716,
   });
 
   // Reverse Geocode helper
@@ -55,8 +57,8 @@ export default function MapLocationPicker({ onSelect }: Props) {
     if (!geocoderRef.current || !mapRef.current) return;
 
     const geocoder = new MapboxGeocoder({
-      accessToken: mapboxgl.accessToken,
-      mapboxgl,
+      accessToken: mapboxgl.accessToken || "",
+      mapboxgl: mapboxgl as any,
       marker: false,
     });
 
@@ -75,6 +77,17 @@ export default function MapLocationPicker({ onSelect }: Props) {
       reverseGeocode(lng, lat);
     });
   }, []);
+
+  // Sync state with props for edit mode
+  useEffect(() => {
+    if (initialLat && initialLng) {
+      setMarker({ lat: initialLat, lng: initialLng });
+      mapRef.current?.flyTo({
+        center: [initialLng, initialLat],
+        zoom: 15,
+      });
+    }
+  }, [initialLat, initialLng]);
 
   return (
     <div className="space-y-3">
