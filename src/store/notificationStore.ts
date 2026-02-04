@@ -3,7 +3,8 @@ import {
     getUserNotificationsApi,
     markNotificationAsReadApi,
     markAllNotificationsAsReadApi,
-    getUnreadNotificationCountApi
+    getUnreadNotificationCountApi,
+    clearAllNotificationsApi
 } from '../api/notificationApi';
 
 export interface INotification {
@@ -23,6 +24,7 @@ interface INotificationStore {
     notifications: INotification[];
     unreadCount: number;
     isLoading: boolean;
+    filter: 'all' | 'unread' | 'read';
 
     fetchNotifications: (limit?: number, skip?: number) => Promise<void>;
     fetchUnreadCount: () => Promise<void>;
@@ -30,17 +32,20 @@ interface INotificationStore {
     markAsRead: (id: string) => Promise<void>;
     markAllAsRead: () => Promise<void>;
     clearAll: () => Promise<void>;
+    setFilter: (filter: 'all' | 'unread' | 'read') => void;
 }
 
 export const useNotificationStore = create<INotificationStore>((set, get) => ({
     notifications: [],
     unreadCount: 0,
     isLoading: false,
+    filter: 'all',
 
     fetchNotifications: async (limit = 20, skip = 0) => {
         set({ isLoading: true });
         try {
-            const response = await getUserNotificationsApi(limit, skip);
+            const { filter } = get();
+            const response = await getUserNotificationsApi(limit, skip, filter);
             set({ notifications: response.data.data });
         } catch (error) {
             console.error("Failed to fetch notifications", error);
@@ -97,10 +102,14 @@ export const useNotificationStore = create<INotificationStore>((set, get) => ({
     clearAll: async () => {
         try {
             set({ notifications: [], unreadCount: 0 });
-            // Import this function at top of file
             await clearAllNotificationsApi();
         } catch (error) {
             console.error("Failed to clear all notifications", error);
         }
+    },
+
+    setFilter: (filter: 'all' | 'unread' | 'read') => {
+        set({ filter });
+        get().fetchNotifications();
     }
 }));

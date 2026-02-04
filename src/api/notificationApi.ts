@@ -1,7 +1,7 @@
 import API from "./apiInstance";
 
-export const getUserNotificationsApi = (limit = 20, skip = 0) => {
-    return API.get(`/notifications?limit=${limit}&skip=${skip}`);
+export const getUserNotificationsApi = (limit = 20, skip = 0, filter = 'all') => {
+    return API.get(`/notifications?limit=${limit}&skip=${skip}&filter=${filter}`);
 };
 
 export const markNotificationAsReadApi = (id: string) => {
