@@ -27,6 +27,7 @@ import { followChefApi, unfollowChefApi, checkIsFollowingApi, getFollowStatsApi 
 import FoodieNavbar from '@/components/shared/foodie/Navbar.foodie';
 import ReviewSection from '@/components/shared/ReviewPage';
 import Pagination from '@/components/shared/Pagination';
+import { useChatStore } from '@/store/chatStore';
 
 type ActiveTab = 'recipes' | 'blogs' | 'workshops' | 'reviews';
 
@@ -209,6 +210,30 @@ export default function ChefDetail() {
                                             Follow Chef
                                         </>
                                     )}
+                                </button>
+                                <button
+                                    onClick={async () => {
+                                        try {
+                                            console.log('Chef data:', chef);
+                                            const chefUserId = chef.chefId?._id;
+                                            console.log('Chef User ID:', chefUserId);
+                                            if (!chefUserId) {
+                                                console.error('Chef ID not found', chef);
+                                                return;
+                                            }
+                                            const conversation = await useChatStore.getState().createOrGetConversation(chefUserId, 'chef');
+                                            console.log('Conversation created:', conversation);
+                                            if (conversation) {
+                                                navigate(`/foodie/chat/${conversation._id}`);
+                                            }
+                                        } catch (error) {
+                                            console.error('Error creating conversation:', error);
+                                        }
+                                    }}
+                                    className="px-8 py-3 rounded-2xl font-bold transition-all flex items-center gap-2 shadow-lg bg-blue-600 text-white hover:bg-blue-700 hover:scale-105 active:scale-95"
+                                >
+                                    <MessageSquare size={20} />
+                                    Message
                                 </button>
                             </div>
 

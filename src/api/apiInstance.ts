@@ -35,7 +35,16 @@ API.interceptors.response.use(
             try {
 
                 const { data } = await API.post('/auth/refresh');
-                useAuthStore.getState().login(data.accessToken, data.role)
+
+                // Map MongoDB _id to id for authStore
+                const mappedUser = {
+                    id: (data.user as any)?._id || data.user?.id,
+                    name: data.user?.name,
+                    email: data.user?.email,
+                    role: data.user?.role || data.role
+                };
+
+                useAuthStore.getState().login(data.accessToken, mappedUser);
 
                 original.headers.Authorization = `Bearer ${data.accessToken}`
 

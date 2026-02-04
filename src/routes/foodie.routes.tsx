@@ -23,6 +23,7 @@ import LiveSession from '@/pages/shared/LiveSession';
 import WorkshopSummary from '@/pages/shared/WorkshopSummary';
 import FoodieWalletPage from '@/pages/user/Wallet.foodie';
 import FollowingList from '@/pages/user/FollowingList.foodie';
+import ChatPage from '@/pages/shared/ChatPage';
 
 function UserRouter() {
     return (
@@ -57,6 +58,8 @@ function UserRouter() {
             <Route path="/foodie/workshop-summary/:workshopId" element={<WorkshopSummary />} />
             <Route path="/foodie/chef/:id" element={<ChefDetail />} />
             <Route path="/foodie/wallet" element={<FoodieWalletPage />} />
+            <Route path="/foodie/chat" element={<ChatPage />} />
+            <Route path="/foodie/chat/:conversationId" element={<ChatPage />} />
 
         </Routes>
     );

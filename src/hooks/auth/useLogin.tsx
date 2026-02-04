@@ -62,8 +62,17 @@ export const useLogin = () => {
         return;
       }
 
-      login(data.accessToken, data.user);
-       if (data.user.role == "admin") {
+      // Map MongoDB _id to id for authStore
+      const mappedUser = {
+        id: (data.user as any)._id || data.user.id,
+        _id: (data.user as any)._id || data.user.id, // Ensure _id is present
+        name: data.user.name,
+        email: data.user.email,
+        role: data.user.role
+      };
+
+      login(data.accessToken, mappedUser);
+      if (data.user.role == "admin") {
         showError("Access denied.");
         return;
       }

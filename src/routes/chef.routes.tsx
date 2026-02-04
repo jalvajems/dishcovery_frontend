@@ -21,6 +21,7 @@ import WorkshopSummary from "@/pages/shared/WorkshopSummary";
 import ChefWalletPage from "@/pages/chef/Wallet.chef";
 import FollowersList from "@/pages/chef/FollowersList.chef";
 import FoodieProfileDetail from "@/pages/chef/FoodieProfileDetail.chef";
+import ChatPage from "@/pages/shared/ChatPage";
 
 function ChefRoutes() {
     return (
@@ -52,6 +53,8 @@ function ChefRoutes() {
             <Route path="/chef/wallet" element={<ChefWalletPage />} />
             <Route path="/chef/followers" element={<FollowersList />} />
             <Route path="/chef/foodie-profile/:id" element={<FoodieProfileDetail />} />
+            <Route path="/chef/chat" element={<ChatPage />} />
+            <Route path="/chef/chat/:conversationId" element={<ChatPage />} />
         </Routes>
     )
 }

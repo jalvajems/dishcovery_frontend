@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getFoodieProfileForChefApi } from '@/api/followApi';
-import { MapPin, Mail, ArrowLeft, Heart } from 'lucide-react';
+import { MapPin, Mail, ArrowLeft, Heart, MessageSquare } from 'lucide-react';
 import ChefNavbar from '@/components/shared/chef/NavBar.chef';
 import { showError } from '@/utils/toast';
+import { useChatStore } from '@/store/chatStore';
 
 export default function FoodieProfileDetail() {
     const { id } = useParams<{ id: string }>();
@@ -77,6 +78,44 @@ export default function FoodieProfileDetail() {
                                 <p className="text-gray-600 text-lg italic italic">
                                     "{profile.bio || "A passionate food lover exploring new tastes."}"
                                 </p>
+                                <div className="mt-6">
+                                    <button
+                                        onClick={async () => {
+                                            try {
+                                                console.log('Profile data:', profile);
+                                                console.log('userId object:', profile.userId);
+
+                                                // Try different possible structures
+                                                let foodieUserId = profile.userId?._id || profile.userId?.id || profile.userId;
+
+                                                // If userId is a string, use it directly
+                                                if (typeof foodieUserId === 'object') {
+                                                    foodieUserId = foodieUserId._id || foodieUserId.id;
+                                                }
+
+                                                console.log('Foodie User ID:', foodieUserId);
+
+                                                if (!foodieUserId || typeof foodieUserId !== 'string') {
+                                                    console.error('Foodie ID not found or invalid', profile);
+                                                    alert('Unable to start conversation. User ID not found.');
+                                                    return;
+                                                }
+
+                                                const conversation = await useChatStore.getState().createOrGetConversation(foodieUserId, 'foodie');
+                                                console.log('Conversation created:', conversation);
+                                                if (conversation) {
+                                                    navigate(`/chef/chat/${conversation._id}`);
+                                                }
+                                            } catch (error) {
+                                                console.error('Error creating conversation:', error);
+                                            }
+                                        }}
+                                        className="px-8 py-3 rounded-2xl font-bold transition-all flex items-center gap-2 shadow-lg bg-blue-600 text-white hover:bg-blue-700 hover:scale-105 active:scale-95"
+                                    >
+                                        <MessageSquare size={20} />
+                                        Message
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
