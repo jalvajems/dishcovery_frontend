@@ -16,6 +16,12 @@ export const getAllRecipesFoodieApi = (
     });
 };
 
+export const getRecentRecipesApi = (limit: number) => {
+    return API.get(FOODIE_ROUTES.RECIPE_RECENT, {
+        params: { limit },
+    });
+};
+
 export const getRecipeDetailFoodieApi = (id: string) => {
     return API.get(FOODIE_ROUTES.RECIPE_DETAIL(id));
 };
@@ -37,6 +43,12 @@ export const getBlogsFoodieApi = (
 ) => {
     return API.get(FOODIE_ROUTES.BLOG_LIST, {
         params: { page, limit, search, filter },
+    });
+};
+
+export const getRecentBlogsApi = (limit: number) => {
+    return API.get(FOODIE_ROUTES.BLOG_RECENT, {
+        params: { limit },
     });
 };
 
@@ -81,6 +93,12 @@ export const getAllFoodSpotApi = (
 ) => {
     return API.get(FOODIE_ROUTES.FOODSPOT_LIST, {
         params: { page, limit, search, filter },
+    });
+};
+
+export const getRecentFoodSpotsApi = (limit: number) => {
+    return API.get(FOODIE_ROUTES.FOODSPOT_RECENT, {
+        params: { limit },
     });
 };
 

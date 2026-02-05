@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { showError } from '@/utils/toast';
-import { getAllFoodSpotApi, getAllMyFoodSpotApi } from '@/api/foodieApi';
+import { getAllMyFoodSpotApi } from '@/api/foodieApi';
 import Pagination from '@/components/shared/Pagination';
 import SearchBar from '@/components/shared/SearchBar';
 
@@ -33,6 +33,8 @@ export default function MyFoodSpotList() {
       showError(error.response?.data?.message || `Something went wrong:${error}`)
     }
   }
+  console.log('spots',foodSpots);
+  
 
   useEffect(()=>{
     handleFetchSpots()

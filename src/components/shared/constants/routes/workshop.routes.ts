@@ -14,4 +14,5 @@ export const WORKSHOP_ROUTES = {
 
   APPROVED_LIST: "/workshop/approved",
   GET_BY_ID: (id: string) => `/workshop/${id}`,
+  RECENT: "/workshop/recent",
 } as const;

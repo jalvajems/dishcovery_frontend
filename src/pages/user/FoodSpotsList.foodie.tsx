@@ -125,7 +125,7 @@ export default function FoodSpotListing() {
                     </p>
 
                     <button
-                      onClick={() => navigate(`/foodie/myfoodspot/${spot._id}`)}
+                      onClick={() => navigate(`/foodie/foodspot/${spot._id}`)}
                       className="flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-green-100 hover:text-green-700 hover:scale-105 transition-all"
                     >
                       View Details

@@ -26,6 +26,7 @@ import FollowingList from '@/pages/user/FollowingList.foodie';
 import ChatPage from '@/pages/shared/ChatPage';
 
 import ProtectedRoute from './Protected.routes';
+import MyFoodSpotDetailPage from '@/pages/user/MyFoodSpotDetail.foodie';
 
 function UserRouter() {
     return (
@@ -52,7 +53,8 @@ function UserRouter() {
                 <Route path='/foodie/profile-add' element={<AddFoodieProfile />} />
                 <Route path='/foodie/profile-edit/:id' element={<EditFoodieProfile />} />
 
-                <Route path='/foodie/myfoodspot/:id' element={<FoodSpotDetailPage />} />
+                <Route path='/foodie/foodspot/:id' element={<FoodSpotDetailPage />} />
+                <Route path='/foodie/myfoodspot/:id' element={<MyFoodSpotDetailPage />} />
                 <Route path='/foodie/foodspot-add' element={<AddFoodSpot />} />
                 <Route path='/foodie/foodspot-edit/:id' element={<EditFoodSpot />} />
 

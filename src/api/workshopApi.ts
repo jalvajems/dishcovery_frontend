@@ -58,6 +58,12 @@ export const getApprovedWorkshopsApi = (
   });
 };
 
+export const getRecentWorkshopsApi = (limit: number) => {
+  return API.get(WORKSHOP_ROUTES.RECENT, {
+    params: { limit },
+  });
+};
+
 export const getWorkshopByIdApi = (id: string) => {
   return API.get(WORKSHOP_ROUTES.GET_BY_ID(id));
 };

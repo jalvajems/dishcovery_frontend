@@ -39,4 +39,9 @@ export const FOODIE_ROUTES = {
     `/foodie/chef/${chefId}/blogs`,
   CHEF_WORKSHOPS: (chefId: string) =>
     `/foodie/chef/${chefId}/workshops`,
+
+  // Recent
+  RECIPE_RECENT: "/foodie/recipes/recent",
+  BLOG_RECENT: "/foodie/blogs/recent",
+  FOODSPOT_RECENT: "/foodie/foodspot/recent",
 } as const;
