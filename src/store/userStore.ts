@@ -28,7 +28,7 @@ export const useUserStore = create<IUserStore>()(
         set({ name: null, email: null, image: null, isVerifiedUser: null }),
     }),
     {
-      name: "auth-storage",
+      name: "user-storage",
     }
   )
 );
