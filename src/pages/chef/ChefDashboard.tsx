@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { chefDashboardApi, getAllRecipeApi, getMyBlogsChefApi } from "@/api/chefApi";
-import { Utensils, Star, Users, Heart } from "lucide-react";
+import { Utensils, Star, Users } from "lucide-react";
 import { useUserStore } from "@/store/userStore";
 import { useNavigate } from "react-router-dom";
 import Pagination from "@/components/shared/Pagination";
@@ -21,6 +21,12 @@ export default function ChefDashboard() {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
   const { setIsVerifiedUser } = useUserStore()
+  const [dashboardStats, setDashboardStats] = useState({
+    totalRecipes: 0,
+    averageRating: 0,
+    totalFollowers: 0,
+    totalWorkshops: 0
+  });
 
 
 
@@ -89,9 +95,15 @@ export default function ChefDashboard() {
   async function checkChefProfile() {
     try {
       const res = await chefDashboardApi();
+console.log('----------',res);
 
       setIsVerifiedUser(res.data.isVerified)
       setIsVerified(res.data.isVerified)
+
+      // Set dashboard stats from API response
+      if (res.data.stats) {
+        setDashboardStats(res.data.stats);
+      }
 
       if (!res.data.hasProfile) {
         setShowProfileModal(true);
@@ -107,42 +119,28 @@ export default function ChefDashboard() {
   const stats = [
     {
       label: "Total Recipes",
-      value: 48,
+      value: dashboardStats.totalRecipes,
       icon: Utensils,
-      footer: "2 new this week",
+      footer: "Published recipes",
     },
     {
       label: "Average Rating",
-      value: "4.8",
+      value: dashboardStats.averageRating > 0 ? dashboardStats.averageRating.toFixed(1) : "N/A",
       icon: Star,
-      footer: "Based on 342 reviews",
+      footer: "From chef reviews",
     },
     {
       label: "Followers",
-      value: "3.4k",
+      value: dashboardStats.totalFollowers,
       icon: Users,
-      footer: "120 new this week",
+      footer: "Total followers",
     },
     {
-      label: "Donations Received",
-      value: "₹12k",
-      icon: Heart,
-      footer: "8 new donations",
+      label: "Total Workshops",
+      value: dashboardStats.totalWorkshops,
+      icon: Utensils,
+      footer: "All workshops",
     },
-  ];
-
-  const activities = [
-    {
-      title: "Uploaded a New Recipe",
-      desc: "Spicy Butter Garlic Shrimp",
-      time: "2 hours ago",
-    },
-    {
-      title: "Received a Review",
-      desc: "Your Italian Pasta has a new 5 star review",
-      time: "5 hours ago",
-    },
-
   ];
 
 
@@ -213,25 +211,7 @@ export default function ChefDashboard() {
         ))}
       </div>
 
-      {/* ------------------------------------------------------ */}
-      {/* ACTIVITIES */}
-      {/* ------------------------------------------------------ */}
-      <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-gray-900 to-green-700 bg-clip-text text-transparent">
-        My Activities
-      </h2>
 
-      <div className="grid grid-cols-3 gap-6 mb-12">
-        {activities.map((a, i) => (
-          <div
-            key={i}
-            className="bg-white p-6 rounded-2xl shadow-md border border-gray-100 hover:shadow-lg transition-all"
-          >
-            <h3 className="text-xl font-bold mb-2">{a.title}</h3>
-            <p className="text-gray-600">{a.desc}</p>
-            <p className="text-sm text-gray-400 mt-3">{a.time}</p>
-          </div>
-        ))}
-      </div>
 
       {/* ------------------------------------------------------ */}
       {/* RECENT RECIPES */}
@@ -240,7 +220,7 @@ export default function ChefDashboard() {
         Recent Recipes
       </h2>
 
-      <div className="grid grid-cols-4 gap-6 mb-12">
+      <div className="grid grid-cols-3 gap-6 mb-8">
         {recipes.map((r: any, i) => (
           <div
             key={i}
@@ -250,16 +230,14 @@ export default function ChefDashboard() {
               onClick={() => handleViewButtonRecipe(r._id)}
               src={r.images}
               alt={r.title}
-              className="h-40 w-full object-cover group-hover:scale-105 transition-transform duration-500"
+              className="h-48 w-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
             <div className="p-4">
-              <h3 className="font-bold text-lg">{r.title}</h3>
+              <h3 className="font-bold text-lg truncate">{r.title}</h3>
+              <p className="text-sm text-gray-500 mt-1">{r.cuisine}</p>
             </div>
           </div>
         ))}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-gray-100">
-
-        </div>
       </div>
       <Pagination
         currentPage={currentPageRecipe}
@@ -273,7 +251,7 @@ export default function ChefDashboard() {
         Recent Blogs
       </h2>
 
-      <div className="grid grid-cols-4 gap-6 mb-12">
+      <div className="grid grid-cols-3 gap-6 mb-8">
         {blogs.map((b: any, i) => (
           <div
             key={i}
@@ -283,16 +261,14 @@ export default function ChefDashboard() {
               onClick={() => handleViewButtonRecipe(b._id)}
               src={b.coverImage}
               alt={b.title}
-              className="h-40 w-full object-cover group-hover:scale-105 transition-transform duration-500"
+              className="h-48 w-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
             <div className="p-4">
-              <h3 className="font-bold text-lg">{b.title}</h3>
+              <h3 className="font-bold text-lg truncate">{b.title}</h3>
+              <p className="text-sm text-gray-500 mt-1">{b.tags?.[0] || 'Blog'}</p>
             </div>
           </div>
         ))}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-gray-100">
-
-        </div>
       </div>
       <Pagination
         currentPage={currentPageBlog}
