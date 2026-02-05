@@ -23,38 +23,42 @@ import FollowersList from "@/pages/chef/FollowersList.chef";
 import FoodieProfileDetail from "@/pages/chef/FoodieProfileDetail.chef";
 import ChatPage from "@/pages/shared/ChatPage";
 
+import ProtectedRoute from './Protected.routes';
+
 function ChefRoutes() {
     return (
         <Routes>
-            <Route path="/chef" element={<ChefLayout />}>
-                <Route path="dashboard" element={<ChefDashboard />} />
-                <Route path="recipes-listing" element={<RecipeListing />} />
-                <Route path="blog-listing" element={<BlogListChef />} />
-                <Route path="workshop-listing" element={<WorkshopListChef />} />
+            <Route element={<ProtectedRoute />}>
+                <Route path="/chef" element={<ChefLayout />}>
+                    <Route path="dashboard" element={<ChefDashboard />} />
+                    <Route path="recipes-listing" element={<RecipeListing />} />
+                    <Route path="blog-listing" element={<BlogListChef />} />
+                    <Route path="workshop-listing" element={<WorkshopListChef />} />
+                </Route>
+                <Route path="/recipe-detail/:id" element={<RecipeDetailPage />} />
+                <Route path="/recipe-add" element={<AddRecipe />} />
+                <Route path="/recipe-edit/:id" element={<EditRecipe />} />
+
+                <Route path="/blog-add" element={<AddNewBlog />} />
+                <Route path="/blog-edit/:blogId" element={<EditBlog />} />
+                <Route path="/blog-detail/:blogId" element={<BlogDetailPage />} />
+
+                <Route path="/chef/profile" element={<ChefProfilePage />} />
+                <Route path="/chef/profile-add" element={<CreateProfileChef />} />
+                <Route path="/chef/profile-edit" element={<ChefProfileEdit />} />
+
+                <Route path="/chef/workshop-add" element={<AddWorkshopChef />} />
+                <Route path="/chef/workshop-edit/:id" element={<EditWorkshopChef />} />
+                <Route path="/chef/workshop-detail/:id" element={<WorkshopDetailChef />} />
+                <Route path="/chef/live-session/:workshopId" element={<LiveSession />} />
+                <Route path="/chef/workshop-summary/:workshopId" element={<WorkshopSummary />} />
+
+                <Route path="/chef/wallet" element={<ChefWalletPage />} />
+                <Route path="/chef/followers" element={<FollowersList />} />
+                <Route path="/chef/foodie-profile/:id" element={<FoodieProfileDetail />} />
+                <Route path="/chef/chat" element={<ChatPage />} />
+                <Route path="/chef/chat/:conversationId" element={<ChatPage />} />
             </Route>
-            <Route path="/recipe-detail/:id" element={<RecipeDetailPage />} />
-            <Route path="/recipe-add" element={<AddRecipe />} />
-            <Route path="/recipe-edit/:id" element={<EditRecipe />} />
-
-            <Route path="/blog-add" element={<AddNewBlog />} />
-            <Route path="/blog-edit/:blogId" element={<EditBlog />} />
-            <Route path="/blog-detail/:blogId" element={<BlogDetailPage />} />
-
-            <Route path="/chef/profile" element={<ChefProfilePage />} />
-            <Route path="/chef/profile-add" element={<CreateProfileChef />} />
-            <Route path="/chef/profile-edit" element={<ChefProfileEdit />} />
-
-            <Route path="/chef/workshop-add" element={<AddWorkshopChef />} />
-            <Route path="/chef/workshop-edit/:id" element={<EditWorkshopChef />} />
-            <Route path="/chef/workshop-detail/:id" element={<WorkshopDetailChef />} />
-            <Route path="/chef/live-session/:workshopId" element={<LiveSession />} />
-            <Route path="/chef/workshop-summary/:workshopId" element={<WorkshopSummary />} />
-
-            <Route path="/chef/wallet" element={<ChefWalletPage />} />
-            <Route path="/chef/followers" element={<FollowersList />} />
-            <Route path="/chef/foodie-profile/:id" element={<FoodieProfileDetail />} />
-            <Route path="/chef/chat" element={<ChatPage />} />
-            <Route path="/chef/chat/:conversationId" element={<ChatPage />} />
         </Routes>
     )
 }
