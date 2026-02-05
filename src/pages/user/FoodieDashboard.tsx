@@ -21,6 +21,7 @@ interface Recipe {
   };
   difficulty: string;
   cookingTime: number;
+  tags?: string[];
 }
 
 interface Blog {
@@ -169,7 +170,7 @@ export default function FoodieDashboard() {
         </div>
 
         {loading ? <LoadingSkeleton /> : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {recipes.length > 0 ? recipes.map(recipe => (
               <div key={recipe._id} onClick={() => navigate(`/foodie/recipe-detail/${recipe._id}`)} className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer group flex flex-col h-full border border-gray-100 hover:border-green-100">
                 <div className="relative h-64 overflow-hidden">
@@ -184,7 +185,7 @@ export default function FoodieDashboard() {
                   </div>
                   <h3 className="font-bold text-xl text-gray-900 mb-3 group-hover:text-green-700 transition-colors line-clamp-1">{recipe.title}</h3>
                   <div className="mt-auto pt-4 border-t border-gray-100 flex items-center gap-2">
-                    <p className="text-sm text-gray-600 font-medium">By {recipe.chefId?.name} </p>
+                    <p className="text-sm text-gray-600 font-medium">By {recipe.chefId?.firstName} {recipe.chefId?.lastName}</p>
                   </div>
                 </div>
               </div>
@@ -210,7 +211,7 @@ export default function FoodieDashboard() {
         </div>
 
         {loading ? <LoadingSkeleton /> : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {blogs.length > 0 ? blogs.map(blog => (
               <div key={blog._id} onClick={() => navigate(`/foodie/blog-detail/${blog._id}`)} className="group cursor-pointer">
                 <div className="relative h-64 rounded-2xl overflow-hidden mb-4 shadow-lg">
@@ -220,7 +221,7 @@ export default function FoodieDashboard() {
                 <div>
                   <h3 className="font-bold text-xl text-gray-900 mb-2 group-hover:text-blue-600 transition-colors leading-snug">{blog.heading}</h3>
                   <p className="text-gray-600 line-clamp-2 text-sm mb-3 opacity-80">{blog.description}</p>
-                  <p className="text-xs text-blue-500 font-semibold">Written by {blog?.chefId?.name} {blog.author?.lastName}</p>
+                  <p className="text-xs text-blue-500 font-semibold">Written by {blog.author?.firstName} {blog.author?.lastName}</p>
                 </div>
               </div>
             )) : (
@@ -245,7 +246,7 @@ export default function FoodieDashboard() {
         </div>
 
         {loading ? <LoadingSkeleton /> : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {foodSpots.length > 0 ? foodSpots.map(spot => (
               <div key={spot._id} onClick={() => navigate(`/foodie/food-spots/${spot._id}`)} className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 cursor-pointer flex flex-col">
                 <div className="h-48 overflow-hidden relative">
@@ -283,7 +284,7 @@ export default function FoodieDashboard() {
         </div>
 
         {loading ? <LoadingSkeleton /> : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {workshops.length > 0 ? workshops.map(workshop => (
               <div key={workshop._id} onClick={() => navigate(`/foodie/workshop-detail/${workshop._id}`)} className="bg-gradient-to-br from-white to-purple-50 rounded-2xl p-4 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer border border-purple-100 flex gap-4 items-center">
                 <div className="w-24 h-24 md:w-28 md:h-28 rounded-xl overflow-hidden shrink-0 shadow-sm">

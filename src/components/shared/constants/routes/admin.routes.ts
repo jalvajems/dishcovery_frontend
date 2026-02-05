@@ -1,6 +1,8 @@
 export const ADMIN_ROUTES = {
 
-    DASHBOARD: "/admin/admin-dashboard",
+  DASHBOARD: "/admin/admin-dashboard",
+  DASHBOARD_STATS: "/admin/dashboard-stats",
+  GROWTH_DATA: "/admin/growth-data",
 
   FOODIE_LIST: "/admin/foodie-management",
   BLOCK: (id: string) => `/admin/toggle-block/${id}`,

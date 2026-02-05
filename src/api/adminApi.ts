@@ -69,3 +69,11 @@ export const adminApproveFoodSpotApi = (id: string) => {
 export const adminUnapproveFoodSpotApi = (id: string) => {
     return API.patch(ADMIN_ROUTES.FOODSPOT_UNAPPROVE(id));
 };
+
+export const adminGetDashboardStatsApi = () => {
+    return API.get(ADMIN_ROUTES.DASHBOARD_STATS);
+};
+
+export const adminGetGrowthDataApi = () => {
+    return API.get(ADMIN_ROUTES.GROWTH_DATA);
+};

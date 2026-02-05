@@ -93,7 +93,7 @@ export default function BlogListFoodie() {
                 {blogs.map((blog: any) => (
                     <div
                         key={blog._id}
-                        className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-100 group"
+                        className="bg-white/90 backdrop-blur-sm rounded-2xl m-6 p-6 shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-100 group "
                     >
                         <div className="flex gap-6 items-center">
                             {/* Text Section */}
