@@ -23,7 +23,8 @@ const App: React.FC = () => {
         pauseOnHover
         draggable
         theme="colored"
-      />    </BrowserRouter>
+      />
+    </BrowserRouter>
 
   )
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Star, ChevronRight, Award, Trophy, Lightbulb, MessageSquare, UserCircle, Users } from "lucide-react";
+import { Award, Trophy, Lightbulb, MessageSquare, UserCircle, Pencil, Mail } from "lucide-react";
 import {
   getChefProfileApi,
 } from "@/api/chefApi";
@@ -26,10 +26,10 @@ export default function ChefProfilePage() {
     async function fetchData() {
       try {
         const chefRes = await getChefProfileApi()
-        const followers= await getFollowersApi()
-        console.log("--------fff",followers);
+        const followers = await getFollowersApi()
+        console.log("--------fff", followers);
         setFollowers(followers.data.datas)
-        
+
 
         setChef(chefRes.data.datas);
         setReviews(chefRes.data.reviews || []);
@@ -69,133 +69,156 @@ export default function ChefProfilePage() {
   console.log('------', chef);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50">
-
+    <div className="min-h-screen bg-slate-50 pb-20">
       <ChefNavbar />
-      <main className="max-w-6xl mx-auto px-8 py-12">
 
-        {/* BREADCRUMB */}
-        <div className="flex items-center gap-2 text-sm mb-8">
-          <a href="/chef/dashboard" className="text-green-600 font-semibold hover:underline">Home</a>
-          <ChevronRight className="w-4 h-4 text-gray-400" />
+      {/* Hero Header */}
+      <div className="relative h-64 bg-emerald-600 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-teal-500 opacity-90"></div>
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1543353071-873f17a7a088?w=1600&h=400&fit=crop')] bg-cover bg-center opacity-20"></div>
+      </div>
 
-          <span className="text-gray-800 font-medium">{chef.chefId.name}</span>
-        </div>
+      <div className="max-w-5xl mx-auto px-4 -mt-32 relative z-10">
+        <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-emerald-900/10 border border-gray-100 overflow-hidden">
 
-        {/* CHEF HEADER */}
-        <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl border p-10 mb-12">
-          <div className="flex gap-8 items-start">
-            <div className="w-40 h-40 rounded-full overflow-hidden shadow-xl ring-8 ring-green-100">
-              <img src={chef.image || "/default-avatar.png"} className="w-full h-full object-cover" />
-            </div>
+          {/* Action Buttons (Floating Top Right) */}
+          <div className="absolute top-6 right-6 flex gap-3">
+            <button
+              onClick={handleEditButton}
+              className="p-3 bg-white/90 backdrop-blur-md text-gray-700 hover:text-emerald-600 rounded-2xl shadow-lg border border-gray-100 transition-all hover:scale-110 active:scale-95 group"
+              title="Edit Profile"
+            >
+              <Pencil size={20} className="group-hover:rotate-12 transition-transform" />
+            </button>
+          </div>
 
-            <div className="flex-1">
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-green-700 to-emerald-700 bg-clip-text text-transparent">
-                {chef.chefId.name}
-              </h1>
+          <div className="p-8 md:p-12">
+            <div className="flex flex-col md:flex-row gap-8 items-center md:items-start text-center md:text-left">
+              {/* Profile Image */}
+              <div className="relative group">
+                <div className="w-40 h-40 md:w-48 md:h-48 rounded-[2rem] overflow-hidden shadow-2xl ring-8 ring-emerald-50 transition-transform group-hover:scale-[1.02]">
+                  <img
+                    src={chef.image || "/default-avatar.png"}
+                    alt="profile"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 md:left-auto md:right-0 md:translate-x-0 px-4 py-2 bg-emerald-500 text-white rounded-2xl shadow-lg border-2 border-white font-bold text-sm">
+                  Chef
+                </div>
+              </div>
 
-              <p className="text-green-600 font-semibold text-lg mb-3 mt-3">
-                Specialty: {chef.specialities?.[0] || "Not added"}
-              </p>
-
-              <div className="flex items-center gap-8 mb-4">
-                <div
-                  onClick={() => navigate('/chef/followers')}
-                  className="cursor-pointer group hover:bg-green-50 p-2 rounded-xl transition-all"
-                >
-                  <div className="text-2xl font-black text-gray-900 flex items-center gap-2">
-                    <Users className="text-green-600" size={24} />
-                    {/* {stats.followers} */}
-                    {followers.length||0}
-                  </div>
-                  <div className="text-sm font-bold text-gray-400 uppercase tracking-widest group-hover:text-green-600">Followers</div>
+              {/* Basic Info */}
+              <div className="flex-1 space-y-4 py-2">
+                <div>
+                  <h1 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight">
+                    {chef.chefId.name}
+                  </h1>
+                  <p className="text-lg text-emerald-600 font-bold mt-2">
+                    {chef.specialities?.[0] || "Culinary Artist"}
+                  </p>
+                  <p className="text-gray-500 font-medium flex items-center justify-center md:justify-start gap-2 mt-1">
+                    <Mail size={18} className="text-emerald-500" />
+                    {chef.chefId.email}
+                  </p>
                 </div>
 
-                <div className="flex items-center gap-6">
-                  <button
-                    onClick={() => handleEditButton()}
-                    className="px-6 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-bold hover:shadow-xl hover:scale-105 transition-all shadow-md"
+                <p className="text-gray-600 text-lg leading-relaxed max-w-2xl italic">
+                  "{chef.bio || "Crafting a culinary journey, one dish at a time."}"
+                </p>
+
+                {/* Stats Row */}
+                <div className="flex flex-wrap justify-center md:justify-start gap-8 pt-4">
+                  <div
+                    onClick={() => navigate('/chef/followers')}
+                    className="text-center md:text-left cursor-pointer group hover:opacity-80 transition-all"
                   >
-                    Edit Profile
-                  </button>
+                    <span className="block text-2xl font-black text-gray-900 group-hover:text-emerald-600 transition-colors">{followers?.length || 0}</span>
+                    <span className="text-sm font-bold text-gray-400 uppercase tracking-widest group-hover:text-emerald-500 transition-colors">Followers</span>
+                  </div>
+                  <div className="text-center md:text-left">
+                    <span className="block text-2xl font-black text-gray-900">{chef.certificates?.length || 0}</span>
+                    <span className="text-sm font-bold text-gray-400 uppercase tracking-widest">Certificates</span>
+                  </div>
                 </div>
               </div>
             </div>
+
+            {/* Divider */}
+            <hr className="my-12 border-gray-100" />
+
+            {/* Credentials Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+              {/* Certificates */}
+              <div className="bg-slate-50 p-6 rounded-3xl border border-gray-100 hover:border-emerald-200 transition-colors">
+                <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-gray-900">
+                  <Award className="w-6 h-6 text-emerald-600" /> Certificates
+                </h3>
+                {chef.certificates && chef.certificates.length > 0 ? (
+                  <ul className="space-y-3">
+                    {chef.certificates.map((cert: string, index: number) => (
+                      <li key={index} className="flex items-start gap-2 text-gray-600 text-sm font-medium">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 shrink-0"></span>
+                        {cert}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-gray-400 text-sm italic">No certificates added.</p>
+                )}
+              </div>
+
+              {/* Achievements */}
+              <div className="bg-slate-50 p-6 rounded-3xl border border-gray-100 hover:border-emerald-200 transition-colors">
+                <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-gray-900">
+                  <Trophy className="w-6 h-6 text-emerald-600" /> Achievements
+                </h3>
+                {chef.achievements && chef.achievements.length > 0 ? (
+                  <ul className="space-y-3">
+                    {chef.achievements.map((ach: string, index: number) => (
+                      <li key={index} className="flex items-start gap-2 text-gray-600 text-sm font-medium">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 shrink-0"></span>
+                        {ach}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-gray-400 text-sm italic">No achievements added.</p>
+                )}
+              </div>
+
+              {/* Skills */}
+              <div className="bg-slate-50 p-6 rounded-3xl border border-gray-100 hover:border-emerald-200 transition-colors">
+                <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-gray-900">
+                  <Lightbulb className="w-6 h-6 text-emerald-600" /> Skills
+                </h3>
+                {chef.skills && chef.skills.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {chef.skills.map((skill: string, index: number) => (
+                      <span key={index} className="px-3 py-1 bg-white border border-gray-200 text-gray-700 rounded-xl text-xs font-bold shadow-sm">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-400 text-sm italic">No skills added.</p>
+                )}
+              </div>
+            </div>
+
+            {/* REVIEWS SECTION */}
+            <div>
+              <h2 className="text-2xl font-black text-gray-900 mb-8 flex items-center gap-3">
+                <MessageSquare className="text-emerald-600" size={24} /> Reviews & Ratings
+              </h2>
+              <div className="bg-slate-50 rounded-[2rem] p-6 md:p-8 border border-gray-100">
+                <ChefReviewSection reviewableId={chef.chefId._id} reviewableType="Chef" />
+              </div>
+            </div>
+
           </div>
         </div>
-
-        {/* ABOUT SECTION */}
-        <div className="bg-white/90 rounded-2xl p-8 shadow-xl mb-12">
-          <h2 className="text-3xl font-bold mb-4 flex items-center gap-2">
-            <UserCircle className="w-8 h-8 text-green-600" /> About {chef.chefId.name}
-          </h2>
-          <p className="text-gray-700 text-lg leading-relaxed mb-6">
-            {chef.bio || "This chef has not added a bio yet."}
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8 border-t pt-8">
-            {/* Certificates */}
-            <div>
-              <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-green-700">
-                <Award className="w-6 h-6" /> Certificates
-              </h3>
-              {chef.certificates && chef.certificates.length > 0 ? (
-                <ul className="list-disc list-inside space-y-2 text-gray-700">
-                  {chef.certificates.map((cert: string, index: number) => (
-                    <li key={index}>{cert}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-500 italic">No certificates added.</p>
-              )}
-            </div>
-
-            {/* Achievements */}
-            <div>
-              <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-green-700">
-                <Trophy className="w-6 h-6" /> Achievements
-              </h3>
-              {chef.achievements && chef.achievements.length > 0 ? (
-                <ul className="list-disc list-inside space-y-2 text-gray-700">
-                  {chef.achievements.map((ach: string, index: number) => (
-                    <li key={index}>{ach}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-500 italic">No achievements added.</p>
-              )}
-            </div>
-
-            {/* Skills */}
-            <div>
-              <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-green-700">
-                <Lightbulb className="w-6 h-6" /> Skills
-              </h3>
-              {chef.skills && chef.skills.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {chef.skills.map((skill: string, index: number) => (
-                    <span key={index} className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-500 italic">No skills added.</p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* REVIEWS SECTION */}
-        <div className="bg-white/90 rounded-2xl p-8 shadow-xl mb-12">
-          <h2 className="text-3xl font-bold mb-6 flex items-center gap-2">
-            <MessageSquare className="w-8 h-8 text-green-600" /> Reviews & Ratings
-          </h2>
-
-
-          <ChefReviewSection reviewableId={chef.chefId._id} reviewableType="Chef" />
-        </div>
-      </main>
+      </div>
     </div>
   );
 }

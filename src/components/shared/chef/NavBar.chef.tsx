@@ -1,5 +1,6 @@
 
 import { NotificationBell } from "../NotificationBell";
+import Chatbot from "@/components/chat/Chatbot";
 import logo from "../../../assets/logo.png"
 import { getChefProfileApi } from "@/api/chefApi";
 import { showError } from "@/utils/toast";
@@ -41,6 +42,7 @@ export default function ChefNavbar() {
         <div className="flex items-center gap-6">
 
           {/* Notification */}
+          <Chatbot />
           <NotificationBell />
 
           <div className="h-8 w-[1px] bg-gray-200 hidden md:block"></div>

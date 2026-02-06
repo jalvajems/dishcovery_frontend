@@ -75,13 +75,7 @@ export default function FoodSpotListing() {
               </h2>
               <p className="text-green-600 font-medium">Explore hand-picked food spots around you.</p>
             </div>
-            <button
-              onClick={() => navigate('/foodie/spot-listing/add')}
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-green-200 transition-all flex items-center gap-2"
-            >
-              <Plus className="w-5 h-5" />
-              Add Spot
-            </button>
+          
           </div>
 
           {/* Filter Buttons */}
@@ -120,10 +114,7 @@ export default function FoodSpotListing() {
                     <h3 className="text-3xl font-bold text-gray-900 mb-3 group-hover:text-green-700 transition-colors">
                       {spot.name}
                     </h3>
-                    <p className="text-gray-600 mb-5 line-clamp-2">
-                      {spot.description}
-                    </p>
-
+                  
                     <button
                       onClick={() => navigate(`/foodie/foodspot/${spot._id}`)}
                       className="flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-green-100 hover:text-green-700 hover:scale-105 transition-all"

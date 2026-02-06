@@ -142,267 +142,253 @@ export default function ChefDetail() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20">
+        <div className="min-h-screen bg-gray-50/50 pb-20 font-sans">
             <FoodieNavbar />
 
-            {/* Header / Hero */}
-            <div className="bg-white border-b border-gray-100">
-                <div className="max-w-7xl mx-auto px-4 py-12 md:py-20">
-                    <div className="flex flex-col md:flex-row gap-8 items-center md:items-start text-center md:text-left">
-                        <div className="relative">
-                            <img
-                                src={chef.image || chef.chefId?.image || 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=400&h=400&fit=crop'}
-                                alt={chef.chefId?.name}
-                                className="w-40 h-40 md:w-56 md:h-56 rounded-3xl object-cover shadow-xl border-4 border-white"
-                            />
-                            <div className="absolute -bottom-4 right-0 md:right-4 bg-emerald-500 text-white px-4 py-2 rounded-2xl shadow-lg border-2 border-white flex items-center gap-2 font-bold whitespace-nowrap">
-                                <Star className="w-4 h-4 fill-white" />
-                                4.8 Rating
-                            </div>
-                        </div>
+            {/* Hero Banner with Gradient Overlay */}
+            <div className="relative h-[350px] md:h-[450px] w-full group overflow-hidden">
+                <img
+                    src="https://images.unsplash.com/photo-1428515613728-6b4607e44363?q=80&w=2070&auto=format&fit=crop"
+                    alt="Kitchen Banner"
+                    className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+            </div>
 
-                        <div className="flex-1 space-y-4 pt-4">
-                            <div>
-                                <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-2">
-                                    {chef.chefId?.name}
-                                </h1>
-                                <div className="flex flex-wrap justify-center md:justify-start items-center gap-4 text-gray-500 font-medium">
-                                    <span className="flex items-center gap-1">
-                                        <MapPin className="w-4 h-4 text-emerald-600" />
-                                        {chef.location}
-                                    </span>
-                                    <span>•</span>
-                                    <span className="flex items-center gap-1">
-                                        <Users className="w-4 h-4 text-emerald-600" />
-                                        {stats.followers} Followers
-                                    </span>
-                                    <span>•</span>
-                                    <span className="flex items-center gap-1">
-                                        <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                                        {chef.isVerified ? 'Verified Chef' : 'Master Chef'}
-                                    </span>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-32 relative z-10">
+                <div className="flex flex-col lg:flex-row gap-8">
+
+                    {/* Left Sidebar - Profile Info */}
+                    <div className="lg:w-1/3 flex flex-col gap-6">
+                        {/* Profile Card */}
+                        <div className="bg-white rounded-[2rem] p-6 shadow-xl border border-gray-100 flex flex-col items-center text-center animate-fade-in-up">
+                            <div className="relative mb-6">
+                                <div className="w-40 h-40 rounded-full p-2 bg-white shadow-lg -mt-20">
+                                    <img
+                                        src={chef.image || chef.chefId?.image || 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=400&h=400&fit=crop'}
+                                        alt={chef.chefId?.name}
+                                        className="w-full h-full rounded-full object-cover"
+                                    />
+                                </div>
+                                <div className="absolute bottom-2 right-2 bg-emerald-500 text-white p-2 rounded-full shadow-lg border-4 border-white">
+                                    <ShieldCheck size={20} />
                                 </div>
                             </div>
 
-                            <p className="text-lg text-gray-600 max-w-2xl leading-relaxed">
-                                {chef.bio || "Crafting culinary magic through passion and tradition."}
+                            <h1 className="text-3xl font-extrabold text-gray-900 mb-2">{chef.chefId?.name}</h1>
+                            <p className="text-emerald-600 font-bold text-sm uppercase tracking-wider mb-4">
+                                {chef.isVerified ? 'Verified Master Chef' : 'Culinary Artist'}
                             </p>
 
-                            <div className="flex flex-wrap justify-center md:justify-start gap-4 py-2">
-                                <button
-                                    onClick={handleFollow}
-                                    disabled={followLoading}
-                                    className={`px-8 py-3 rounded-2xl font-bold transition-all flex items-center gap-2 shadow-lg ${isFollowing
-                                        ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                        : 'bg-emerald-600 text-white hover:bg-emerald-700 hover:scale-105 active:scale-95'
-                                        } disabled:opacity-50`}
-                                >
-                                    {followLoading ? (
-                                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                                    ) : isFollowing ? (
-                                        <>
-                                            <UserMinus size={20} />
-                                            Unfollow
-                                        </>
-                                    ) : (
-                                        <>
-                                            <UserPlus size={20} />
-                                            Follow Chef
-                                        </>
-                                    )}
-                                </button>
-                                <button
-                                    onClick={async () => {
-                                        try {
-                                            console.log('Chef data:', chef);
-                                            const chefUserId = chef.chefId?._id;
-                                            console.log('Chef User ID:', chefUserId);
-                                            if (!chefUserId) {
-                                                console.error('Chef ID not found', chef);
-                                                return;
-                                            }
-                                            const conversation = await useChatStore.getState().createOrGetConversation(chefUserId, 'chef');
-                                            console.log('Conversation created:', conversation);
-                                            if (conversation) {
-                                                navigate(`/foodie/chat/${conversation._id}`);
-                                            }
-                                        } catch (error) {
-                                            console.error('Error creating conversation:', error);
-                                        }
-                                    }}
-                                    className="px-8 py-3 rounded-2xl font-bold transition-all flex items-center gap-2 shadow-lg bg-blue-600 text-white hover:bg-blue-700 hover:scale-105 active:scale-95"
-                                >
-                                    <MessageSquare size={20} />
-                                    Message
-                                </button>
-                            </div>
-
-                            <div className="flex flex-wrap justify-center md:justify-start gap-2 pt-2">
-                                {chef.specialities?.map((spec: string, idx: number) => (
-                                    <span key={idx} className="px-4 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-sm font-bold border border-emerald-100">
+                            <div className="flex flex-wrap justify-center gap-2 mb-6">
+                                {chef.specialities?.slice(0, 3).map((spec: string, idx: number) => (
+                                    <span key={idx} className="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-bold border border-emerald-100">
                                         {spec}
                                     </span>
                                 ))}
                             </div>
-                        </div>
-                    </div>
 
-                    {/* Professional Details Section */}
-                    <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {/* Certificates */}
-                        <div className="bg-emerald-50/50 p-6 rounded-3xl border border-emerald-100">
-                            <div className="flex items-center gap-3 mb-4 text-emerald-700">
-                                <Award className="w-6 h-6" />
-                                <h3 className="font-bold text-lg">Certificates</h3>
-                            </div>
-                            {chef.certificates?.length > 0 ? (
-                                <ul className="space-y-2">
-                                    {chef.certificates.map((cert: string, idx: number) => (
-                                        <li key={idx} className="text-sm font-medium text-gray-700 flex items-start gap-2">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
-                                            {cert}
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : (
-                                <p className="text-sm text-gray-400 italic">No certificates listed</p>
-                            )}
-                        </div>
+                            <p className="text-gray-600 leading-relaxed mb-6 text-sm px-2">
+                                {chef.bio || "Crafting culinary magic through passion and tradition. Join me on a journey of flavors."}
+                            </p>
 
-                        {/* Achievements */}
-                        <div className="bg-amber-50/50 p-6 rounded-3xl border border-amber-100">
-                            <div className="flex items-center gap-3 mb-4 text-amber-700">
-                                <Trophy className="w-6 h-6" />
-                                <h3 className="font-bold text-lg">Achievements</h3>
+                            {/* Action Buttons */}
+                            <div className="grid grid-cols-2 gap-3 w-full">
+                                <button
+                                    onClick={handleFollow}
+                                    disabled={followLoading}
+                                    className={`py-3 px-4 rounded-xl font-bold text-sm transition-all flex justify-center items-center gap-2 shadow-sm ${isFollowing
+                                        ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        : 'bg-emerald-600 text-white hover:bg-emerald-700 hover:shadow-emerald-200 hover:-translate-y-0.5'
+                                        }`}
+                                >
+                                    {followLoading ? <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full" /> :
+                                        isFollowing ? <UserMinus size={18} /> : <UserPlus size={18} />}
+                                    {isFollowing ? 'Unfollow' : 'Follow'}
+                                </button>
+                                <button
+                                    onClick={async () => {
+                                        try {
+                                            const chefUserId = chef.chefId?._id;
+                                            if (!chefUserId) return;
+                                            const conversation = await useChatStore.getState().createOrGetConversation(chefUserId, 'chef');
+                                            if (conversation) navigate(`/foodie/chat/${conversation._id}`);
+                                        } catch (error) {
+                                            console.error('Error creating conversation:', error);
+                                        }
+                                    }}
+                                    className="py-3 px-4 rounded-xl font-bold text-sm bg-blue-600 text-white hover:bg-blue-700 hover:shadow-blue-200 hover:-translate-y-0.5 transition-all flex justify-center items-center gap-2 shadow-sm"
+                                >
+                                    <MessageSquare size={18} /> Message
+                                </button>
                             </div>
-                            {chef.achievements?.length > 0 ? (
-                                <ul className="space-y-2">
-                                    {chef.achievements.map((ach: string, idx: number) => (
-                                        <li key={idx} className="text-sm font-medium text-gray-700 flex items-start gap-2">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 shrink-0" />
-                                            {ach}
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : (
-                                <p className="text-sm text-gray-400 italic">No achievements listed</p>
-                            )}
                         </div>
 
-                        {/* Skills */}
-                        <div className="bg-blue-50/50 p-6 rounded-3xl border border-blue-100">
-                            <div className="flex items-center gap-3 mb-4 text-blue-700">
-                                <Zap className="w-6 h-6" />
-                                <h3 className="font-bold text-lg">Culinary Skills</h3>
-                            </div>
-                            {chef.skills?.length > 0 ? (
-                                <div className="flex flex-wrap gap-2">
-                                    {chef.skills.map((skill: string, idx: number) => (
-                                        <span key={idx} className="px-3 py-1 bg-white border border-blue-100 text-blue-600 rounded-lg text-xs font-bold shadow-sm">
-                                            {skill}
-                                        </span>
-                                    ))}
+                        {/* Stats Card */}
+                        <div className="bg-white rounded-[2rem] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 animate-fade-in-up delay-100">
+                            <h3 className="font-bold text-lg text-gray-900 mb-4 px-2">Chef Stats</h3>
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between p-3 rounded-2xl bg-gray-50 hover:bg-emerald-50/50 transition-colors group">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-white rounded-xl shadow-sm group-hover:scale-110 transition-transform text-emerald-600">
+                                            <Users size={18} />
+                                        </div>
+                                        <span className="text-gray-600 font-medium text-sm">Followers</span>
+                                    </div>
+                                    <span className="font-bold text-gray-900">{stats.followers}</span>
                                 </div>
-                            ) : (
-                                <p className="text-sm text-gray-400 italic">No skills listed</p>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Tabs Section */}
-            <div className="max-w-7xl mx-auto px-4 mt-8">
-                <div className="flex overflow-x-auto gap-2 p-1 bg-white rounded-2xl shadow-sm border border-gray-100 mb-8 hide-scrollbar">
-                    <TabButton
-                        active={activeTab === 'recipes'}
-                        label="Recipes"
-                        icon={ChefHat}
-                        onClick={() => handleTabChange('recipes')}
-                    />
-                    <TabButton
-                        active={activeTab === 'blogs'}
-                        label="Blogs"
-                        icon={BookOpen}
-                        onClick={() => handleTabChange('blogs')}
-                    />
-                    <TabButton
-                        active={activeTab === 'workshops'}
-                        label="Workshops"
-                        icon={Calendar}
-                        onClick={() => handleTabChange('workshops')}
-                    />
-                    <TabButton
-                        active={activeTab === 'reviews'}
-                        label="Reviews"
-                        icon={MessageSquare}
-                        onClick={() => handleTabChange('reviews')}
-                    />
-                </div>
-
-                {/* Content Area */}
-                <div className="min-h-[400px]">
-                    {activeTab === 'reviews' ? (
-                        <div className="max-w-4xl mx-auto">
-                            <ReviewSection reviewableId={chef.chefId?._id} reviewableType="Chef" />
-                        </div>
-                    ) : (
-                        <div className="space-y-6">
-                            {activityLoading ? (
-                                <div className="flex justify-center py-20">
-                                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-600"></div>
+                                <div className="flex items-center justify-between p-3 rounded-2xl bg-gray-50 hover:bg-amber-50/50 transition-colors group">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-white rounded-xl shadow-sm group-hover:scale-110 transition-transform text-amber-500">
+                                            <Star size={18} className="fill-current" />
+                                        </div>
+                                        <span className="text-gray-600 font-medium text-sm">Rating</span>
+                                    </div>
+                                    <span className="font-bold text-gray-900">4.8/5.0</span>
                                 </div>
-                            ) : activities.length > 0 ? (
-                                <>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        {activities.map((item: any) => (
-                                            <ActivityCard
-                                                key={item._id}
-                                                item={item}
-                                                type={activeTab}
-                                                navigate={navigate}
-                                            />
+                                <div className="flex items-center justify-between p-3 rounded-2xl bg-gray-50 hover:bg-blue-50/50 transition-colors group">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-white rounded-xl shadow-sm group-hover:scale-110 transition-transform text-blue-500">
+                                            <MapPin size={18} />
+                                        </div>
+                                        <span className="text-gray-600 font-medium text-sm">Location</span>
+                                    </div>
+                                    <span className="font-bold text-gray-900 truncate max-w-[120px] text-right">{chef.location}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Professional Details (Certificates, etc.) */}
+                        <div className="space-y-4 animate-fade-in-up delay-200">
+                            {/* Certificates */}
+                            {chef.certificates?.length > 0 && (
+                                <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100">
+                                    <div className="flex items-center gap-3 mb-4 text-emerald-700">
+                                        <Award className="w-5 h-5" />
+                                        <h3 className="font-bold text-gray-900">Certificates</h3>
+                                    </div>
+                                    <ul className="space-y-2">
+                                        {chef.certificates.map((cert: string, idx: number) => (
+                                            <li key={idx} className="text-sm text-gray-600 flex items-start gap-2">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+                                                {cert}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+
+                            {/* Achievements */}
+                            {chef.achievements?.length > 0 && (
+                                <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100">
+                                    <div className="flex items-center gap-3 mb-4 text-amber-600">
+                                        <Trophy className="w-5 h-5" />
+                                        <h3 className="font-bold text-gray-900">Achievements</h3>
+                                    </div>
+                                    <ul className="space-y-2">
+                                        {chef.achievements.map((ach: string, idx: number) => (
+                                            <li key={idx} className="text-sm text-gray-600 flex items-start gap-2">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 shrink-0" />
+                                                {ach}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+
+                            {/* Skills */}
+                            {chef.skills?.length > 0 && (
+                                <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100">
+                                    <div className="flex items-center gap-3 mb-4 text-blue-600">
+                                        <Zap className="w-5 h-5" />
+                                        <h3 className="font-bold text-gray-900">Skills</h3>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {chef.skills.map((skill: string, idx: number) => (
+                                            <span key={idx} className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold border border-blue-100">
+                                                {skill}
+                                            </span>
                                         ))}
                                     </div>
-                                    <div className="mt-12 flex justify-center">
-                                        <Pagination
-                                            currentPage={currentPage}
-                                            totalPages={totalPages}
-                                            onChange={setCurrentPage}
-                                        />
-                                    </div>
-                                </>
-                            ) : (
-                                <div className="text-center py-20 bg-white rounded-3xl border border-gray-100 shadow-sm">
-                                    <div className="bg-gray-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        {activeTab === 'recipes' ? <ChefHat size={32} className="text-gray-300" /> :
-                                            activeTab === 'blogs' ? <BookOpen size={32} className="text-gray-300" /> :
-                                                <Calendar size={32} className="text-gray-300" />}
-                                    </div>
-                                    <h3 className="text-xl font-bold text-gray-900">No {activeTab} yet</h3>
-                                    <p className="text-gray-500">This chef hasn't posted any {activeTab} yet.</p>
                                 </div>
                             )}
                         </div>
-                    )}
+                    </div>
+
+                    {/* Right Content - Tabs and Grid */}
+                    <div className="lg:w-2/3">
+                        <div className="bg-white rounded-[2rem] p-2 shadow-sm border border-gray-100 mb-8 flex overflow-x-auto hide-scrollbar sticky top-24 z-30">
+                            {[
+                                { id: 'recipes', icon: ChefHat, label: 'Recipes' },
+                                { id: 'blogs', icon: BookOpen, label: 'Blogs' },
+                                { id: 'workshops', icon: Calendar, label: 'Workshops' },
+                                { id: 'reviews', icon: MessageSquare, label: 'Reviews' }
+                            ].map((tab) => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => handleTabChange(tab.id as ActiveTab)}
+                                    className={`flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold transition-all whitespace-nowrap flex-1 justify-center ${activeTab === tab.id
+                                        ? 'bg-gray-900 text-white shadow-lg shadow-gray-900/10'
+                                        : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                                        }`}
+                                >
+                                    <tab.icon size={18} />
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="min-h-[400px]">
+                            {activeTab === 'reviews' ? (
+                                <div className="animate-fade-in-up">
+                                    <ReviewSection reviewableId={chef.chefId?._id} reviewableType="Chef" />
+                                </div>
+                            ) : (
+                                <div className="space-y-8 animate-fade-in-up">
+                                    {activityLoading ? (
+                                        <div className="flex justify-center py-20">
+                                            <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-emerald-600"></div>
+                                        </div>
+                                    ) : activities.length > 0 ? (
+                                        <>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                {activities.map((item: any) => (
+                                                    <ActivityCard
+                                                        key={item._id}
+                                                        item={item}
+                                                        type={activeTab}
+                                                        navigate={navigate}
+                                                    />
+                                                ))}
+                                            </div>
+                                            <div className="flex justify-center pt-4">
+                                                <Pagination
+                                                    currentPage={currentPage}
+                                                    totalPages={totalPages}
+                                                    onChange={setCurrentPage}
+                                                />
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center py-24 bg-white rounded-[2rem] border border-gray-100 border-dashed text-center">
+                                            <div className="bg-gray-50 p-6 rounded-full mb-4">
+                                                {activeTab === 'recipes' ? <ChefHat size={32} className="text-gray-300" /> :
+                                                    activeTab === 'blogs' ? <BookOpen size={32} className="text-gray-300" /> :
+                                                        <Calendar size={32} className="text-gray-300" />}
+                                            </div>
+                                            <h3 className="text-xl font-bold text-gray-900 mb-2">No {activeTab} Found</h3>
+                                            <p className="text-gray-400 max-w-sm">
+                                                This chef hasn't posted any {activeTab} yet. Check back later!
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    );
-}
-
-function TabButton({ active, label, icon: Icon, onClick }: any) {
-    return (
-        <button
-            onClick={onClick}
-            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${active
-                ? 'bg-emerald-600 text-white shadow-md'
-                : 'text-gray-500 hover:bg-gray-50 hover:text-emerald-600'
-                }`}
-        >
-            <Icon size={18} />
-            {label}
-        </button>
     );
 }
 
@@ -411,53 +397,57 @@ function ActivityCard({ item, type, navigate }: any) {
     const isBlog = type === 'blogs';
 
     return (
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all group">
-            <div className="flex flex-col sm:flex-row">
-                <div className="w-full sm:w-48 h-48 sm:h-auto overflow-hidden">
-                    <img
-                        src={item.images || item.image || 'https://images.unsplash.com/photo-1495195129352-aed325a55b65?w=400&h=300&fit=crop'}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        alt={item.title}
-                    />
+        <div
+            onClick={() => {
+                const path = isWorkshop ? `/foodie/workshop-detail/${item._id}` :
+                    isBlog ? `/foodie/blog-detail/${item._id}` :
+                        `/foodie/recipe-detail/${item._id}`;
+                navigate(path);
+            }}
+            className="group bg-white rounded-[2rem] shadow-sm hover:shadow-[0_20px_40px_rgb(0,0,0,0.06)] border border-gray-100 overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1"
+        >
+            <div className="relative h-48 overflow-hidden">
+                <img
+                    src={item.images || item.image || 'https://images.unsplash.com/photo-1495195129352-aed325a55b65?w=400&h=300&fit=crop'}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    alt={item.title}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute top-4 left-4">
+                    <span className="px-3 py-1.5 bg-white/90 backdrop-blur-md text-gray-900 rounded-lg text-xs font-bold shadow-sm">
+                        {isWorkshop ? item.category : isBlog ? item.tags?.[0] || 'Blog' : item.cuisine}
+                    </span>
                 </div>
-                <div className="flex-1 p-6 flex flex-col justify-between">
-                    <div>
-                        <div className="flex justify-between items-start mb-2">
-                            <span className="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs font-bold">
-                                {isWorkshop ? item.category : isBlog ? item.tags?.[0] : item.cuisine}
-                            </span>
-                        </div>
-                        <h4 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors line-clamp-1">
-                            {item.title}
-                        </h4>
-                        <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
-                            {isWorkshop ? (
-                                <>
-                                    <span className="flex items-center gap-1"><Clock size={14} /> {item.duration} min</span>
-                                    <span className="flex items-center gap-1"><Star size={14} className="text-amber-400 fill-amber-400" /> 4.9</span>
-                                </>
-                            ) : isBlog ? (
-                                <span>{new Date(item.createdAt).toLocaleDateString()}</span>
-                            ) : (
-                                <>
-                                    <span className="flex items-center gap-1"><Clock size={14} /> {item.cookingTime} min</span>
-                                    <span className="flex items-center gap-1"><Star size={14} className="text-amber-400 fill-amber-400" /> 4.8</span>
-                                </>
-                            )}
-                        </div>
-                    </div>
+            </div>
 
-                    <button
-                        onClick={() => {
-                            const path = isWorkshop ? `/foodie/workshop-detail/${item._id}` :
-                                isBlog ? `/foodie/blog-detail/${item._id}` :
-                                    `/foodie/recipe-detail/${item._id}`;
-                            navigate(path);
-                        }}
-                        className="flex items-center gap-2 text-emerald-600 font-bold hover:gap-3 transition-all"
-                    >
-                        View More <ArrowRight size={18} />
-                    </button>
+            <div className="p-6">
+                <h4 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1 group-hover:text-emerald-600 transition-colors">
+                    {item.title}
+                </h4>
+
+                <div className="flex items-center gap-4 text-sm text-gray-500 mb-6">
+                    {isWorkshop ? (
+                        <>
+                            <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg"><Clock size={14} className="text-emerald-500" /> {item.duration}m</span>
+                            <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg"><Star size={14} className="text-amber-400 fill-amber-400" /> 4.9</span>
+                        </>
+                    ) : isBlog ? (
+                        <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg"><Calendar size={14} className="text-emerald-500" /> {new Date(item.createdAt).toLocaleDateString()}</span>
+                    ) : (
+                        <>
+                            <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg"><Clock size={14} className="text-emerald-500" /> {item.cookingTime}m</span>
+                            <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg"><Star size={14} className="text-amber-400 fill-amber-400" /> 4.8</span>
+                        </>
+                    )}
+                </div>
+
+                <div className="flex items-center justify-between mt-auto">
+                    <span className="text- emerald-600 font-bold text-sm bg-emerald-50 px-3 py-1 rounded-lg group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                        View Details
+                    </span>
+                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all text-gray-400">
+                        <ArrowRight size={14} />
+                    </div>
                 </div>
             </div>
         </div>

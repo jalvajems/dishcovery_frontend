@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import {
   Search,
-  ChevronDown,
   ArrowRight,
-  Plus
+  Plus,
+  MapPin
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { showError } from '@/utils/toast';
@@ -12,33 +12,33 @@ import Pagination from '@/components/shared/Pagination';
 import SearchBar from '@/components/shared/SearchBar';
 
 export default function MyFoodSpotList() {
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-      const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [totalPages, setTotalPages] = useState(1);
-    const limit = 1;
-  const [foodSpots , setFoodSpots]=useState([])
+  const limit = 1;
+  const [foodSpots, setFoodSpots] = useState([])
 
-    const handlePageChange = (page: number) => {
+  const handlePageChange = (page: number) => {
     setCurrentPage(page)
   }
 
-  const handleFetchSpots=async()=>{
+  const handleFetchSpots = async () => {
     try {
-      const res=await getAllMyFoodSpotApi(currentPage,limit,searchQuery);
+      const res = await getAllMyFoodSpotApi(currentPage, limit, searchQuery);
       setTotalPages(res.data.totalCount)
       setFoodSpots(res.data.data)
-    } catch (error:any) {
+    } catch (error: any) {
       showError(error.response?.data?.message || `Something went wrong:${error}`)
     }
   }
-  console.log('spots',foodSpots);
-  
+  console.log('spots', foodSpots);
 
-  useEffect(()=>{
+
+  useEffect(() => {
     handleFetchSpots()
-  },[currentPage,searchQuery, limit])
+  }, [currentPage, searchQuery, limit])
 
 
 
@@ -68,12 +68,12 @@ export default function MyFoodSpotList() {
             {/* Search inside banner */}
             <div className="relative w-full max-w-2xl">
               <SearchBar
-                        placeholder="Search recipes, cuisine..."
-                        onSearch={(value)=>{
-                            setSearchQuery(value);
-                            setCurrentPage(1)
-                        }}
-                        />
+                placeholder="Search recipes, cuisine..."
+                onSearch={(value) => {
+                  setSearchQuery(value);
+                  setCurrentPage(1)
+                }}
+              />
               <button className="absolute right-2 top-1/2 -translate-y-1/2 px-8 py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition">
                 Search
               </button>
@@ -94,56 +94,74 @@ export default function MyFoodSpotList() {
             ))}
           </div> */}
 
-          <button 
-          onClick={()=>navigate('/foodie/foodspot-add')}
-          className="flex items-center gap-2 px-7 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl shadow hover:scale-105 transition">
+          <button
+            onClick={() => navigate('/foodie/foodspot-add')}
+            className="flex items-center gap-2 px-7 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl shadow hover:scale-105 transition">
             <Plus className="w-5 h-5" />
             Add Spot
           </button>
         </div>
 
         {/* FOOD SPOT CARDS */}
-        <div className="space-y-8">
-          {foodSpots.map((spot:any) => (
-            <div
-              key={spot._id}
-              className="bg-white/90 backdrop-blur rounded-2xl p-6 shadow-xl hover:shadow-2xl transition group"
+        {foodSpots.length === 0 ? (
+          <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-20 text-center shadow-xl border border-gray-100 mb-8">
+            <div className="w-20 h-20 bg-green-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <MapPin className="w-10 h-10 text-green-500" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">No Food Spots Yet</h2>
+            <p className="text-gray-500 mb-8 max-w-md mx-auto">
+              You haven't shared any food spots yet. Help others discover great places!
+            </p>
+            <button
+              onClick={() => navigate('/foodie/foodspot-add')}
+              className="px-8 py-3 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition-all shadow-lg hover:shadow-green-200"
             >
-              <div className="flex gap-6 items-center">
-                <div className="flex-1">
-                  {spot.badge && (
-                    <span className="inline-block mb-3 px-4 py-1.5 bg-green-100 text-green-700 rounded-lg font-semibold text-sm">
-                      {spot.badge}
-                    </span>
-                  )}
-                  <h3 className="text-3xl font-bold mb-3 group-hover:text-green-700 transition">
-                    {spot.name}
-                  </h3>
-                  <p className="text-gray-600 mb-5 text-lg leading-relaxed">
-                    {spot.description}
-                  </p>
-                  <button onClick={()=>navigate(`/foodie/myfoodspot/${spot._id}`)} className="flex items-center gap-2 px-6 py-3 bg-gray-100 rounded-xl font-semibold hover:bg-green-100 hover:text-green-700 transition">
-                    View Details
-                    <ArrowRight />
-                  </button>
-                </div>
+              Add New Spot
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {foodSpots.map((spot: any) => (
+              <div
+                key={spot._id}
+                className="bg-white/90 backdrop-blur rounded-2xl p-6 shadow-xl hover:shadow-2xl transition group"
+              >
+                <div className="flex gap-6 items-center">
+                  <div className="flex-1">
+                    {spot.badge && (
+                      <span className="inline-block mb-3 px-4 py-1.5 bg-green-100 text-green-700 rounded-lg font-semibold text-sm">
+                        {spot.badge}
+                      </span>
+                    )}
+                    <h3 className="text-3xl font-bold mb-3 group-hover:text-green-700 transition">
+                      {spot.name}
+                    </h3>
+                    <p className="text-gray-600 mb-5 text-lg leading-relaxed">
+                      {spot.address.placeName} {spot.address.city}
+                    </p>
+                    <button onClick={() => navigate(`/foodie/myfoodspot/${spot._id}`)} className="flex items-center gap-2 px-6 py-3 bg-gray-100 rounded-xl font-semibold hover:bg-green-100 hover:text-green-700 transition">
+                      View Details
+                      <ArrowRight />
+                    </button>
+                  </div>
 
-                <div className="w-72 h-56 rounded-2xl overflow-hidden shadow-lg">
-                  <img
-                    src={spot.coverImage}
-                    alt={spot.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
+                  <div className="w-72 h-56 rounded-2xl overflow-hidden shadow-lg">
+                    <img
+                      src={spot.coverImage}
+                      alt={spot.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-        <Pagination 
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onChange={handlePageChange}
-        
+            ))}
+          </div>
+        )}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onChange={handlePageChange}
+
         />
 
       </div>

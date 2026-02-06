@@ -24,7 +24,6 @@ export default function FoodieSidebar() {
         { icon: ChefHat, label: 'Chefs', path: '/foodie/chefs' },
         { icon: UserPlus, label: 'Followings', path: '/foodie/followings' },
         { icon: MessageCircle, label: 'Chat', path: '/foodie/chat' },
-        { icon: Bot, label: 'AI Chef', path: '/foodie/aichef' },
       ]
     },
     {

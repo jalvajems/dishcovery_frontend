@@ -124,31 +124,38 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
     };
 
     return (
-        <div className="flex flex-col h-full bg-gray-50">
+        <div className="flex flex-col h-full bg-white relative">
             {/* Header */}
-            <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3">
+            <div className="bg-white/90 backdrop-blur-md border-b border-gray-100 px-6 py-4 flex items-center gap-4 z-10 shadow-sm">
                 {onBack && (
                     <button
                         onClick={onBack}
-                        className="lg:hidden p-2 hover:bg-gray-100 rounded-full transition-colors"
+                        className="lg:hidden p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600"
                     >
                         <ArrowLeft className="w-5 h-5" />
                     </button>
                 )}
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-semibold">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white font-bold shadow-md ring-2 ring-green-100">
                     {otherUser?.name?.charAt(0).toUpperCase() || '?'}
                 </div>
                 <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900">{otherUser?.name || 'Unknown User'}</h3>
-                    <p className="text-xs text-gray-500 capitalize">{otherUser?.role || ''}</p>
+                    <h3 className="font-bold text-gray-900 leading-tight">{otherUser?.name || 'Unknown User'}</h3>
+                    <div className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                        <p className="text-xs text-gray-500 font-medium capitalize">{otherUser?.role || 'User'}</p>
+                    </div>
                 </div>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/50">
                 {messages.length === 0 ? (
-                    <div className="flex items-center justify-center h-full text-gray-500">
-                        <p>No messages yet. Start the conversation!</p>
+                    <div className="flex flex-col items-center justify-center h-full text-gray-400 space-y-2 opacity-60">
+                        <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mb-2">
+                            <Send className="w-6 h-6 text-gray-300" />
+                        </div>
+                        <p className="font-medium">No messages yet.</p>
+                        <p className="text-sm">Say hello to start the conversation!</p>
                     </div>
                 ) : (
                     <>
@@ -156,12 +163,12 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
                             <MessageBubble key={message._id} message={message} />
                         ))}
                         {isTyping && (
-                            <div className="flex justify-start mb-4">
-                                <div className="bg-gray-200 rounded-2xl rounded-bl-none px-4 py-2">
-                                    <div className="flex gap-1">
-                                        <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                                        <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                                        <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                            <div className="flex justify-start mb-4 animate-fade-in">
+                                <div className="bg-gray-100 rounded-2xl rounded-bl-none px-4 py-3 shadow-inner">
+                                    <div className="flex gap-1.5 items-center h-full">
+                                        <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                                        <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                                        <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
                                     </div>
                                 </div>
                             </div>
@@ -172,23 +179,23 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
             </div>
 
             {/* Input */}
-            <div className="bg-white border-t border-gray-200 p-4">
-                <div className="flex items-center gap-2">
+            <div className="bg-white border-t border-gray-100 p-4 md:p-6">
+                <div className="flex items-center gap-3 bg-gray-50 p-2 pr-2 rounded-[2rem] border border-gray-200 focus-within:ring-2 focus-within:ring-green-100 focus-within:border-green-400 transition-all shadow-inner">
                     <input
                         type="text"
                         value={messageInput}
                         onChange={handleInputChange}
                         onKeyPress={handleKeyPress}
-                        placeholder="Type a message..."
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Type your message..."
+                        className="flex-1 px-4 py-2 bg-transparent border-none focus:outline-none text-gray-700 placeholder-gray-400 font-medium"
                         disabled={isSending}
                     />
                     <button
                         onClick={handleSendMessage}
                         disabled={!messageInput.trim() || isSending}
-                        className="p-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                        className="p-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-full hover:shadow-lg hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:scale-100"
                     >
-                        <Send className="w-5 h-5" />
+                        <Send className="w-4 h-4 ml-0.5" />
                     </button>
                 </div>
             </div>

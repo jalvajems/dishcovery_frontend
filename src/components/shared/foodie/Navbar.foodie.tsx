@@ -2,6 +2,7 @@ import logo from "../../../assets/logo.png"
 import { useNavigate } from "react-router-dom";
 import { useUserStore } from "@/store/userStore";
 import { NotificationBell } from "../NotificationBell";
+import Chatbot from "@/components/chat/Chatbot";
 
 export default function FoodieNavbar() {
 
@@ -25,6 +26,7 @@ export default function FoodieNavbar() {
 
         {/* Right Actions */}
         <div className="flex items-center gap-6">
+          <Chatbot />
           <NotificationBell />
 
           <div className="h-8 w-[1px] bg-gray-200 hidden md:block"></div>

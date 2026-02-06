@@ -1,17 +1,14 @@
 import { useEffect, useState } from 'react';
-import { MapPin, Star, ArrowRight } from 'lucide-react';
+import { MapPin, Star, ArrowRight, ChefHat } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getChefsApi } from '@/api/foodieApi';
 import Pagination from '@/components/shared/Pagination';
 import SearchBar from '@/components/shared/SearchBar';
-import { getFollowingApi } from '@/api/followApi';
 
 export default function ChefList() {
     const navigate = useNavigate();
     const [chefs, setChefs] = useState([]);
-    const [followedChefs, setFollowedChefs] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [followedLoading, setFollowedLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [filter, setFilter] = useState(""); // New state for filter
     const [currentPage, setCurrentPage] = useState(1);
@@ -20,20 +17,7 @@ export default function ChefList() {
 
     useEffect(() => {
         fetchChefs();
-        fetchFollowedChefs(); // Keep fetching followed chefs
-    }, [currentPage, searchQuery, filter]); // Added filter to dependency array
-
-    const fetchFollowedChefs = async () => {
-        setFollowedLoading(true);
-        try {
-            const response = await getFollowingApi();
-            setFollowedChefs(response.data.datas);
-        } catch (error) {
-            console.error('Error fetching followed chefs:', error);
-        } finally {
-            setFollowedLoading(false);
-        }
-    };
+    }, [currentPage, searchQuery, filter]);
 
     const fetchChefs = async () => {
         setLoading(true);
@@ -54,90 +38,59 @@ export default function ChefList() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 p-8">
-            <div className="max-w-7xl mx-auto">
-                {/* Header Section */}
-                <div className="mb-12 text-center">
-                    <h1 className="text-5xl font-extrabold text-gray-900 mb-4">
-                        Meet Our <span className="text-emerald-600">Master Chefs</span>
-                    </h1>
-                    <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                        Discover the culinary artists behind your favorite dishes. Explore their profiles, recipes, and workshops.
-                    </p>
+        <div className="min-h-screen bg-white text-gray-900 pb-20 font-sans">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+                {/* Hero Banner Section */}
+                <div className="relative h-[40vh] md:h-[50vh] rounded-[2.5rem] overflow-hidden mb-5 shadow-2xl animate-fade-in-up uppercase group">
+                    <img
+                        src="https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?q=80&w=2070&auto=format&fit=crop"
+                        alt="Chefs Banner"
+                        className="w-full h-full object-cover transform scale-105 group-hover:scale-110 transition-transform duration-[2s] ease-in-out"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent" />
+
+                    <div className="absolute inset-0 flex flex-col justify-center items-start px-8 md:px-20 max-w-5xl">
+                        <div className="inline-flex items-center gap-3 mb-6 animate-fade-in-up delay-100">
+                            <div className="p-3 bg-emerald-500/20 backdrop-blur-md rounded-2xl border border-emerald-500/30">
+                                <ChefHat className="w-8 h-8 text-emerald-400" />
+                            </div>
+                            <span className="text-emerald-400 font-bold tracking-[0.2em] text-sm uppercase">World Class Talent</span>
+                        </div>
+                        <h2 className="text-5xl md:text-7xl font-black text-white mb-8 tracking-tighter leading-[0.9] drop-shadow-2xl animate-fade-in-up delay-200">
+                            Master <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300">Chefs</span><br />
+                            <span className="text-4xl md:text-6xl font-thin text-gray-300">Culinary Artists</span>
+                        </h2>
+                        <p className="text-xl text-gray-300 max-w-2xl font-light leading-relaxed animate-fade-in-up delay-300 border-l-4 border-emerald-500 pl-6">
+                            Discover the creative minds behind your favorite dishes. Explore their profiles, exclusive recipes, and join their workshops.
+                        </p>
+                    </div>
                 </div>
 
-                {/* Followed Chefs Section */}
-                {/* {followedLoading ? (
-                    <div className="flex gap-6 overflow-x-auto pb-6 -mx-4 px-4 mb-8">
-                        {[1, 2, 3].map(i => (
-                            <div key={i} className="flex-shrink-0 w-32 md:w-40 animate-pulse">
-                                <div className="w-full aspect-square bg-gray-200 rounded-[2rem] mb-3" />
-                                <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto" />
-                            </div>
-                        ))}
-                    </div>
-                ) : followedChefs.length > 0 && (
-                    <div className="mb-16">
-                        <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-2xl font-black text-gray-900 flex items-center gap-3">
-                                <Star className="text-amber-400 fill-amber-400" size={24} />
-                                Chefs You Follow
-                            </h2>
-                            <span className="text-sm font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">
-                                {followedChefs.length} Following
-                            </span>
-                        </div>
-                        <div className="flex gap-6 overflow-x-auto pb-6 hide-scrollbar -mx-4 px-4">
-                            {followedChefs.map((follow: any) => (
-                                <div
-                                    key={follow._id}
-                                    onClick={() => navigate(`/foodie/chef/${follow.followingId?._id}`)}
-                                    className="flex-shrink-0 w-32 md:w-40 group cursor-pointer"
-                                >
-                                    <div className="relative mb-3">
-                                        <div className="w-full aspect-square rounded-[2rem] overflow-hidden shadow-md ring-4 ring-white group-hover:ring-emerald-100 transition-all duration-300">
-                                            <img
-                                                src={follow.followingId.image || follow.followingId?.image || 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=400&h=400&fit=crop'} alt={follow.followingId?.name}
-                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                            />
-                                        </div>
-                                        <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-white p-1.5 rounded-xl border-2 border-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <ArrowRight size={14} />
-                                        </div>
-                                    </div>
-                                    <h4 className="font-bold text-gray-900 text-center truncate px-2 group-hover:text-emerald-600 transition-colors">
-                                        {follow.followingId?.name}
-                                    </h4>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )} */}
-
                 {/* Search and Filters Section */}
-                <div className="max-w-4xl mx-auto mb-16">
-                    <div className="bg-white p-6 rounded-[2.5rem] shadow-xl border border-gray-100">
-                        <div className="flex flex-col md:flex-row gap-6 items-center">
+                <div className="max-w-4xl mx-auto mb-5   animate-fade-in-up delay-200">
+                    <div className="bg-white/80 backdrop-blur-md p-4 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
+                        <div className="flex flex-col md:flex-row gap-4 items-center">
                             <div className="flex-1 w-full">
                                 <SearchBar
-                                    placeholder="Search by specialty or name..."
+                                    placeholder="Search chefs by name..."
                                     onSearch={handleSearch}
                                 />
                             </div>
-                            <div className="flex gap-2 p-1 bg-gray-50 rounded-2xl">
-                                {['', 'chinese','arabic', 'Indian', 'Italian'].map((spec) => (
+                            <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
+                                {['', 'chinese', 'arabic', 'Indian', 'Italian'].map((spec) => (
                                     <button
                                         key={spec}
                                         onClick={() => {
                                             setFilter(spec);
                                             setCurrentPage(1);
                                         }}
-                                        className={`px-6 py-2 rounded-xl font-bold text-sm transition-all ${filter === spec
-                                            ? 'bg-emerald-600 text-white shadow-md'
-                                            : 'text-gray-500 hover:text-gray-700 hover:bg-white'
+                                        className={`px-5 py-2.5 rounded-2xl font-bold text-sm whitespace-nowrap transition-all duration-300 ${filter === spec
+                                            ? 'bg-gray-900 text-white shadow-lg shadow-gray-900/20'
+                                            : 'bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                                             }`}
                                     >
-                                        {spec || 'All'}
+                                        {spec ? spec.charAt(0).toUpperCase() + spec.slice(1) : 'All'}
                                     </button>
                                 ))}
                             </div>
@@ -148,66 +101,67 @@ export default function ChefList() {
                 {/* Chef Grid */}
                 {loading ? (
                     <div className="flex justify-center items-center h-64">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+                        <div className="w-12 h-12 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin"></div>
                     </div>
                 ) : (
                     <>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
                             {chefs.map((chef: any) => (
                                 <div
                                     key={chef._id}
-                                    className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 group"
+                                    className="bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-[0_20px_50px_rgb(0,0,0,0.08)] transition-all duration-500 border border-gray-100 group flex flex-col"
                                 >
-                                    <div className="relative h-64 overflow-hidden">
+                                    <div className="relative h-72 overflow-hidden bg-gray-100">
                                         <img
                                             src={chef.image || chef.chefId?.image || 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=400&h=400&fit=crop'}
                                             alt={chef.chefId?.name}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                                         />
-
-                                    </div>
-
-                                    <div className="p-6">
-                                        <div className="mb-4">
-                                            <h3 className="text-2xl font-bold text-gray-900 mb-1 group-hover:text-emerald-600 transition-colors">
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60" />
+                                        <div className="absolute bottom-4 left-4 right-4 text-white">
+                                            <h3 className="text-2xl font-extrabold mb-1 drop-shadow-md">
                                                 {chef.chefId?.name}
                                             </h3>
-                                            <div className="flex items-center gap-1 text-gray-500 text-sm">
-                                                <MapPin className="w-4 h-4" />
-                                                {chef.location}
+                                            <div className="flex items-center gap-2 text-white/90 text-sm font-medium">
+                                                <MapPin className="w-4 h-4 text-emerald-400" />
+                                                {chef.location || "Location not set"}
                                             </div>
                                         </div>
+                                    </div>
 
-                                        <div className="flex flex-wrap gap-2 mb-6">
+                                    <div className="p-6 flex-1 flex flex-col">
+                                        <div className="flex flex-wrap gap-2 mb-8">
                                             {chef.specialities.slice(0, 3).map((spec: string, idx: number) => (
                                                 <span
                                                     key={idx}
-                                                    className="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs font-semibold"
+                                                    className="px-3 py-1 bg-gray-50 text-gray-600 rounded-xl text-xs font-bold border border-gray-100"
                                                 >
                                                     {spec}
                                                 </span>
                                             ))}
                                             {chef.specialities.length > 3 && (
-                                                <span className="px-3 py-1 bg-gray-50 text-gray-500 rounded-full text-xs font-semibold">
-                                                    +{chef.specialities.length - 3} more
+                                                <span className="px-3 py-1 bg-gray-50 text-gray-400 rounded-xl text-xs font-bold border border-gray-100">
+                                                    +{chef.specialities.length - 3}
                                                 </span>
                                             )}
                                         </div>
 
-                                        <button
-                                            onClick={() => navigate(`/foodie/chef/${chef.chefId?._id}`)}
-                                            className="w-full py-4 bg-gray-900 text-white rounded-2xl font-bold hover:bg-emerald-600 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2"
-                                        >
-                                            View Profile
-                                            <ArrowRight className="w-5 h-5" />
-                                        </button>
+                                        <div className="mt-auto">
+                                            <button
+                                                onClick={() => navigate(`/foodie/chef/${chef.chefId?._id}`)}
+                                                className="w-full py-4 bg-gray-900 text-white rounded-2xl font-bold hover:bg-emerald-600 hover:shadow-lg hover:shadow-emerald-600/20 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-3 group/btn"
+                                            >
+                                                View Profile
+                                                <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
                         </div>
 
                         {/* Pagination */}
-                        <div className="mt-12 flex justify-center">
+                        <div className="mt-20 flex justify-center">
                             <Pagination
                                 currentPage={currentPage}
                                 totalPages={totalPages}
