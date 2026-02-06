@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import { Video, VideoOff, Mic, MicOff, PhoneOff, Users } from 'lucide-react';
 import { getSessionInfoApi, endSessionApi, joinSessionApi } from '@/api/sessionApi';
 import { Pin, PinOff } from 'lucide-react';
+import ConfirmModal from '@/components/shared/ConfirmModal';
 
 // Ensure global Buffer and process for simple-peer
 import { Buffer } from 'buffer';
@@ -25,7 +26,7 @@ const LiveSession = () => {
     const { workshopId } = useParams<{ workshopId: string }>();
     const navigate = useNavigate();
     const { user, token } = useAuthStore();
-    
+
     const [stream, setStream] = useState<MediaStream | null>(null);
     const [peers, setPeers] = useState<PeerData[]>([]);
     const [remoteStreams, setRemoteStreams] = useState<{ [peerId: string]: MediaStream }>({});
@@ -34,23 +35,21 @@ const LiveSession = () => {
     const [sessionInfo, setSessionInfo] = useState<any>(null);
     const [chefPeer, setChefPeer] = useState<PeerData | null>(null);
     const [pinnedId, setPinnedId] = useState<string | null>(null);
+    const [showExitModal, setShowExitModal] = useState(false);
     // Use refs for stable access in socket handlers
     const sessionInfoRef = useRef<any>(null);
     const userRef = useRef<any>(user);
     const streamRef = useRef<MediaStream | null>(null);
-    
+
     const socketRef = useRef<Socket | null>(null);
     const peersRef = useRef<{ peerId: string; peer: PeerInstance }[]>([]);
-    
-    
+
+
     const checkIsHost = () => {
-        const role = user
-        console.log('role......',role);
-        
-        return role === 'chef';
+        return user?.role === 'chef';
     };
     const normalizeId = (id: any) => id?.toString() || '';
-    
+
     // Update stream ref
     useEffect(() => {
         streamRef.current = stream;
@@ -61,21 +60,21 @@ const LiveSession = () => {
             navigate('/dashboard');
             return;
         }
-        
+
         const initSession = async () => {
             try {
                 // 1. Fetch Session Info
                 const info = await getSessionInfoApi(workshopId);
                 setSessionInfo(info.data);
                 sessionInfoRef.current = info.data;
-                
+
                 // 3.1. Immediate Redirection if Completed
                 if (info.data?.status === 'COMPLETED') {
                     const rolePath = user?.role?.toLowerCase() === 'chef' ? 'chef' : 'foodie';
                     navigate(`/${rolePath}/workshop-summary/${workshopId}`);
                     return;
                 }
-                
+
                 // 2. Get User Media
                 const currentStream = await navigator.mediaDevices.getUserMedia({
                     video: true,
@@ -83,24 +82,24 @@ const LiveSession = () => {
                 });
                 setStream(currentStream);
                 streamRef.current = currentStream;
-                
+
                 // 3. Connect Socket
                 socketRef.current = io('http://localhost:4000', {
                     auth: { token },
                     transports: ['websocket']
                 });
-                
-                socketRef.current.on('connect', async() => {
+
+                socketRef.current.on('connect', async () => {
                     console.log('Connected to socket server');
-                    if(user=='chef'){
+                    if (user?.role === 'chef') {
                         socketRef.current?.emit('join-session', workshopId);
-                    }else if(user=='user'){
-                        
+                    } else {
+
                         await joinSessionApi(workshopId)
                         socketRef.current?.emit('join-session', workshopId);
                     }
                 });
-                
+
                 // Helper to create peer
                 const createPeer = (userToSignal: string, callerId: string, stream: MediaStream) => {
                     const peer = new SimplePeer({
@@ -114,7 +113,7 @@ const LiveSession = () => {
                             ]
                         }
                     });
-                    
+
                     peer.on('signal', (signal) => {
                         socketRef.current?.emit('webrtc-signal', {
                             to: userToSignal,
@@ -122,19 +121,19 @@ const LiveSession = () => {
                             from: callerId
                         });
                     });
-                    
+
                     peer.on('stream', (remoteStream) => {
                         console.log('Received remote stream from initiator:', userToSignal);
                         setRemoteStreams(prev => ({ ...prev, [userToSignal]: remoteStream }));
                     });
-                    
+
                     peer.on('connect', () => console.log('PEER CONNECTED (Initiator) with:', userToSignal));
                     peer.on('error', (err) => console.error('PEER ERROR (Initiator):', err));
                     peer.on('close', () => console.log('PEER CLOSED (Initiator) with:', userToSignal));
-                    
+
                     return peer;
                 };
-                
+
                 const addPeer = (incomingSignal: any, callerId: string, stream: MediaStream) => {
                     const peer = new SimplePeer({
                         initiator: false,
@@ -147,7 +146,7 @@ const LiveSession = () => {
                             ]
                         }
                     });
-                    
+
                     peer.on('signal', (signal) => {
                         socketRef.current?.emit('webrtc-signal', {
                             to: callerId,
@@ -155,52 +154,52 @@ const LiveSession = () => {
                             from: normalizeId(userRef.current?._id || userRef.current?.id)
                         });
                     });
-                    
+
                     peer.on('stream', (remoteStream) => {
                         console.log('Received remote stream from answerer:', callerId);
                         setRemoteStreams(prev => ({ ...prev, [callerId]: remoteStream }));
                     });
-                    
+
                     peer.on('connect', () => console.log('PEER CONNECTED (Answerer) with:', callerId));
                     peer.on('error', (err) => console.error('PEER ERROR (Answerer):', err));
                     peer.on('close', () => console.log('PEER CLOSED (Answerer) with:', callerId));
-                    
+
                     peer.signal(incomingSignal);
                     return peer;
                 }
-                
-                
+
+
                 // Socket Events
                 socketRef.current.on('all-users', (usersInRoom: { userId: string, role: string }[]) => {
                     console.log('--- ALL USERS RECEIVED (MESH) ---', usersInRoom);
                     const myId = normalizeId(userRef.current?._id || userRef.current?.id);
-                    
+
                     // ANY NEWCOMER initiates connections to EVERYONE already in the room
                     usersInRoom.forEach(u => {
                         const normalizedTargetId = normalizeId(u.userId);
                         if (normalizedTargetId === myId) return;
                         if (peersRef.current.find(p => normalizeId(p.peerId) === normalizedTargetId)) return;
-                        
+
                         const peer = createPeer(normalizedTargetId, myId, currentStream);
                         peersRef.current.push({ peerId: normalizedTargetId, peer });
                         setPeers((users) => [...users, { peerId: normalizedTargetId, peer }]);
                     });
                 });
-                
+
                 socketRef.current.on('participant-joined', (data: { userId: string, role: string, socketId: string }) => {
                     const myId = normalizeId(userRef.current?._id || userRef.current?.id);
                     const normalizedJoinerId = normalizeId(data.userId);
-                    
+
                     if (normalizedJoinerId === myId) return;
-                    
+
                     // In mesh, we wait for the newcomer to initiate the call (createPeer above)
                     // We only log here to know they joined.
                     // toast.info(`${data.role} joined the session`);
                 });
-                
+
                 socketRef.current.on('webrtc-signal', (data: { from: string, signal: any }) => {
                     const fromId = normalizeId(data.from);
-                    
+
                     const item = peersRef.current.find((p) => normalizeId(p.peerId) === fromId);
                     if (item) {
                         item.peer.signal(data.signal);
@@ -209,7 +208,7 @@ const LiveSession = () => {
                         const peer = addPeer(data.signal, fromId, currentStream);
                         peersRef.current.push({ peerId: fromId, peer });
                         setPeers((users) => [...users, { peerId: fromId, peer }]);
-                        
+
                         // Auto-pin Chef for Foodies
                         const chefId = normalizeId(sessionInfoRef.current?.chefId?._id || sessionInfoRef.current?.chefId);
                         if (fromId === chefId) {
@@ -234,13 +233,13 @@ const LiveSession = () => {
                     peersRef.current = newPeers;
                     setPeers((users) => users.filter(p => p.peerId !== userId));
                 });
-                
+
                 socketRef.current.on('session-ended', () => {
                     // toast.warning("Host has ended the session");
                     const rolePath = user?.role === 'chef' ? 'chef' : 'foodie';
                     navigate(`/${rolePath}/workshop-summary/${workshopId}`);
                 });
-                
+
                 socketRef.current.on('chef-action', (data: { action: 'mute' | 'remove' }) => {
                     if (data.action === 'mute') {
                         setIsMuted(true);
@@ -253,21 +252,21 @@ const LiveSession = () => {
                         navigate('/foodie/dashboard');
                     }
                 });
-                
+
             } catch (err) {
                 console.error("Error initializing session:", err);
                 toast.error("Failed to join session");
             }
         };
-        
+
         initSession();
-        
+
         return () => {
             socketRef.current?.disconnect();
             stream?.getTracks().forEach(track => track.stop());
         };
     }, [workshopId]);
-    
+
     // Auto-pin Chef when their stream arrives
     useEffect(() => {
         if (pinnedId) return;
@@ -276,46 +275,49 @@ const LiveSession = () => {
             setPinnedId(chefId);
         }
     }, [remoteStreams, pinnedId]);
-    
+
     const toggleMute = () => {
         if (stream) {
             stream.getAudioTracks()[0].enabled = !stream.getAudioTracks()[0].enabled;
             setIsMuted(!stream.getAudioTracks()[0].enabled);
         }
     };
-    
+
     const toggleVideo = () => {
         if (stream) {
             stream.getVideoTracks()[0].enabled = !stream.getVideoTracks()[0].enabled;
             setIsVideoOff(!stream.getVideoTracks()[0].enabled);
         }
     };
-    
-    const leaveSession = async () => {
-        if (window.confirm(checkIsHost() ? "Are you sure you want to end this workshop for everyone?" : "Are you sure you want to leave?")) {
-            if (checkIsHost()) {
-                try {
-                    await endSessionApi(workshopId!);
-                    socketRef.current?.emit('chef-control', { workshopId, action: 'end' });
-                } catch (error) {
-                    toast.error("Failed to mark workshop as completed");
-                    socketRef.current?.emit('chef-control', { workshopId, action: 'end' });
-                }
-            } else {
-                {user=='chef'?navigate('/chef/dashboard'):navigate('/foodie/dashboard') }
-                
+
+    const leaveSession = () => {
+        setShowExitModal(true);
+    };
+
+    const performExit = async () => {
+        if (checkIsHost()) {
+            try {
+                await endSessionApi(workshopId!);
+                socketRef.current?.emit('chef-control', { workshopId, action: 'end' });
+            } catch (error) {
+                toast.error("Failed to mark workshop as completed");
+                socketRef.current?.emit('chef-control', { workshopId, action: 'end' });
             }
+        } else {
+            { user?.role === 'chef' ? navigate('/chef/dashboard') : navigate('/foodie/dashboard') }
+
         }
+        setShowExitModal(false);
     };
     const handleChefAction = (targetId: string, action: 'mute' | 'remove') => {
         socketRef.current?.emit('chef-control', { workshopId, targetId, action });
         toast.info(`Sending ${action} command...`);
     }
-    
+
     const togglePin = (id: string | null) => {
         setPinnedId(prev => (prev === id ? null : id));
     };
-    
+
     const isChef = (id: string) => {
         const chefId = normalizeId(sessionInfoRef.current?.chefId?._id || sessionInfoRef.current?.chefId);
         return normalizeId(id) === chefId;
@@ -439,9 +441,23 @@ const LiveSession = () => {
                     onClick={leaveSession}
                 >
                     <PhoneOff size={22} className="mr-3 group-hover:rotate-[135deg] transition-transform" />
-                    {user === 'chef' ? "End Workshop" : "Leave Room"}
+                    {user?.role === 'chef' ? "End Workshop" : "Leave Room"}
                 </button>
             </div>
+
+            <ConfirmModal
+                isOpen={showExitModal}
+                title={checkIsHost() ? "End Workshop?" : "Leave Session?"}
+                message={checkIsHost()
+                    ? "Are you sure you want to end this workshop for everyone? This cannot be undone."
+                    : "Are you sure you want to leave the room?"
+                }
+                confirmText={checkIsHost() ? "End Workshop" : "Leave"}
+                cancelText="Cancel"
+                confirmVariant="danger"
+                onConfirm={performExit}
+                onCancel={() => setShowExitModal(false)}
+            />
         </div>
     );
 };

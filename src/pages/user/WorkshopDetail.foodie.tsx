@@ -98,7 +98,7 @@ export default function WorkshopDetailFoodie() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/20 to-transparent"></div>
 
-                <div className="absolute bottom-0 left-0 w-full p-12 md:p-20 text-white max-w-7xl mx-auto">
+                <div className="absolute bottom-0 left-0 w-full p-8 md:p-12 text-white w-full mx-auto">
                     <div className="flex items-center gap-3 mb-6">
                         <span className={`px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase backdrop-blur-md border ${workshop.mode === 'ONLINE' ? 'bg-indigo-500/20 border-indigo-500/30' : 'bg-orange-500/20 border-orange-500/30'
                             }`}>
@@ -146,7 +146,7 @@ export default function WorkshopDetailFoodie() {
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-8 py-20">
+            <div className="w-full mx-auto px-4 md:px-8 py-20">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
                     {/* Left Content */}
                     <div className="lg:col-span-8 space-y-20">

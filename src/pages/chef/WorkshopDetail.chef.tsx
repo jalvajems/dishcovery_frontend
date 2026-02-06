@@ -42,7 +42,7 @@ export default function WorkshopDetailChef() {
     const [loading, setLoading] = useState(true);
 
     const [showConfirmModal, setShowConfirmModal] = useState(false);
-    const [modalAction, setModalAction] = useState<'COMPLETE' | null>(null);
+
 
     const [cancelModalOpen, setCancelModalOpen] = useState(false);
     const [cancelReason, setCancelReason] = useState("");
@@ -156,7 +156,7 @@ export default function WorkshopDetailChef() {
     })();
 
     return (
-        <div className="p-8 max-w-5xl mx-auto pb-20 bg-gray-50/30 min-h-screen">
+        <div className="p-4 md:p-8 w-full mx-auto pb-20 bg-gray-50/30 min-h-screen">
             <ChefNavbar />
             <button
                 onClick={() => navigate(-1)}
@@ -292,7 +292,7 @@ export default function WorkshopDetailChef() {
 
                         <section>
                             <h3 className="text-xl font-black text-gray-900 mb-4 uppercase tracking-tight">About this workshop</h3>
-                            <p className="text-gray-600 leading-relaxed text-lg whitespace-pre-wrap font-medium">
+                            <p className="text-gray-600 leading-relaxed text-lg whitespace-pre-wrap font-medium break-words">
                                 {workshop.description}
                             </p>
                         </section>
@@ -521,7 +521,6 @@ export default function WorkshopDetailChef() {
                                         {(workshop.status === 'APPROVED' || workshop.status === 'UPCOMING' || workshop.status === 'LIVE') && (
                                             <button
                                                 onClick={() => {
-                                                    setModalAction('COMPLETE');
                                                     setShowConfirmModal(true);
                                                 }}
                                                 className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-green-600 text-white rounded-2xl font-black shadow-lg shadow-green-100 hover:bg-green-700 transition-all group"
@@ -558,7 +557,6 @@ export default function WorkshopDetailChef() {
                 isOpen={showConfirmModal}
                 onCancel={() => {
                     setShowConfirmModal(false);
-                    setModalAction(null);
                 }}
                 onConfirm={handleComplete} // Since we only use it for completion now
                 title="Complete Workshop"
