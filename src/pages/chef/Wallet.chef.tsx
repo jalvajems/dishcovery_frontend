@@ -174,39 +174,7 @@ export default function ChefWalletPage() {
             </div>
           </div>
 
-          {/* Pending Balance Card */}
-          <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-3 bg-yellow-50 rounded-xl">
-                <Clock className="w-5 h-5 text-yellow-600" />
-              </div>
-              <p className="text-sm text-gray-600 font-semibold">Pending Balance</p>
-            </div>
-            <div className="flex items-baseline gap-1 mb-2">
-              <span className="text-gray-600">₹</span>
-              <h2 className="text-3xl font-bold text-gray-900">
-                {wallet?.pendingBalance?.toLocaleString()}
-              </h2>
-            </div>
-            <p className="text-xs text-gray-500">Processing payments</p>
-          </div>
-
-          {/* Total Earnings Card */}
-          <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-3 bg-emerald-50 rounded-xl">
-                <TrendingUp className="w-5 h-5 text-emerald-600" />
-              </div>
-              <p className="text-sm text-gray-600 font-semibold">Total Earnings</p>
-            </div>
-            <div className="flex items-baseline gap-1 mb-2">
-              <span className="text-gray-600">₹</span>
-              <h2 className="text-3xl font-bold text-gray-900">
-                {wallet?.stats?.totalCredit?.toLocaleString() || 0}
-              </h2>
-            </div>
-            <p className="text-xs text-gray-500">Gross Income</p>
-          </div>
+         
 
           {/* Refunds Given Card */}
           <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
