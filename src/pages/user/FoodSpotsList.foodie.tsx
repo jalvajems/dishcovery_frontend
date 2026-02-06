@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
   ArrowRight,
-  Plus
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { showError } from '@/utils/toast';
@@ -25,7 +24,8 @@ export default function FoodSpotListing() {
   async function fetchFoodSpots() {
     try {
       const res = await getAllFoodSpotApi(currentPage, limit, searchQuery, filter);
-      setTotalPages(res.data.totalCount)
+      const computedTotalPages = Math.ceil(res.data.totalCount / limit);
+      setTotalPages(computedTotalPages || 1);
       setSpots(res.data.data)
     } catch (error: any) {
       showError(error.response?.data?.message || `Something went wrong:${error}`)
@@ -75,7 +75,7 @@ export default function FoodSpotListing() {
               </h2>
               <p className="text-green-600 font-medium">Explore hand-picked food spots around you.</p>
             </div>
-          
+
           </div>
 
           {/* Filter Buttons */}
@@ -114,7 +114,7 @@ export default function FoodSpotListing() {
                     <h3 className="text-3xl font-bold text-gray-900 mb-3 group-hover:text-green-700 transition-colors">
                       {spot.name}
                     </h3>
-                  
+
                     <button
                       onClick={() => navigate(`/foodie/foodspot/${spot._id}`)}
                       className="flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-green-100 hover:text-green-700 hover:scale-105 transition-all"

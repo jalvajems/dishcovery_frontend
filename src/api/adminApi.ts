@@ -47,7 +47,7 @@ export const adminUnblockBlogApi = (id: string) => {
 }
 
 export const adminFoodSpotListingApi = (page: number, limit: number, search: string, isBlocked: string, isApproved: string) => {
-    return API.get(ADMIN_ROUTES.FOODIE_LIST, { params: { page, limit, search, isBlocked, isApproved } });
+    return API.get(ADMIN_ROUTES.FOODSPOT_LIST, { params: { page, limit, search, isBlocked, isApproved } });
 };
 
 export const rejectFoodSpotApi = (id: string, reason: string) => {

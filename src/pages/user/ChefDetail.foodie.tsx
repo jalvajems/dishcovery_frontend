@@ -109,7 +109,7 @@ export default function ChefDetail() {
             } else if (activeTab === 'blogs') {
                 response = await getChefBlogsApi(id!, currentPage, limit, '');
             } else if (activeTab === 'workshops') {
-                response = await getChefWorkshopsApi(id!, currentPage, limit);
+                response = await getChefWorkshopsApi(id!, currentPage, limit,'','');
             }
 
             if (response) {
@@ -122,6 +122,7 @@ export default function ChefDetail() {
             setActivityLoading(false);
         }
     };
+console.log("----",activities);
 
     const handleTabChange = (tab: ActiveTab) => {
         setActiveTab(tab);
@@ -408,7 +409,7 @@ function ActivityCard({ item, type, navigate }: any) {
         >
             <div className="relative h-48 overflow-hidden">
                 <img
-                    src={item.images || item.image || 'https://images.unsplash.com/photo-1495195129352-aed325a55b65?w=400&h=300&fit=crop'}
+                    src={item.images || item.coverImage|| item.banner || 'https://images.unsplash.com/photo-1495195129352-aed325a55b65?w=400&h=300&fit=crop'}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     alt={item.title}
                 />

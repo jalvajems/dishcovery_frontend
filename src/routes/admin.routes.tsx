@@ -8,6 +8,7 @@ import BlogManagement from "@/pages/admin/BlogManagement";
 import FoodSpotManagement from "@/pages/admin/FoodSpotManagement";
 import WorkshopManagement from "@/pages/admin/WorkshopManagement";
 import WorkshopDetailAdmin from "@/pages/admin/WorkshopDetail.admin";
+import FoodSpotDetailAdmin from "@/pages/admin/FoodSpotDetail.admin";
 
 import AdminProtectedRoute from './AdminProtected.routes';
 
@@ -22,6 +23,7 @@ export default function AdminRoutes() {
           <Route path="recipe-management" element={<RecipeManagement />} />
           <Route path="blog-management" element={<BlogManagement />} />
           <Route path="foodspot-management" element={<FoodSpotManagement />} />
+          <Route path="foodspot-management/:id" element={<FoodSpotDetailAdmin />} />
           <Route path="workshop-management" element={<WorkshopManagement />} />
           <Route path="workshop-management/:id" element={<WorkshopDetailAdmin />} />
         </Route>

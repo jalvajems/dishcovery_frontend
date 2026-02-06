@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAdminTable } from "@/components/shared/hooks/useAdminTable";
 import SearchFilterBar from "@/components/shared/admin/SearchFilterBar";
 import ReusableTable, { type ITableColumn } from "@/components/shared/DataTable";
 import Pagination from "@/components/shared/Pagination";
 import ConfirmModal from "@/components/shared/ConfirmModal";
+import { Eye } from "lucide-react";
 import {
     adminBlockFoodSpotApi,
     adminUnblockFoodSpotApi,
@@ -25,12 +27,12 @@ type FoodSpot = {
     };
     speciality: string[];
     createdAt: string;
-    createdAt: string;
     isBlocked: boolean;
     isApproved: boolean;
 };
 
 export default function FoodSpotManagement() {
+    const navigate = useNavigate();
     const {
         data: foodSpots,
         totalPages,
@@ -128,8 +130,21 @@ export default function FoodSpotManagement() {
                 </button>
             ),
         },
+        {
+            key: "_id",
+            label: "Action",
+            render: (row) => (
+                <button
+                    onClick={() => navigate(`/admin-dashboard/foodspot-management/${row._id}`)}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-white text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-green-600 transition-all text-sm font-medium shadow-sm"
+                >
+                    <Eye className="w-4 h-4" />
+                    Details
+                </button>
+            )
+        }
     ];
-    
+
 
     return (
         <div className="p-8">
@@ -174,8 +189,8 @@ export default function FoodSpotManagement() {
                             actionType === "APPROVE" ? "Approve Food Spot" : "Unapprove Food Spot"
                 }
                 message={`Are you sure you want to ${actionType === "BLOCK" ? "block" :
-                        actionType === "UNBLOCK" ? "unblock" :
-                            actionType === "APPROVE" ? "approve" : "unapprove"
+                    actionType === "UNBLOCK" ? "unblock" :
+                        actionType === "APPROVE" ? "approve" : "unapprove"
                     } "${selectedSpot?.name}"?`}
                 onConfirm={handleConfirm}
                 onCancel={() => setModalOpen(false)}

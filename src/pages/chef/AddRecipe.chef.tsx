@@ -190,6 +190,7 @@ const [errors, setErrors] = useState<FormErrors>({});
                 >
                   <option value="">Select category</option>
                   <option value="italian">Italian</option>
+                  <option value="arabic">Arabic</option>
                   <option value="thai">Thai</option>
                   <option value="mexican">Mexican</option>
                   <option value="chinese">Chinese</option>

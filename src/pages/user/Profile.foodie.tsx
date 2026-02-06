@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { LogOut, Pencil, Heart, Users, MapPin, Mail, Phone, Settings } from "lucide-react";
+import { LogOut, Pencil, Heart, Users, MapPin, Mail, Phone, Settings, ChevronRight, Home } from "lucide-react";
 import { getFoodieProfileApi, getSavedRecipeApi } from "@/api/foodieApi";
 import { getFollowingApi, getFollowStatsApi } from "@/api/followApi";
 import { showError } from "@/utils/toast";
@@ -77,6 +77,19 @@ export default function ProfileFoodie() {
       <div className="relative h-64 bg-emerald-600 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-teal-500 opacity-90"></div>
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1543353071-873f17a7a088?w=1600&h=400&fit=crop')] bg-cover bg-center opacity-20"></div>
+
+        {/* Breadcrumb */}
+        <div className="absolute top-6 left-6 md:left-12 flex items-center gap-2 text-white/80 text-sm font-medium z-20">
+          <div
+            onClick={() => navigate('/foodie/dashboard')}
+            className="flex items-center gap-1 hover:text-white cursor-pointer transition-colors"
+          >
+            <Home size={14} />
+            <span>Home</span>
+          </div>
+          <ChevronRight size={14} />
+          <span className="text-white">My Profile</span>
+        </div>
       </div>
 
       <div className="max-w-5xl mx-auto px-4 -mt-32 relative z-10">

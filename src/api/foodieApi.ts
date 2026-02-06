@@ -162,10 +162,13 @@ export const getChefBlogsApi = (
 export const getChefWorkshopsApi = (
     chefId: string,
     page: number,
-    limit: number
+    limit: number,
+    search: string,
+    status: string
 ) => {
     return API.get(FOODIE_ROUTES.CHEF_WORKSHOPS(chefId), {
-        params: { page, limit },
+        params: { page, limit, search, status }
     });
 };
+
 //==========
