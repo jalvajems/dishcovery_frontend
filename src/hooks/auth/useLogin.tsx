@@ -61,11 +61,9 @@ export const useLogin = () => {
         showError('user is blocked!!')
         return;
       }
-
-      // Map MongoDB _id to id for authStore
       const mappedUser = {
         id: (data.user as any)._id || data.user.id,
-        _id: (data.user as any)._id || data.user.id, // Ensure _id is present
+        _id: (data.user as any)._id || data.user.id, 
         name: data.user.name,
         email: data.user.email,
         role: data.user.role

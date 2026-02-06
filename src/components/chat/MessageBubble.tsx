@@ -18,7 +18,6 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
     const [showConfirm, setShowConfirm] = useState(false);
     const [confirmAction, setConfirmAction] = useState<{ forEveryone: boolean } | null>(null);
 
-    // Safe ID extraction
     const getUserId = (u: any): string => {
         if (!u) return '';
         if (typeof u === 'string') return u;
@@ -33,7 +32,6 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
     const isSender = senderIdStr === currentUserIdStr;
     const isDeletedForMe = message.deletedFor?.includes(currentUserIdStr);
 
-    // If deleted for me, don't render anything
     if (isDeletedForMe) return null;
 
     const formatTime = (dateString: string) => {

@@ -1,5 +1,4 @@
 import { useLogin } from '@/hooks/auth/useLogin';
-// import logo from "../../assets/logo.png";
 
 export default function Login() {
 
@@ -85,14 +84,7 @@ export default function Login() {
               Log in
             </button>
 
-            {/* Continue with Google Button */}
-            <button
-              onClick={handleGoogleLogin}
-              className="w-full px-6 py-3 bg-green-50 text-black font-medium rounded-lg hover:bg-green-100 transition-colors"
-            >
-              Continue with Google
-            </button>
-
+        
             {/* Sign up Links */}
             <div className="text-center pt-2">
               <p className="text-sm text-green-600">

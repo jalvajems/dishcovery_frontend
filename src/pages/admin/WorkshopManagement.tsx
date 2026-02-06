@@ -34,13 +34,9 @@ export default function WorkshopManagement() {
         updateFilter,
     } = useAdminTable<Workshop>({
         fetchApi: async (page, limit, search, filters) => {
-            // Backend getAllWorkshops for admin currently doesn't support pagination in the implemented service
-            // but I added it to the repository and service to return all. 
-            // I'll adjust the API call to match the backend implementation.
             const response = await getAllWorkshopsAdminApi();
             const allData = response.data.data;
 
-            // Client-side filtering/pagination for now if backend doesn't support yet
             let filtered = allData;
             if (search) {
                 filtered = filtered.filter((w: any) =>

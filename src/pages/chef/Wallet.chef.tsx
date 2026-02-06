@@ -46,11 +46,7 @@ export default function ChefWalletPage() {
   const handleGetChefWallet = async (page: number) => {
     try {
       const res = await getChefWalletApi(page, itemsPerPage)
-      // Assuming backend returns pagination metadata in the response root or data
-      // Adjust based on actual backend response structure. 
-      // For now trusting basic structure + manual pagination handling if needed
       setWallet(res.data.data)
-      // If backend provides totalPages directly:
       setTotalPages(res.data.totalPages || 1);
       setCurrentPage(page);
     } catch (error) {

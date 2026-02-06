@@ -50,18 +50,15 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
             socketRef.current.on('notification:new', (notification) => {
                 addNotification(notification);
-                fetchUnreadCount(); // Ensure count is synced
+                fetchUnreadCount();
                 toast.info(notification.message, {
                     onClick: () => {
-                        // Handle click if needed, or rely on user going to notifications
                     }
                 });
             });
         }
 
         return () => {
-            // We don't verify disconnect on unmount to keep connection alive during navigation
-            // But if token changes (logout), the effect re-runs and disconnects above.
         };
     }, [token, user]);
 

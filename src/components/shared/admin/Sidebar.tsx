@@ -31,7 +31,6 @@ export default function Sidebar({ activePath, onMenuSelect }: SidebarProps) {
     { icon: BookOpen, label: "Blogs Management", path: "/admin-dashboard/blog-management" },
     { icon: MapPin, label: "Food Spot Management", path: "/admin-dashboard/foodspot-management" },
     { icon: BookOpen, label: "Workshop Management", path: "/admin-dashboard/workshop-management" },
-    { icon: BarChart3, label: "Reports & Analytics", path: "/admin-dashboard/reports" },
   ];
 
   const handleLogout = async () => {

@@ -132,7 +132,7 @@ export default function WorkshopDetailChef() {
         try {
             await markAttendanceApi(bookingId, status);
             toast.success(`Marked as ${status}`);
-            fetchParticipants(); // Refresh to show updated status
+            fetchParticipants();
         } catch (error) {
             toast.error("Failed to update attendance");
         }
@@ -143,7 +143,6 @@ export default function WorkshopDetailChef() {
 
     const canEdit = workshop.status === 'DRAFT' || workshop.status === 'REJECTED';
 
-    // Check if workshop can be started (only if online, approved/upcoming, and time has arrived)
     const canStart = (() => {
         if (workshop.mode !== 'ONLINE') return false;
         if (workshop.status !== 'APPROVED' && workshop.status !== 'UPCOMING') return false;

@@ -13,7 +13,6 @@ const ChatPage: React.FC = () => {
     const { conversations, activeConversation, setActiveConversation, loadConversations } = useChatStore();
     const [isMobileView, setIsMobileView] = useState(false);
 
-    // Determine base path based on user role
     const basePath = user?.role === 'chef' ? '/chef/chat' : '/foodie/chat';
 
     useEffect(() => {
@@ -21,7 +20,6 @@ const ChatPage: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        // Handle mobile view detection
         const checkMobileView = () => {
             setIsMobileView(window.innerWidth < 1024);
         };
@@ -33,7 +31,6 @@ const ChatPage: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        // Set active conversation from URL parameter
         if (conversationId && conversations.length > 0) {
             const conversation = conversations.find(c => c._id === conversationId);
             if (conversation) {

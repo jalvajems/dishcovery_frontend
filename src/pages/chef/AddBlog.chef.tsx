@@ -13,7 +13,6 @@ type BlogErrors = {
   coverImage?: string;
 };
 
-// Predefined tag suggestions
 const SUGGESTED_TAGS = [
   "Recipe",
   "Cooking Tips",
@@ -122,7 +121,6 @@ const AddNewBlog: React.FC = () => {
     setCoverImage(null);
   };
 
-  // Filter suggested tags based on input and exclude already selected tags
   const filteredSuggestedTags = SUGGESTED_TAGS.filter(
     (tag) =>
       tag.toLowerCase().includes(tagInput.toLowerCase()) && !tags.includes(tag)

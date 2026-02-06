@@ -50,12 +50,7 @@ export const NotificationBell = () => {
             await markAsRead(notification._id);
         }
 
-        // Navigation logic
         if (notification.type === 'SESSION_STARTED' && notification.workshopId) {
-            // Check role to determine path? 
-            // The bell allows generic navigation, but routes might differ.
-            // Assuming current user role context matches notification.
-            // But better safe:
             if (notification.recipientRole === 'chef') {
                 navigate(`/chef/workshops/${notification.workshopId}`); // Or live session
             } else {

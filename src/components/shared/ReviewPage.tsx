@@ -6,7 +6,7 @@ import { showError } from "@/utils/toast";
 type ReviewableType = "Recipe" | "Blog" | "Workshop" | "FoodSpot" | "Chef";
 
 interface ReviewSectionProps {
-    reviewableId?: string; // optional if page will supply via params component
+    reviewableId?: string; 
     reviewableType: ReviewableType;
 }
 

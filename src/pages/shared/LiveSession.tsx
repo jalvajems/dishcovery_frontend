@@ -10,7 +10,6 @@ import { getSessionInfoApi, endSessionApi, joinSessionApi } from '@/api/sessionA
 import { Pin, PinOff } from 'lucide-react';
 import ConfirmModal from '@/components/shared/ConfirmModal';
 
-// Ensure global Buffer and process for simple-peer
 import { Buffer } from 'buffer';
 if (typeof window !== 'undefined') {
     window.Buffer = window.Buffer || Buffer;
@@ -36,7 +35,6 @@ const LiveSession = () => {
     const [chefPeer, setChefPeer] = useState<PeerData | null>(null);
     const [pinnedId, setPinnedId] = useState<string | null>(null);
     const [showExitModal, setShowExitModal] = useState(false);
-    // Use refs for stable access in socket handlers
     const sessionInfoRef = useRef<any>(null);
     const userRef = useRef<any>(user);
     const streamRef = useRef<MediaStream | null>(null);
@@ -50,7 +48,6 @@ const LiveSession = () => {
     };
     const normalizeId = (id: any) => id?.toString() || '';
 
-    // Update stream ref
     useEffect(() => {
         streamRef.current = stream;
     }, [stream]);
@@ -63,19 +60,16 @@ const LiveSession = () => {
 
         const initSession = async () => {
             try {
-                // 1. Fetch Session Info
                 const info = await getSessionInfoApi(workshopId);
                 setSessionInfo(info.data);
                 sessionInfoRef.current = info.data;
 
-                // 3.1. Immediate Redirection if Completed
                 if (info.data?.status === 'COMPLETED') {
                     const rolePath = user?.role?.toLowerCase() === 'chef' ? 'chef' : 'foodie';
                     navigate(`/${rolePath}/workshop-summary/${workshopId}`);
                     return;
                 }
 
-                // 2. Get User Media
                 const currentStream = await navigator.mediaDevices.getUserMedia({
                     video: true,
                     audio: true
@@ -83,7 +77,6 @@ const LiveSession = () => {
                 setStream(currentStream);
                 streamRef.current = currentStream;
 
-                // 3. Connect Socket
                 socketRef.current = io('http://localhost:4000', {
                     auth: { token },
                     transports: ['websocket']
@@ -100,7 +93,6 @@ const LiveSession = () => {
                     }
                 });
 
-                // Helper to create peer
                 const createPeer = (userToSignal: string, callerId: string, stream: MediaStream) => {
                     const peer = new SimplePeer({
                         initiator: true,
@@ -174,7 +166,6 @@ const LiveSession = () => {
                     console.log('--- ALL USERS RECEIVED (MESH) ---', usersInRoom);
                     const myId = normalizeId(userRef.current?._id || userRef.current?.id);
 
-                    // ANY NEWCOMER initiates connections to EVERYONE already in the room
                     usersInRoom.forEach(u => {
                         const normalizedTargetId = normalizeId(u.userId);
                         if (normalizedTargetId === myId) return;
@@ -192,9 +183,6 @@ const LiveSession = () => {
 
                     if (normalizedJoinerId === myId) return;
 
-                    // In mesh, we wait for the newcomer to initiate the call (createPeer above)
-                    // We only log here to know they joined.
-                    // toast.info(`${data.role} joined the session`);
                 });
 
                 socketRef.current.on('webrtc-signal', (data: { from: string, signal: any }) => {

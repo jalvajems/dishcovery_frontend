@@ -10,7 +10,11 @@ import {
   Camera,
   Save,
   Loader2,
+  DollarSign,
+  Utensils,
+  Image as ImageIcon
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 import MapLocationPicker from "@/utils/MapLocationPicker";
 import { addFoodSpotApi } from "@/api/foodieApi";
@@ -18,7 +22,6 @@ import { showError, showSuccess } from "@/utils/toast";
 import { useAwsS3Upload } from "@/components/shared/hooks/useAwsS3Upload";
 import FoodieNavbar from "@/components/shared/foodie/Navbar.foodie";
 import { useNavigate } from "react-router-dom";
-
 
 interface FoodItem {
   name: string;
@@ -36,9 +39,8 @@ interface LocationData {
   fullAddress: string;
 }
 
-
 export default function AddFoodSpot() {
-  const navigate=useNavigate()
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -54,10 +56,10 @@ export default function AddFoodSpot() {
   ]);
 
   const [location, setLocation] = useState<LocationData | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { uploadToS3, loading: uploadLoading } = useAwsS3Upload();
 
-  
   const uploadSingleImage = async (
     e: React.ChangeEvent<HTMLInputElement>,
     cb: (url: string) => void
@@ -80,7 +82,6 @@ export default function AddFoodSpot() {
     setFoods(updated);
   };
 
-  
   const addFood = () =>
     setFoods([...foods, { name: "", price: "", image: "" }]);
 
@@ -97,12 +98,13 @@ export default function AddFoodSpot() {
     setFoods(updated);
   };
 
-  
   const handleSave = async () => {
     try {
       if (!form.name.trim()) return showError("Food spot name is required");
       if (!coverImage) return showError("Cover image is required");
       if (!location) return showError("Location is required");
+
+      setIsSubmitting(true);
 
       const payload = {
         name: form.name,
@@ -112,7 +114,6 @@ export default function AddFoodSpot() {
           type: "Point",
           coordinates: [location.lng, location.lat],
         },
-
         address: {
           placeName: location.placeName,
           city: location.city,
@@ -120,19 +121,15 @@ export default function AddFoodSpot() {
           country: location.country,
           fullAddress: location.fullAddress,
         },
-
         exploredFoods: foods.map((f) => ({
           name: f.name,
           price: f.price ? Number(f.price) : undefined,
           image: f.image,
         })),
-
         speciality: form.speciality
           ? form.speciality.split(",").map((s) => s.trim())
           : [],
-
         tags: form.tags ? form.tags.split(",").map((t) => t.trim()) : [],
-
         openingHours: {
           open: form.openingOpen,
           close: form.openingClose,
@@ -141,208 +138,301 @@ export default function AddFoodSpot() {
 
       await addFoodSpotApi(payload);
       showSuccess("Food spot created successfully!");
-      navigate(`/foodie/spot-listing`)
+      navigate(`/foodie/spot-listing`);
     } catch (err: any) {
       showError(err?.response?.data?.message || "Something went wrong");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-white">
-      <div className="max-w-6xl mx-auto p-6 space-y-6">
-        {/* Header */}
-        <FoodieNavbar/>
-        <h1 className="text-3xl font-bold text-emerald-600">
-          Add New Food Spot
-        </h1>
+    <div className="min-h-screen bg-[#f8fafc]">
+      <FoodieNavbar />
 
-        {/* Basic Info */}
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h2 className="font-bold flex gap-2 items-center">
-            <Star size={18} /> Basic Information
-          </h2>
-
-          <input
-            placeholder="Spot Name"
-            className="input mt-4"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-          />
-
-          <textarea
-            placeholder="Description"
-            className="input mt-3"
-            rows={4}
-            value={form.description}
-            onChange={(e) => setForm({ ...form, description: e.target.value })}
-          />
+      {/* Hero Header */}
+      <div className="bg-white border-b sticky top-16 z-30 shadow-sm">
+        <div className="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Add New Food Spot</h1>
+            <p className="text-sm text-gray-500">Share your culinary discovery with the world</p>
+          </div>
+          <button
+            onClick={handleSave}
+            disabled={isSubmitting || uploadLoading}
+            className="px-6 py-2.5 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {isSubmitting ? (
+              <Loader2 className="animate-spin" size={18} />
+            ) : (
+              <Save size={18} />
+            )}
+            Publish Spot
+          </button>
         </div>
+      </div>
 
-        {/* Location */}
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h2 className="font-bold flex gap-2 items-center">
-            <MapPin size={18} /> Location
-          </h2>
+      <div className="max-w-5xl mx-auto px-6 py-8 space-y-8">
 
-          <MapLocationPicker onSelect={(data: LocationData) => setLocation(data)} />
+        {/* Main Grid Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-          {location && (
-            <p className="text-sm mt-2 text-gray-600">
-              📍 {location.fullAddress}
-            </p>
-          )}
-        </div>
+          {/* Left Column - Main Info */}
+          <div className="lg:col-span-2 space-y-6">
 
-        {/* Cover Image */}
-        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-          <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <Camera className="text-emerald-500" size={20} /> Cover Image
-          </h2>
+            {/* Basic Information Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100"
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-emerald-50 rounded-lg">
+                  <Star className="text-emerald-600" size={20} />
+                </div>
+                <h2 className="text-lg font-bold text-gray-800">Basic Information</h2>
+              </div>
 
-          {coverImage ? (
-            <div className="relative h-64 w-full rounded-xl overflow-hidden group">
-              <img src={coverImage} alt="Cover" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Spot Name</label>
+                  <input
+                    placeholder="e.g. The Burger Joint"
+                    className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Description</label>
+                  <textarea
+                    placeholder="Tell us what makes this place special..."
+                    className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none resize-none"
+                    rows={4}
+                    value={form.description}
+                    onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Speciality</label>
+                    <input
+                      placeholder="e.g. Wood-fired pizza"
+                      className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none"
+                      value={form.speciality}
+                      onChange={(e) => setForm({ ...form, speciality: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Tags</label>
+                    <div className="relative">
+                      <Tag className="absolute left-4 top-3.5 text-gray-400" size={16} />
+                      <input
+                        placeholder="Italian, Casual, etc."
+                        className="w-full pl-10 pr-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none"
+                        value={form.tags}
+                        onChange={(e) => setForm({ ...form, tags: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Menu Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-orange-50 rounded-lg">
+                    <Utensils className="text-orange-500" size={20} />
+                  </div>
+                  <h2 className="text-lg font-bold text-gray-800">Food Menu</h2>
+                </div>
                 <button
-                  onClick={() => setCoverImage("")}
-                  className="p-3 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all transform hover:scale-110"
+                  onClick={addFood}
+                  className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-colors font-medium text-sm"
                 >
-                  <X size={20} />
+                  <Plus size={16} /> Add Item
                 </button>
               </div>
-            </div>
-          ) : (
-            <label className="block cursor-pointer">
-              <div className="border-2 border-dashed border-emerald-300 rounded-xl p-8 text-center hover:border-emerald-500 hover:bg-emerald-50 transition-all h-64 flex flex-col items-center justify-center">
-                {/* We can re-use the file input logic here */}
-                <Upload className="mb-2 text-emerald-500" size={32} />
-                <p className="text-gray-700 font-medium">Upload Cover Photo</p>
-                <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 10MB</p>
+
+              <div className="space-y-4">
+                <AnimatePresence>
+                  {foods.map((food, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="group flex gap-4 items-start bg-gray-50 p-4 rounded-xl relative border border-transparent hover:border-gray-200 transition-all"
+                    >
+                      <div className="flex-shrink-0">
+                        <label className="block cursor-pointer relative w-20 h-20 rounded-lg overflow-hidden bg-white border border-dashed border-gray-300 hover:border-emerald-400 transition-colors">
+                          {food.image ? (
+                            <img src={food.image} className="w-full h-full object-cover" alt="Food" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-400">
+                              <ImageIcon size={20} />
+                            </div>
+                          )}
+                          <input
+                            type="file"
+                            hidden
+                            accept="image/*"
+                            onChange={(e) => handleFoodImageUpload(i, e)}
+                          />
+                        </label>
+                      </div>
+
+                      <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <input
+                          placeholder="Item Name"
+                          className="w-full px-3 py-2 bg-white rounded-lg border border-gray-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-200 outline-none text-sm"
+                          value={food.name}
+                          onChange={(e) => updateFood(i, "name", e.target.value)}
+                        />
+                        <div className="relative">
+                          <DollarSign className="absolute left-3 top-2.5 text-gray-400" size={14} />
+                          <input
+                            placeholder="Price"
+                            type="number"
+                            className="w-full pl-8 pr-3 py-2 bg-white rounded-lg border border-gray-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-200 outline-none text-sm"
+                            value={food.price}
+                            onChange={(e) => updateFood(i, "price", e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      {foods.length > 1 && (
+                        <button
+                          onClick={() => removeFood(i)}
+                          className="text-gray-400 hover:text-red-500 p-1"
+                        >
+                          <X size={16} />
+                        </button>
+                      )}
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
               </div>
-              <input
-                type="file"
-                hidden
-                accept="image/*"
-                onChange={(e) => uploadSingleImage(e, setCoverImage)}
-              />
-            </label>
-          )}
-        </div>
+            </motion.div>
 
-       
-
-        {/* Food Menu */}
-        <div className="bg-white p-6 rounded-xl shadow">
-          <div className="flex justify-between items-center">
-            <h2 className="font-bold flex gap-2 items-center">
-              <Tag size={18} /> Food Menu
-            </h2>
-            <button
-              onClick={addFood}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-green-500 text-white rounded-lg hover:from-emerald-600 hover:to-green-600 transition-all shadow-md hover:shadow-lg"
+            {/* Location Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100"
             >
-              <Plus size={16} /> Add
-            </button>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-blue-50 rounded-lg">
+                  <MapPin className="text-blue-600" size={20} />
+                </div>
+                <h2 className="text-lg font-bold text-gray-800">Location</h2>
+              </div>
+
+              <div className="rounded-xl overflow-hidden border border-gray-200">
+                <MapLocationPicker onSelect={(data: LocationData) => setLocation(data)} />
+              </div>
+
+              {location && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-xl flex items-start gap-3 text-sm text-gray-600">
+                  <MapPin size={16} className="mt-0.5 flex-shrink-0 text-emerald-600" />
+                  <p>{location.fullAddress}</p>
+                </div>
+              )}
+            </motion.div>
+
           </div>
 
-          <div className="space-y-4 mt-4">
-            {foods.map((food, i) => (
-              <div key={i} className="flex gap-4 items-center">
-                <input
-                  placeholder="Food name"
-                  value={food.name}
-                  onChange={(e) => updateFood(i, "name", e.target.value)}
-                  className="input"
-                />
+          {/* Right Column - Side Info */}
+          <div className="space-y-6">
 
-                <input
-                  placeholder="Price"
-                  type="number"
-                  value={food.price}
-                  onChange={(e) => updateFood(i, "price", e.target.value)}
-                  className="input"
-                />
+            {/* Cover Image Card */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100"
+            >
+              <h2 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <Camera size={18} /> Cover Image
+              </h2>
 
-                {food.image ? (
-                  <img src={food.image} className="w-16 h-16 rounded" />
-                ) : (
+              {coverImage ? (
+                <div className="relative h-48 w-full rounded-xl overflow-hidden group">
+                  <img src={coverImage} alt="Cover" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
+                    <button
+                      onClick={() => setCoverImage("")}
+                      className="p-2 bg-white text-red-500 rounded-full hover:bg-red-50 transition-all shadow-lg"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <label className="block cursor-pointer group">
+                  <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center hover:border-emerald-400 hover:bg-emerald-50/50 transition-all h-48 flex flex-col items-center justify-center gap-3">
+                    <div className="p-3 bg-gray-50 rounded-full group-hover:bg-white transition-colors">
+                      <Upload className="text-gray-400 group-hover:text-emerald-500" size={24} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-700">Click to upload</p>
+                      <p className="text-xs text-gray-400 mt-1">PNG, JPG (Cover photo)</p>
+                    </div>
+                  </div>
                   <input
                     type="file"
-                    onChange={(e) => handleFoodImageUpload(i, e)}
+                    hidden
+                    accept="image/*"
+                    onChange={(e) => uploadSingleImage(e, setCoverImage)}
                   />
-                )}
+                </label>
+              )}
+            </motion.div>
 
-                {foods.length > 1 && (
-                  <button onClick={() => removeFood(i)}>
-                    <X />
-                  </button>
-                )}
+            {/* Opening Hours Card */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100"
+            >
+              <h2 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <Clock size={18} /> Opening Hours
+              </h2>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">OPENS AT</label>
+                  <input
+                    type="time"
+                    className="w-full px-4 py-2 bg-gray-50 rounded-lg border-transparent focus:bg-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-200 transition-all outline-none"
+                    value={form.openingOpen}
+                    onChange={(e) => setForm({ ...form, openingOpen: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">CLOSES AT</label>
+                  <input
+                    type="time"
+                    className="w-full px-4 py-2 bg-gray-50 rounded-lg border-transparent focus:bg-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-200 transition-all outline-none"
+                    value={form.openingClose}
+                    onChange={(e) => setForm({ ...form, openingClose: e.target.value })}
+                  />
+                </div>
               </div>
-            ))}
+            </motion.div>
+
           </div>
         </div>
-
-        {/* Additional Details */}
-        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Additional Details</h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Speciality</label>
-              <input
-                placeholder="e.g., Wood-fired pizza"
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none"
-                value={form.speciality}
-                onChange={(e) => setForm({ ...form, speciality: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Tags</label>
-              <input
-                placeholder="e.g., Italian, Casual Dining"
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none"
-                value={form.tags}
-                onChange={(e) => setForm({ ...form, tags: e.target.value })}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Opening Hours */}
-        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-          <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <Clock className="text-emerald-500" size={20} /> Opening Hours
-          </h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Opens At</label>
-              <input
-                type="time"
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none"
-                value={form.openingOpen}
-                onChange={(e) => setForm({ ...form, openingOpen: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Closes At</label>
-              <input
-                type="time"
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none"
-                value={form.openingClose}
-                onChange={(e) => setForm({ ...form, openingClose: e.target.value })}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Save */}
-        <button
-          onClick={handleSave}
-
-          className="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold"
-        >
-          <Save size={18} className="inline mr-2" />
-          Save Food Spot
-        </button>
       </div>
     </div>
   );

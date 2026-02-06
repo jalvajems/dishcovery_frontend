@@ -36,7 +36,6 @@ API.interceptors.response.use(
 
                 const { data } = await API.post('/auth/refresh');
 
-                // Map MongoDB _id to id for authStore
                 const mappedUser = {
                     id: (data.user as any)?._id || data.user?.id,
                     name: data.user?.name,

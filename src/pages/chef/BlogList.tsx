@@ -42,9 +42,6 @@ export default function BlogListChef() {
 
 
 
-  // const filteredBlogs = activeTab === 'Published'
-  //   ? blogs.filter(blog => blog.status === 'Published')
-  //   : blogs.filter(blog => blog.status === 'Draft');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-blue-50 p-8">

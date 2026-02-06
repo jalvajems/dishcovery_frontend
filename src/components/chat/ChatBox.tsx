@@ -25,7 +25,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
             loadMessages(conversation._id);
             markAsRead(conversation._id);
 
-            // Join chat room via socket
             socket?.emit('chat:join', conversation._id);
 
             return () => {
@@ -35,7 +34,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
     }, [conversation._id]);
 
     useEffect(() => {
-        // Listen for new messages
         const handleNewMessage = (data: any) => {
             if (data.conversationId === conversation._id) {
                 addMessage(data.message);
@@ -50,15 +48,13 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
 
         const handleMessageRead = (data: { conversationId: string, readBy: string }) => {
             if (data.conversationId === conversation._id) {
-                // We could implement a bulk update store action but for now reloading messages or just ignoring if we don't have granular update
-                loadMessages(conversation._id); // Simplest way to reflect read status
+                loadMessages(conversation._id); 
             }
         };
 
         const handleMessageDeleted = (data: { conversationId: string, messageId: string, isDeletedForEveryone: boolean }) => {
             if (data.conversationId === conversation._id) {
                 if (data.isDeletedForEveryone) {
-                    // Ideally we update the specific message
                     loadMessages(conversation._id);
                 }
             }
@@ -78,7 +74,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
     }, [socket, conversation._id, otherUser?._id, loadMessages]);
 
     useEffect(() => {
-        // Scroll to bottom when new messages arrive
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
@@ -90,7 +85,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
             await sendMessage(conversation._id, messageInput.trim());
             setMessageInput('');
 
-            // Stop typing indicator
             socket?.emit('chat:typing', { conversationId: conversation._id, isTyping: false });
         } catch (error) {
             console.error('Failed to send message:', error);
@@ -102,15 +96,12 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setMessageInput(e.target.value);
 
-        // Emit typing indicator
         socket?.emit('chat:typing', { conversationId: conversation._id, isTyping: true });
 
-        // Clear previous timeout
         if (typingTimeoutRef.current) {
             clearTimeout(typingTimeoutRef.current);
         }
 
-        // Stop typing after 2 seconds of inactivity
         typingTimeoutRef.current = setTimeout(() => {
             socket?.emit('chat:typing', { conversationId: conversation._id, isTyping: false });
         }, 2000);
