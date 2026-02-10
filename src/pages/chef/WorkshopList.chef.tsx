@@ -17,7 +17,7 @@ export default function WorkshopListChef() {
     const limit = 6;
     const [activeTab, setActiveTab] = useState("All");
 
-    const tabs = ["All", "DRAFT", "PENDING_APPROVAL", "APPROVED", "LIVE", "COMPLETED", "CANCELLED", "REJECTED"];
+    const tabs = ["All", "DRAFT", "PENDING_APPROVAL", "APPROVED", "LIVE", "COMPLETED", "CANCELLED", "REJECTED", "EXPIRED"];
 
     // Modal State
     const [showCancelModal, setShowCancelModal] = useState(false);
@@ -40,8 +40,8 @@ export default function WorkshopListChef() {
             setLoading(false);
         }
     };
-    console.log('workshoppppppppppp',workshops);
-    
+    console.log('workshoppppppppppp', workshops);
+
 
     const handleSubmitForApproval = async (id: string) => {
         try {
@@ -86,6 +86,7 @@ export default function WorkshopListChef() {
             REJECTED: "bg-red-100 text-red-700 border-red-200",
             LIVE: "bg-purple-100 text-purple-700 border-purple-200 animate-pulse",
             COMPLETED: "bg-blue-100 text-blue-700 border-blue-200",
+            EXPIRED: "bg-orange-100 text-orange-700 border-orange-200",
         };
         return (
             <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-tighter uppercase border ${styles[status] || styles.DRAFT}`}>
@@ -235,6 +236,11 @@ export default function WorkshopListChef() {
                                             >
                                                 Cancel
                                             </button>
+                                        )}
+                                        {w.status === 'EXPIRED' && (
+                                            <span className="px-3 py-1.5 bg-orange-50 text-orange-600 rounded-2xl border border-orange-100 text-xs font-bold">
+                                                Expired
+                                            </span>
                                         )}
                                         <button
                                             onClick={() => navigate(`/chef/workshop-detail/${w._id}`)}

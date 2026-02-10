@@ -190,7 +190,8 @@ export default function WorkshopDetailChef() {
                                     <span className={`px-4 py-1 rounded-full text-[10px] font-black tracking-widest uppercase border ${workshop.status === 'APPROVED' ? 'bg-green-100 text-green-700 border-green-200' :
                                         workshop.status === 'LIVE' ? 'bg-purple-100 text-purple-700 border-purple-200 animate-pulse' :
                                             workshop.status === 'COMPLETED' ? 'bg-blue-100 text-blue-700 border-blue-200' :
-                                                workshop.status === 'PENDING_APPROVAL' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' : 'bg-gray-100 text-gray-700 border-gray-200'
+                                                workshop.status === 'EXPIRED' ? 'bg-orange-100 text-orange-700 border-orange-200' :
+                                                    workshop.status === 'PENDING_APPROVAL' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' : 'bg-gray-100 text-gray-700 border-gray-200'
                                         }`}>
                                         {workshop.status.replace('_', ' ')}
                                     </span>
@@ -214,7 +215,7 @@ export default function WorkshopDetailChef() {
                                         Edit
                                     </button>
                                 )}
-                                {canEdit && workshop.status !== 'PENDING_APPROVAL' && (
+                                {canEdit && workshop.status !== 'PENDING_APPROVAL' && workshop.status !== 'EXPIRED' && (
                                     <button
                                         onClick={handleSubmit}
                                         className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-2xl font-bold hover:bg-green-700 transition-all shadow-xl"
@@ -492,6 +493,15 @@ export default function WorkshopDetailChef() {
                                                     <p className="text-sm font-bold uppercase tracking-widest leading-relaxed">
                                                         Session controls will appear<br />after admin approval
                                                     </p>
+                                                ) : workshop.status === 'EXPIRED' ? (
+                                                    <div className="space-y-2">
+                                                        <p className="text-sm font-bold uppercase tracking-widest leading-relaxed text-red-500">
+                                                            Session Expired
+                                                        </p>
+                                                        <p className="text-xs text-gray-400">
+                                                            You missed the scheduled start time.
+                                                        </p>
+                                                    </div>
                                                 ) : (
                                                     <p className="text-sm font-bold uppercase tracking-widest leading-relaxed">
                                                         Session controls unavailable<br />

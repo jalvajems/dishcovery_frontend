@@ -48,7 +48,7 @@ export default function MyWorkshopsFoodie() {
         } else if (activeTab === 'Past') {
             filtered = filtered.filter((booking: any) => {
                 const w = booking.workshopId;
-                return w && (w.status === 'COMPLETED' || w.status === 'CANCELLED' || booking.status === 'CANCELLED');
+                return w && (w.status === 'COMPLETED' || w.status === 'CANCELLED' || w.status === 'EXPIRED' || booking.status === 'CANCELLED');
             });
         }
 
@@ -165,11 +165,12 @@ export default function MyWorkshopsFoodie() {
                                                     <div className="flex flex-col items-end gap-2">
                                                         <span className={`px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase border ${workshop.status === 'LIVE' ? 'bg-red-50 text-red-600 border-red-100 animate-pulse' :
                                                             isCancelled ? 'bg-red-50 text-red-600 border-red-100' :
-                                                                isConfirmed ? 'bg-green-50 text-green-600 border-green-100' :
-                                                                    isCompleted ? 'bg-indigo-50 text-indigo-600 border-indigo-100' :
-                                                                        'bg-yellow-50 text-yellow-600 border-yellow-100'
+                                                                workshop.status === 'EXPIRED' ? 'bg-orange-50 text-orange-600 border-orange-100' :
+                                                                    isConfirmed ? 'bg-green-50 text-green-600 border-green-100' :
+                                                                        isCompleted ? 'bg-indigo-50 text-indigo-600 border-indigo-100' :
+                                                                            'bg-yellow-50 text-yellow-600 border-yellow-100'
                                                             }`}>
-                                                            {isCancelled ? 'Cancelled' : workshop.status === 'LIVE' ? 'Live Now' : isCompleted ? 'Completed' : booking.status}
+                                                            {isCancelled ? 'Cancelled' : workshop.status === 'LIVE' ? 'Live Now' : workshop.status === 'EXPIRED' ? 'Expired' : isCompleted ? 'Completed' : booking.status}
                                                         </span>
                                                         <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">
                                                             {booking.bookingType} • ₹{booking.amount}
@@ -208,7 +209,7 @@ export default function MyWorkshopsFoodie() {
                                                         className="flex-1 flex items-center justify-center gap-3 py-4 bg-gray-900 text-white rounded-2xl font-black hover:bg-green-600 transition-all"
                                                     >
                                                         <ArrowRight size={18} />
-                                                        {isCancelled ? 'Rebook Workshop' : 'View Details'}
+                                                        {isCancelled ? 'Rebook Workshop' : workshop.status === 'EXPIRED' ? 'View Details' : 'View Details'}
                                                     </button>
                                                 )}
 
@@ -222,7 +223,7 @@ export default function MyWorkshopsFoodie() {
                                                     </button>
                                                 )}
 
-                                                {booking.status === 'CONFIRMED' && isConfirmed && workshop.status !== 'LIVE' && workshop.status !== 'COMPLETED' && (
+                                                {booking.status === 'CONFIRMED' && isConfirmed && workshop.status !== 'LIVE' && workshop.status !== 'COMPLETED' && workshop.status !== 'EXPIRED' && (
                                                     <button
                                                         onClick={() => handleCancelClick(booking._id)}
                                                         className="flex-1 flex items-center justify-center gap-3 py-4 bg-red-50 text-red-600 rounded-2xl font-black hover:bg-red-100 transition-all border border-red-100"

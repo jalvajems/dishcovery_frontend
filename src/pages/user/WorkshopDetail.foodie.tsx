@@ -88,6 +88,14 @@ export default function WorkshopDetailFoodie() {
                     </div>
                 </div>
             )}
+            {workshop.status === 'EXPIRED' && (
+                <div className="bg-orange-50 border-b border-orange-100 p-4 sticky top-[72px] z-40">
+                    <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 text-orange-700 font-medium">
+                        <Clock className="w-5 h-5" />
+                        <span>This workshop has expired as the chef did not start the session on time. Refunds have been initiated.</span>
+                    </div>
+                </div>
+            )}
 
             {/* Hero Section */}
             <div className="relative h-[600px] w-full group overflow-hidden">
@@ -274,10 +282,10 @@ export default function WorkshopDetailFoodie() {
 
                                 <button
                                     onClick={handleBooking}
-                                    disabled={bookingLoading || workshop.isBooked || workshop.status === 'LIVE' || workshop.status === 'COMPLETED' || workshop.status === 'CANCELLED'}
+                                    disabled={bookingLoading || workshop.isBooked || workshop.status === 'LIVE' || workshop.status === 'COMPLETED' || workshop.status === 'CANCELLED' || workshop.status === 'EXPIRED'}
                                     className={`w-full flex items-center justify-center gap-3 py-6 rounded-[2rem] font-black shadow-2xl transition-all active:scale-95 group mb-6 disabled:opacity-50 disabled:cursor-not-allowed ${workshop.isBooked
                                         ? 'bg-green-100 text-green-700 shadow-none'
-                                        : workshop.status === 'LIVE' || workshop.status === 'CANCELLED'
+                                        : workshop.status === 'LIVE' || workshop.status === 'CANCELLED' || workshop.status === 'EXPIRED'
                                             ? 'bg-red-50 text-red-600 shadow-none'
                                             : workshop.status === 'COMPLETED'
                                                 ? 'bg-gray-100 text-gray-400 shadow-none'
@@ -292,7 +300,8 @@ export default function WorkshopDetailFoodie() {
                                                 workshop.status === 'LIVE' ? 'Live Session Started' :
                                                     workshop.status === 'COMPLETED' ? 'Workshop Completed' :
                                                         workshop.status === 'CANCELLED' ? 'Workshop Cancelled' :
-                                                            'Reserve My Seat'}
+                                                            workshop.status === 'EXPIRED' ? 'Workshop Expired' :
+                                                                'Reserve My Seat'}
                                             {!workshop.isBooked && workshop.status === 'APPROVED' && <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
                                         </>
                                     )}

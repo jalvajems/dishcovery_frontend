@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { Conversation, Message } from '@/types/chat';
 import * as chatApi from '@/api/chatApi';
+import { getErrorMessage } from '@/utils/errorHandler';
 
 interface ChatStore {
     conversations: Conversation[];
@@ -44,8 +45,9 @@ export const useChatStore = create<ChatStore>((set, get) => ({
             set({ loading: true, error: null });
             const data = await chatApi.getUserConversations();
             set({ conversations: data.conversations, loading: false });
-        } catch (error: any) {
-            set({ error: error.message || 'Failed to load conversations', loading: false });
+            set({ conversations: data.conversations, loading: false });
+        } catch (error: unknown) {
+            set({ error: getErrorMessage(error, 'Failed to load conversations'), loading: false });
         }
     },
 
@@ -54,8 +56,9 @@ export const useChatStore = create<ChatStore>((set, get) => ({
             set({ loading: true, error: null });
             const data = await chatApi.getMessages(conversationId);
             set({ messages: data.messages, loading: false });
-        } catch (error: any) {
-            set({ error: error.message || 'Failed to load messages', loading: false });
+            set({ messages: data.messages, loading: false });
+        } catch (error: unknown) {
+            set({ error: getErrorMessage(error, 'Failed to load messages'), loading: false });
         }
     },
 
@@ -66,10 +69,9 @@ export const useChatStore = create<ChatStore>((set, get) => ({
             console.log('Message sent successfully:', data);
             // Message will be added via socket event or we can add it optimistically
             get().addMessage(data.message);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Error sending message:', error);
-            console.error('Error response:', error.response?.data);
-            set({ error: error.message || 'Failed to send message' });
+            set({ error: getErrorMessage(error, 'Failed to send message') });
         }
     },
 
@@ -102,8 +104,8 @@ export const useChatStore = create<ChatStore>((set, get) => ({
                     conv._id === conversationId ? { ...conv, unreadCount: 0 } : conv
                 )
             }));
-        } catch (error: any) {
-            set({ error: error.message || 'Failed to mark messages as read' });
+        } catch (error: unknown) {
+            set({ error: getErrorMessage(error, 'Failed to mark messages as read') });
         }
     },
 
@@ -136,8 +138,8 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
             set({ loading: false });
             return data.conversation;
-        } catch (error: any) {
-            set({ error: error.message || 'Failed to create conversation', loading: false });
+        } catch (error: unknown) {
+            set({ error: getErrorMessage(error, 'Failed to create conversation'), loading: false });
             return null;
         }
     },
@@ -155,9 +157,9 @@ export const useChatStore = create<ChatStore>((set, get) => ({
             const data = await chatApi.deleteMessage(messageId, forEveryone);
             // Update local state immediately
             get().updateMessage(data.data);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Failed to delete message:', error);
-            set({ error: error.message || 'Failed to delete message' });
+            set({ error: getErrorMessage(error, 'Failed to delete message') });
         }
     }
 }));

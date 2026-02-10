@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Search, Calendar, Video, MapPin, ArrowRight, Clock } from 'lucide-react';
+import { logError } from '@/utils/errorHandler';
 import { getApprovedWorkshopsApi } from '@/api/workshopApi';
 import { useNavigate } from 'react-router-dom';
 import Pagination from '@/components/shared/Pagination';
@@ -28,7 +29,7 @@ export default function WorkshopDiscovery() {
             setWorkshops(data);
             setTotalPages(Math.ceil(totalCount / limit));
         } catch (error) {
-            console.error("Failed to fetch workshops");
+            logError(error, "Failed to fetch workshops");
         } finally {
             setLoading(false);
         }
