@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getFollowersApi } from '@/api/followApi';
 import { UserCircle, MapPin, ArrowRight, ArrowLeft, ChefHat } from 'lucide-react';
 import ChefNavbar from '@/components/shared/chef/NavBar.chef';
+import { getErrorMessage, logError } from '@/utils/errorHandler';
 import { showError } from '@/utils/toast';
 import Pagination from '@/components/shared/Pagination';
 
@@ -24,8 +25,9 @@ export default function FollowersList() {
             const response = await getFollowersApi(page, limit);
             setFollowers(response.data.datas);
             setTotal(response.data.total);
-        } catch (error: any) {
-            showError(error.response?.data?.message || "Failed to fetch followers");
+        } catch (error: unknown) {
+            logError(error);
+            showError(getErrorMessage(error, "Failed to fetch followers"));
         } finally {
             setLoading(false);
         }

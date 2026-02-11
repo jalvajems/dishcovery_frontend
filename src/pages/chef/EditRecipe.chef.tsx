@@ -3,14 +3,15 @@ import { Upload, ChevronDown, Plus, X, ChevronRight } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { editRecipePageApi, getRecipeDetailApi } from '@/api/chefApi';
 import { showError, showSuccess } from '@/utils/toast';
+import { getErrorMessage, logError } from '@/utils/errorHandler';
 import { useAwsS3Upload } from '@/components/shared/hooks/useAwsS3Upload';
 import ChefNavbar from '@/components/shared/chef/NavBar.chef';
 import { useUserStore } from '@/store/userStore';
 
 export default function EditRecipe() {
-    const navigate=useNavigate()
-  const location=useLocation()
-  const recipeId=location.state?.recipeId  
+  const navigate = useNavigate()
+  const location = useLocation()
+  const recipeId = location.state?.recipeId
 
   const [formData, setFormData] = useState({
     title: '',
@@ -22,41 +23,42 @@ export default function EditRecipe() {
   });
   const [ingredients, setIngredients] = useState(['']);
   const [steps, setSteps] = useState(['']);
-  const [uploadedImages, setUploadedImages] = useState<string|null>(null);
-      const {isVerifiedUser}=useUserStore()
-      const [errors, setErrors] = useState<Record<string, string>>({});
+  const [uploadedImages, setUploadedImages] = useState<string | null>(null);
+  const { isVerifiedUser } = useUserStore()
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  
+
 
 
   useEffect(() => {
-  async function fetchRecipe() {
-    if (!recipeId) return;
+    async function fetchRecipe() {
+      if (!recipeId) return;
 
-    try {
-      const res = await getRecipeDetailApi(recipeId);
-      const recipe = res.data.data;
+      try {
+        const res = await getRecipeDetailApi(recipeId);
+        const recipe = res.data.data;
 
-      setFormData({
-        title: recipe.title || '',
-        cuisine: recipe.cuisine || '',
-        cookingTime: recipe.cookingTime?.toString() || '',
-        tags: recipe.tags?.[0] || '',
-        dietType: recipe.dietType?.[0] || '',
-        isDraft: recipe.isDraft ?? true,
-      });
+        setFormData({
+          title: recipe.title || '',
+          cuisine: recipe.cuisine || '',
+          cookingTime: recipe.cookingTime?.toString() || '',
+          tags: recipe.tags?.[0] || '',
+          dietType: recipe.dietType?.[0] || '',
+          isDraft: recipe.isDraft ?? true,
+        });
 
-      setIngredients(recipe.ingredients?.length ? recipe.ingredients : ['']);
-      setSteps(recipe.steps?.length ? recipe.steps : ['']);
-      setUploadedImages(recipe.images?.[0] || null);
+        setIngredients(recipe.ingredients?.length ? recipe.ingredients : ['']);
+        setSteps(recipe.steps?.length ? recipe.steps : ['']);
+        setUploadedImages(recipe.images?.[0] || null);
 
-    } catch (error: any) {
-      showError(error.response?.data?.message || 'Failed to load recipe');
+      } catch (error: unknown) {
+        logError(error);
+        showError(getErrorMessage(error, 'Failed to load recipe'));
+      }
     }
-  }
 
-  fetchRecipe();
-}, [recipeId]);
+    fetchRecipe();
+  }, [recipeId]);
 
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -67,19 +69,19 @@ export default function EditRecipe() {
     }));
   };
 
-  const {uploadToS3,fileUrl,loading,error}=useAwsS3Upload()
-  
-    const handleFileUpload = async(e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files) {
-        
-        const Image=e.target.files?.[0]
-        const url=await uploadToS3(Image)
-        console.log(url);
-        
-        setUploadedImages(url)
-  
-      }
-    };
+  const { uploadToS3 } = useAwsS3Upload()
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+
+      const Image = e.target.files?.[0]
+      const url = await uploadToS3(Image)
+      console.log(url);
+
+      setUploadedImages(url)
+
+    }
+  };
 
   const addIngredient = () => {
     setIngredients([...ingredients, '']);
@@ -111,65 +113,64 @@ export default function EditRecipe() {
 
 
   const validateForm = () => {
-  const newErrors: Record<string, string> = {};
+    const newErrors: Record<string, string> = {};
 
-  if (!formData.title.trim()) {
-    newErrors.title = 'Recipe name is required';
-  } else if (formData.title.length < 3) {
-    newErrors.title = 'Recipe name must be at least 3 characters';
-  }
+    if (!formData.title.trim()) {
+      newErrors.title = 'Recipe name is required';
+    } else if (formData.title.length < 3) {
+      newErrors.title = 'Recipe name must be at least 3 characters';
+    }
 
-  if (!formData.cuisine) {
-    newErrors.cuisine = 'Cuisine is required';
-  }
+    if (!formData.cuisine) {
+      newErrors.cuisine = 'Cuisine is required';
+    }
 
-  if (!formData.cookingTime) {
-    newErrors.cookingTime = 'Cooking time is required';
-  } else if (Number(formData.cookingTime) <= 0) {
-    newErrors.cookingTime = 'Cooking time must be greater than 0';
-  }
+    if (!formData.cookingTime) {
+      newErrors.cookingTime = 'Cooking time is required';
+    } else if (Number(formData.cookingTime) <= 0) {
+      newErrors.cookingTime = 'Cooking time must be greater than 0';
+    }
 
-  if (ingredients.filter(i => i.trim()).length === 0) {
-    newErrors.ingredients = 'At least one ingredient is required';
-  }
+    if (ingredients.filter(i => i.trim()).length === 0) {
+      newErrors.ingredients = 'At least one ingredient is required';
+    }
 
-  if (steps.filter(s => s.trim()).length === 0) {
-    newErrors.steps = 'At least one step is required';
-  }
+    if (steps.filter(s => s.trim()).length === 0) {
+      newErrors.steps = 'At least one step is required';
+    }
 
-  setErrors(newErrors);
-  return Object.keys(newErrors).length === 0;
-};
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
 
-  const handleSaveRecipe = async() => {
-      if (!validateForm()) {
-    showError('Ivalid Credentials');
-    return;
-  }
-   try {
-      const recipeData={
-        id:recipeId,
-      title: formData.title,
-      cuisine: formData.cuisine,
-      cookingTime: Number(formData.cookingTime) || 0,
-      tags: formData.tags ? [formData.tags] : [],
-      dietType: formData.dietType ? [formData.dietType] : [],
-      ingredients: ingredients.filter(i => i.trim() !== ''),
-      images:uploadedImages,
-      steps: steps.filter(s => s.trim() !== ''),
-      isDraft: formData.isDraft
+  const handleSaveRecipe = async () => {
+    if (!validateForm()) {
+      showError('Ivalid Credentials');
+      return;
+    }
+    try {
+      const recipeData = {
+        id: recipeId,
+        title: formData.title,
+        cuisine: formData.cuisine,
+        cookingTime: Number(formData.cookingTime) || 0,
+        tags: formData.tags ? [formData.tags] : [],
+        dietType: formData.dietType ? [formData.dietType] : [],
+        ingredients: ingredients.filter(i => i.trim() !== ''),
+        images: uploadedImages,
+        steps: steps.filter(s => s.trim() !== ''),
+        isDraft: formData.isDraft
       }
-      console.log('recipe data ',recipeData);
-      const result=await editRecipePageApi({recipeId:recipeId,recipeData:recipeData})
-      console.log('result ',result);
-      
+      console.log('recipe data ', recipeData);
+      const result = await editRecipePageApi({ recipeId: recipeId, recipeData: recipeData })
+      console.log('result ', result);
+
       navigate(`/recipe-detail/${recipeId}`)
       showSuccess(result.data.message)
-    } catch (error:any) {
-      console.log(error);
-      
-      showError(error.response?.data?.message)
+    } catch (error: unknown) {
+      logError(error);
+      showError(getErrorMessage(error));
     }
   };
 
@@ -180,14 +181,14 @@ export default function EditRecipe() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50">
       {/* Top Navigation */}
-      <ChefNavbar/>
+      <ChefNavbar />
       {/* Main Content */}
       <main className="max-w-3xl mx-auto px-8 py-12">
-                      <div className="flex items-center gap-2 text-sm mb-8">
+        <div className="flex items-center gap-2 text-sm mb-8">
           <a href="/chef/recipes-listing" className="text-green-600 font-semibold hover:underline">Recipe Detail</a>
           <ChevronRight className="w-4 h-4 text-gray-400" />
           <a href="/chef/" className="text-green-600 font-semibold hover:underline">Edit recipe</a>
-          </div>
+        </div>
         <h1 className="text-4xl font-bold mb-8 bg-gradient-to-r from-gray-900 via-green-700 to-emerald-700 bg-clip-text text-transparent">
           Edit Recipe
         </h1>
@@ -200,8 +201,8 @@ export default function EditRecipe() {
                 Recipe Name
               </label>
               {errors.title && (
-  <p className="text-red-500 text-sm mt-1">{errors.title}</p>
-)}
+                <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+              )}
 
               <input
                 type="text"
@@ -220,8 +221,8 @@ export default function EditRecipe() {
                 Category / Cuisine
               </label>
               {errors.cuisine && (
-  <p className="text-red-500 text-sm mt-1">{errors.cuisine}</p>
-)}
+                <p className="text-red-500 text-sm mt-1">{errors.cuisine}</p>
+              )}
 
               <div className="relative">
                 <select
@@ -248,8 +249,8 @@ export default function EditRecipe() {
                 Cooking Time
               </label>
               {errors.cookingTime && (
-  <p className="text-red-500 text-sm mt-1">{errors.cookingTime}</p>
-)}
+                <p className="text-red-500 text-sm mt-1">{errors.cookingTime}</p>
+              )}
 
               <input
                 type="text"
@@ -292,8 +293,8 @@ export default function EditRecipe() {
                   Ingredients
                 </label>
                 {errors.ingredients && (
-  <p className="text-red-500 text-sm mt-2">{errors.ingredients}</p>
-)}
+                  <p className="text-red-500 text-sm mt-2">{errors.ingredients}</p>
+                )}
 
                 <button
                   onClick={addIngredient}
@@ -333,8 +334,8 @@ export default function EditRecipe() {
                   Steps / Instructions
                 </label>
                 {errors.steps && (
-  <p className="text-red-500 text-sm mt-2">{errors.steps}</p>
-)}
+                  <p className="text-red-500 text-sm mt-2">{errors.steps}</p>
+                )}
 
                 <button
                   onClick={addStep}
@@ -391,15 +392,15 @@ export default function EditRecipe() {
                   <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4 group-hover:text-green-600 transition-colors" />
                   <p className="text-gray-700 font-semibold mb-1">Drag and drop images here</p>
                   <p className="text-gray-500 text-sm">Or click to browse</p>
-               {uploadedImages && (
-  <div className="mt-4 flex justify-center">
-    <img 
-      src={uploadedImages} 
-      alt="Preview"
-      className="w-40 h-40 object-cover rounded-xl shadow-md"
-    />
-  </div>
-)}
+                  {uploadedImages && (
+                    <div className="mt-4 flex justify-center">
+                      <img
+                        src={uploadedImages}
+                        alt="Preview"
+                        className="w-40 h-40 object-cover rounded-xl shadow-md"
+                      />
+                    </div>
+                  )}
 
                 </label>
               </div>
@@ -456,8 +457,8 @@ export default function EditRecipe() {
                 Cancel
               </button>
               <button
-              disabled={!isVerifiedUser}
-                onClick={()=>handleSaveRecipe()}
+                disabled={!isVerifiedUser}
+                onClick={() => handleSaveRecipe()}
                 className="flex-1 px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl hover:shadow-xl hover:scale-105 transition-all shadow-lg"
               >
                 Save Recipe
@@ -477,22 +478,22 @@ export default function EditRecipe() {
             <a href="#" className="text-green-600 hover:text-green-700 font-medium transition-colors">Terms & Conditions</a>
             <a href="#" className="text-green-600 hover:text-green-700 font-medium transition-colors">Privacy Policy</a>
           </div>
-          
+
           <div className="flex justify-center gap-4 mb-6">
             <a href="#" className="p-3 bg-green-100 text-green-600 rounded-full hover:bg-green-600 hover:text-white transition-all">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/>
+                <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z" />
               </svg>
             </a>
             <a href="#" className="p-3 bg-green-100 text-green-600 rounded-full hover:bg-green-600 hover:text-white transition-all">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-                <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" fill="white"/>
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" fill="white" />
               </svg>
             </a>
             <a href="#" className="p-3 bg-green-100 text-green-600 rounded-full hover:bg-green-600 hover:text-white transition-all">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/>
+                <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" />
               </svg>
             </a>
           </div>

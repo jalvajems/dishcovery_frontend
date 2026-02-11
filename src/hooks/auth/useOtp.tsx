@@ -1,6 +1,7 @@
 import { resendOtpApi, verifyForgetOtpApi, verifySignupOtpApi } from "@/api/authApi";
 import { useOtpStore } from "@/store/authStore";
 import { showError, showSuccess } from "@/utils/toast";
+import { getErrorMessage, logError } from "@/utils/errorHandler";
 import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -73,18 +74,16 @@ export const useOtp = () => {
 
       } else if (type === 'forgotPassword') {
         console.log('ss1');
-        
+
         await verifyForgetOtpApi({ otp: OtptoSend, email });
         showSuccess("Forget password OTP verified successfully!!");
         clearOtpData();
         navigate('/resetPassword');
       }
 
-    } catch (error: any) {
-
+    } catch (error: unknown) {
       setOtpError(true);
-
-      const msg = error?.response?.data?.message || "Invalid OTP";
+      const msg = getErrorMessage(error, "Invalid OTP");
       showError(msg);
     }
   };
@@ -96,7 +95,7 @@ export const useOtp = () => {
       showSuccess(data.message)
       setTimer(60);
     } catch (error) {
-      console.log(error);
+      logError(error, "Resend OTP failed");
     }
   }
 

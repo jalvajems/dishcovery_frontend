@@ -16,9 +16,9 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-import MapLocationPicker from "@/utils/MapLocationPicker";
 import { addFoodSpotApi } from "@/api/foodieApi";
 import { showError, showSuccess } from "@/utils/toast";
+import { getErrorMessage } from "@/utils/errorHandler";
 import { useAwsS3Upload } from "@/components/shared/hooks/useAwsS3Upload";
 import FoodieNavbar from "@/components/shared/foodie/Navbar.foodie";
 import { useNavigate } from "react-router-dom";
@@ -139,8 +139,8 @@ export default function AddFoodSpot() {
       await addFoodSpotApi(payload);
       showSuccess("Food spot created successfully!");
       navigate(`/foodie/spot-listing`);
-    } catch (err: any) {
-      showError(err?.response?.data?.message || "Something went wrong");
+    } catch (err: unknown) {
+      showError(getErrorMessage(err));
     } finally {
       setIsSubmitting(false);
     }

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Upload, X, Tag, BookOpen, FileText, Image } from 'lucide-react';
 import { editBlogApi, getBlogDetailChefApi } from '@/api/chefApi';
 import { showError, showSuccess } from '@/utils/toast';
+import { getErrorMessage, logError } from '@/utils/errorHandler';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAwsS3Upload } from '@/components/shared/hooks/useAwsS3Upload';
 import ChefNavbar from '@/components/shared/chef/NavBar.chef';
@@ -73,8 +74,9 @@ const EditBlog: React.FC = () => {
                 setTags(blog.tags || []);
                 setCoverImage(blog.coverImage || null);
                 setIsPublished(!blog.isDraft);
-            } catch (error: any) {
-                showError(error.response?.data?.message || 'Failed to load blog');
+            } catch (error: unknown) {
+                logError(error);
+                showError(getErrorMessage(error, 'Failed to load blog'));
             } finally {
                 setIsLoading(false);
             }
@@ -132,9 +134,9 @@ const EditBlog: React.FC = () => {
             const response = await editBlogApi(payload, blogId);
             showSuccess(response.data.message || 'Blog updated successfully!');
             navigate('/chef/blog-listing');
-        } catch (error: any) {
-            showError(error.response?.data?.message);
-            console.error(error);
+        } catch (error: unknown) {
+            logError(error);
+            showError(getErrorMessage(error));
         }
     };
 

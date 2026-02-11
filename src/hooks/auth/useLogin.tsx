@@ -3,6 +3,7 @@ import { chefDashboardApi } from "@/api/chefApi";
 import { userDashboardApi } from "@/api/foodieApi";
 import { useAuthStore } from "@/store/authStore";
 import { showError, showSuccess } from "@/utils/toast";
+import { getErrorMessage } from "@/utils/errorHandler";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -63,7 +64,7 @@ export const useLogin = () => {
       }
       const mappedUser = {
         id: (data.user as any)._id || data.user.id,
-        _id: (data.user as any)._id || data.user.id, 
+        _id: (data.user as any)._id || data.user.id,
         name: data.user.name,
         email: data.user.email,
         role: data.user.role
@@ -79,31 +80,22 @@ export const useLogin = () => {
           await chefDashboardApi();
           showSuccess('Login Successfully!!')
           navigate('/chef/dashboard');
-        } catch (err: any) {
-          const message = err.response?.data?.message || "Login failed. Please try again.";
-
+        } catch (err: unknown) {
+          const message = getErrorMessage(err, "Login failed. Please try again.");
           showError(message);
-
         }
       } else if (data.user.role === 'user') {
         try {
           await userDashboardApi();
           showSuccess('Login Successfully!!')
           navigate('/foodie/dashboard');
-        } catch (err: any) {
-          const message =
-            err.response?.data?.message || "Login failed. Please try again.";
-
+        } catch (err: unknown) {
+          const message = getErrorMessage(err, "Login failed. Please try again.");
           showError(message);
-
         }
       }
-    } catch (error: any) {
-
-      const message =
-        error.response?.data?.message ||
-        "Login failed. Please try again.";
-
+    } catch (error: unknown) {
+      const message = getErrorMessage(error, "Login failed. Please try again.");
       showError(message);
     }
 

@@ -16,7 +16,7 @@ interface ChatStore {
     setActiveConversation: (conversation: Conversation | null) => void;
     loadConversations: () => Promise<void>;
     loadMessages: (conversationId: string) => Promise<void>;
-    sendMessage: (conversationId: string, content: string) => Promise<void>;
+    sendMessage: (conversationId: string, content: string, fileUrl?: string, messageType?: 'text' | 'image' | 'video' | 'audio' | 'file') => Promise<void>;
     addMessage: (message: Message) => void;
     updateMessageStatus: (messageId: string, status: 'sent' | 'delivered' | 'read') => void;
     updateMessage: (message: Message) => void;
@@ -37,7 +37,12 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     error: null,
 
     setActiveConversation: (conversation) => {
-        set({ activeConversation: conversation, messages: [] });
+        set((state) => {
+            if (state.activeConversation?._id === conversation?._id) {
+                return { activeConversation: conversation };
+            }
+            return { activeConversation: conversation, messages: [] };
+        });
     },
 
     loadConversations: async () => {
@@ -62,13 +67,17 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         }
     },
 
-    sendMessage: async (conversationId: string, content: string) => {
+    sendMessage: async (conversationId: string, content: string, fileUrl?: string, messageType?: 'text' | 'image' | 'video' | 'audio' | 'file') => {
         try {
-            console.log('Sending message:', { conversationId, content });
-            const data = await chatApi.sendMessage({ conversationId, content });
+            console.log('Sending message:', { conversationId, content, fileUrl, messageType });
+            const data = await chatApi.sendMessage({ conversationId, content, fileUrl, messageType });
             console.log('Message sent successfully:', data);
-            // Message will be added via socket event or we can add it optimistically
+
+            // Update messages list
             get().addMessage(data.message);
+
+            // Update conversation list with new last message
+            get().updateConversationLastMessage(conversationId, data.message);
         } catch (error: unknown) {
             console.error('Error sending message:', error);
             set({ error: getErrorMessage(error, 'Failed to send message') });

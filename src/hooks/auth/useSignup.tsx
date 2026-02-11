@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useOtpStore } from "@/store/authStore";
 import { showError, showSuccess } from "@/utils/toast";
+import { getErrorMessage } from "@/utils/errorHandler";
 
 export const useSignup = () => {
   const navigate = useNavigate();
@@ -94,9 +95,8 @@ export const useSignup = () => {
       setOtpData(formData.email, 'signup')
       showSuccess(res.data.message)
       navigate("/signup-otp-verify");
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message ||
-        "Login failed. Please try again.";
+    } catch (error: unknown) {
+      const errorMessage = getErrorMessage(error, "Login failed. Please try again.");
       showError(errorMessage)
     }
   };

@@ -24,6 +24,7 @@ import {
     XCircle
 } from "lucide-react";
 import { toast } from "react-toastify";
+import { getErrorMessage, logError } from "@/utils/errorHandler";
 import { getWorkshopParticipantsApi, markAttendanceApi } from "@/api/bookingApi";
 import ChefReviewSection from "@/components/shared/ChefReviewSection";
 import ChefNavbar from "@/components/shared/chef/NavBar.chef";
@@ -58,8 +59,9 @@ export default function WorkshopDetailChef() {
         try {
             const response = await getWorkshopByIdApi(id!);
             setWorkshop(response.data.data);
-        } catch (error) {
-            toast.error("Failed to fetch workshop details");
+        } catch (error: unknown) {
+            logError(error);
+            toast.error(getErrorMessage(error, "Failed to fetch workshop details"));
         } finally {
             setLoading(false);
         }
@@ -69,7 +71,8 @@ export default function WorkshopDetailChef() {
         try {
             const response = await getWorkshopParticipantsApi(id!);
             setParticipants(response.data.data);
-        } catch (error) {
+        } catch (error: unknown) {
+            logError(error);
             console.error("Failed to fetch participants");
         }
     };
@@ -79,8 +82,9 @@ export default function WorkshopDetailChef() {
             await submitWorkshopForApprovalApi(id!);
             toast.success("Submitted for approval");
             fetchWorkshop();
-        } catch (error) {
-            toast.error("Failed to submit");
+        } catch (error: unknown) {
+            logError(error);
+            toast.error(getErrorMessage(error, "Failed to submit"));
         }
     };
 
@@ -90,8 +94,9 @@ export default function WorkshopDetailChef() {
             toast.success("Workshop is now LIVE!");
             fetchWorkshop();
             navigate(`/chef/live-session/${id}`);
-        } catch (error) {
-            toast.error("Failed to start session");
+        } catch (error: unknown) {
+            logError(error);
+            toast.error(getErrorMessage(error, "Failed to start session"));
         }
     };
 
@@ -100,8 +105,9 @@ export default function WorkshopDetailChef() {
             await endWorkshopApi(id!);
             toast.success("Workshop session ended");
             fetchWorkshop();
-        } catch (error) {
-            toast.error("Failed to end session");
+        } catch (error: unknown) {
+            logError(error);
+            toast.error(getErrorMessage(error, "Failed to end session"));
         }
     };
 
@@ -111,8 +117,9 @@ export default function WorkshopDetailChef() {
             toast.success("Workshop marked as completed");
             fetchWorkshop();
             setShowConfirmModal(false);
-        } catch (error) {
-            toast.error("Failed to complete workshop");
+        } catch (error: unknown) {
+            logError(error);
+            toast.error(getErrorMessage(error, "Failed to complete workshop"));
         }
     };
 
@@ -123,8 +130,9 @@ export default function WorkshopDetailChef() {
             toast.success("Workshop cancelled successfully");
             setCancelModalOpen(false);
             fetchWorkshop();
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || "Failed to cancel workshop");
+        } catch (error: unknown) {
+            logError(error);
+            toast.error(getErrorMessage(error, "Failed to cancel workshop"));
         }
     };
 
@@ -133,8 +141,9 @@ export default function WorkshopDetailChef() {
             await markAttendanceApi(bookingId, status);
             toast.success(`Marked as ${status}`);
             fetchParticipants();
-        } catch (error) {
-            toast.error("Failed to update attendance");
+        } catch (error: unknown) {
+            logError(error);
+            toast.error(getErrorMessage(error, "Failed to update attendance"));
         }
     };
 

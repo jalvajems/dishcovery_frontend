@@ -3,6 +3,7 @@ import { Heart, Tag, Calendar, User, ArrowRight, Clock } from 'lucide-react';
 import { useParams, Link } from 'react-router-dom';
 import { getFoodieBlogDetailApi, getRelatedBlogsApi } from '@/api/foodieApi';
 import { showError } from '@/utils/toast';
+import { getErrorMessage, logError } from '@/utils/errorHandler';
 import ReviewSection from '@/components/shared/ReviewPage';
 import FoodieNavbar from '@/components/shared/foodie/Navbar.foodie';
 
@@ -19,8 +20,8 @@ const BlogDetailPage: React.FC = () => {
         if (!blogId) return;
         const res = await getFoodieBlogDetailApi(blogId);
         setBlog(res.data.data);
-      } catch (error: any) {
-        showError(error.response?.data?.message || "Failed to fetch blog details");
+      } catch (error: unknown) {
+        showError(getErrorMessage(error, "Failed to fetch blog details"));
       }
     };
     fetchBlog();
@@ -34,8 +35,8 @@ const BlogDetailPage: React.FC = () => {
         const res = await getRelatedBlogsApi(blog.tags[0]);
         const related = res.data.relatedDatas?.filter((b: any) => b._id !== blog._id) || [];
         setRelatedBlogs(related.slice(0, 3));
-      } catch (error: any) {
-        console.error(error);
+      } catch (error: unknown) {
+        logError(error);
       }
     };
     fetchRelatedBlogs();

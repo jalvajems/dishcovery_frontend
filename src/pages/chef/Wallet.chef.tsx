@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { Wallet, IndianRupee, Calendar, ArrowDownToLine, TrendingUp, DollarSign, Clock } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Wallet, IndianRupee, Calendar, ArrowDownToLine, DollarSign } from "lucide-react";
 import { getChefWalletApi } from "@/api/chefApi";
+import { getErrorMessage, logError } from "@/utils/errorHandler";
 import Pagination from "@/components/shared/Pagination";
+import { showError } from "@/utils/toast";
 import ChefNavbar from "@/components/shared/chef/NavBar.chef";
 import Footer from "@/components/shared/chef/Footer";
 import ReusableTable, { type ITableColumn } from "@/components/shared/DataTable";
@@ -49,8 +51,9 @@ export default function ChefWalletPage() {
       setWallet(res.data.data)
       setTotalPages(res.data.totalPages || 1);
       setCurrentPage(page);
-    } catch (error) {
-      console.error("Failed to fetch wallet", error);
+    } catch (error: unknown) {
+      logError(error);
+      showError(getErrorMessage(error, "Failed to fetch wallet"));
     }
   }
 
@@ -170,7 +173,7 @@ export default function ChefWalletPage() {
             </div>
           </div>
 
-         
+
 
           {/* Refunds Given Card */}
           <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">

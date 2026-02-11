@@ -5,19 +5,36 @@ import { useUserStore } from "@/store/userStore";
 import { useNavigate } from "react-router-dom";
 import Pagination from "@/components/shared/Pagination";
 import ConfirmModal from "@/components/shared/ConfirmModal";
+import { getErrorMessage, logError } from "@/utils/errorHandler";
+import { showError } from "@/utils/toast";
+
+interface Recipe {
+  _id: string;
+  title: string;
+  images: string;
+  cuisine: string;
+}
+
+interface Blog {
+  _id: string;
+  title: string;
+  coverImage: string;
+  tags: string[];
+}
 
 export default function ChefDashboard() {
   const { name } = useUserStore()
   const navigate = useNavigate()
 
 
-  const [recipes, setRecipes] = useState([])
+
+  const [recipes, setRecipes] = useState<Recipe[]>([])
   const [currentPageRecipe, setCurrentPageRecipe] = useState(1);
   const [totalPagesRecipe, setTotalPagesRecipe] = useState(1);
   const limit = 5;
   const [currentPageBlog, setCurrentPageBlog] = useState(1);
   const [totalPagesBlog, setTotalPagesBlog] = useState(1);
-  const [blogs, setBlogs] = useState([]);
+  const [blogs, setBlogs] = useState<Blog[]>([]);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
   const { setIsVerifiedUser } = useUserStore()
@@ -48,8 +65,8 @@ export default function ChefDashboard() {
 
       setTotalPagesRecipe(res.data.totalPages)
 
-    } catch (error: any) {
-      // Handle error
+    } catch (error: unknown) {
+      logError(error);
     }
 
   }
@@ -95,7 +112,7 @@ export default function ChefDashboard() {
   async function checkChefProfile() {
     try {
       const res = await chefDashboardApi();
-console.log('----------',res);
+      console.log('----------', res);
 
       setIsVerifiedUser(res.data.isVerified)
       setIsVerified(res.data.isVerified)
@@ -109,9 +126,9 @@ console.log('----------',res);
         setShowProfileModal(true);
       }
 
-    } catch (error: any) {
-      console.error(error);
-      // showError(error.response?.data?.message||'something went wrong')
+    } catch (error: unknown) {
+      logError(error);
+      showError(getErrorMessage(error, 'Something went wrong'));
     }
   }
 
@@ -221,7 +238,7 @@ console.log('----------',res);
       </h2>
 
       <div className="grid grid-cols-3 gap-6 mb-8">
-        {recipes.map((r: any, i) => (
+        {recipes.map((r, i) => (
           <div
             key={i}
             className="bg-white rounded-xl shadow-md overflow-hidden group hover:shadow-2xl transition-all cursor-pointer"
@@ -252,7 +269,7 @@ console.log('----------',res);
       </h2>
 
       <div className="grid grid-cols-3 gap-6 mb-8">
-        {blogs.map((b: any, i) => (
+        {blogs.map((b, i) => (
           <div
             key={i}
             className="bg-white rounded-xl shadow-md overflow-hidden group hover:shadow-2xl transition-all cursor-pointer"

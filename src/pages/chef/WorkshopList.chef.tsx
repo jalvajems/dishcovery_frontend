@@ -4,6 +4,7 @@ import { getChefWorkshopsApi, submitWorkshopForApprovalApi, cancelWorkshopApi } 
 import { useUserStore } from '@/store/userStore';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { getErrorMessage, logError } from '@/utils/errorHandler';
 import Pagination from '@/components/shared/Pagination';
 
 export default function WorkshopListChef() {
@@ -34,8 +35,9 @@ export default function WorkshopListChef() {
             const res = await getChefWorkshopsApi(currentPage, limit, searchQuery, activeTab);
             setWorkshops(res.data.datas || []);
             setTotalPages(res.data.totalPages || 1);
-        } catch (error) {
-            toast.error("Failed to load workshops");
+        } catch (error: unknown) {
+            logError(error);
+            toast.error(getErrorMessage(error, "Failed to load workshops"));
         } finally {
             setLoading(false);
         }
@@ -48,8 +50,9 @@ export default function WorkshopListChef() {
             await submitWorkshopForApprovalApi(id);
             toast.success("Workshop submitted for admin approval");
             fetchWorkshops();
-        } catch (error) {
-            toast.error("Failed to submit workshop");
+        } catch (error: unknown) {
+            logError(error);
+            toast.error(getErrorMessage(error, "Failed to submit workshop"));
         }
     };
 
@@ -73,8 +76,9 @@ export default function WorkshopListChef() {
             fetchWorkshops();
             setShowCancelModal(false);
             setSelectedWorkshopId(null);
-        } catch (err: any) {
-            toast.error(err.response?.data?.message || "Failed to cancel workshop");
+        } catch (err: unknown) {
+            logError(err);
+            toast.error(getErrorMessage(err, "Failed to cancel workshop"));
         }
     };
 

@@ -1,8 +1,9 @@
-import { Eye, Heart, MessageCircle, Edit2, Trash2, Calendar } from 'lucide-react';
+import { Edit2, Trash2, Calendar } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from "react-router-dom";
 import { deleteBlogApi, getBlogDetailChefApi } from "@/api/chefApi";
 import { showError, showSuccess } from "@/utils/toast";
+import { getErrorMessage, logError } from "@/utils/errorHandler";
 import ChefReviewSection from '@/components/shared/ChefReviewSection';
 import ChefNavbar from '@/components/shared/chef/NavBar.chef';
 import { useUserStore } from '@/store/userStore';
@@ -13,34 +14,36 @@ export default function BlogDetailPage() {
 
   const [blog, setBlog] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-      const {isVerifiedUser}=useUserStore()
-  
+  const { isVerifiedUser } = useUserStore()
 
-  if(!blogId)throw Error('blog id is not defined');
+
+  if (!blogId) throw Error('blog id is not defined');
   useEffect(() => {
     fetchBlog();
   }, [blogId]);
-  
+
   async function fetchBlog() {
     try {
-      if(!blogId)throw Error('blog id is not defined');
+      if (!blogId) throw Error('blog id is not defined');
       const res = await getBlogDetailChefApi(blogId);
       setBlog(res.data.data);
       setLoading(false);
-    } catch (error) {
-      showError("Failed to load blog");
+    } catch (error: unknown) {
+      logError(error);
+      showError(getErrorMessage(error, "Failed to load blog"));
       setLoading(false);
     }
   }
 
   async function handleDelete() {
     try {
-      
+
       await deleteBlogApi(blogId!);
       showSuccess("Blog deleted successfully");
       // navigate("/chef/blog-listing");
-    } catch (error) {
-      showError("Failed to delete blog");
+    } catch (error: unknown) {
+      logError(error);
+      showError(getErrorMessage(error, "Failed to delete blog"));
     }
   }
 
@@ -63,8 +66,8 @@ export default function BlogDetailPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50">
 
-      
-      <ChefNavbar/>
+
+      <ChefNavbar />
 
       <main className="max-w-5xl mx-auto px-8 py-12">
 
@@ -73,7 +76,7 @@ export default function BlogDetailPage() {
           <p className="text-green-600 font-medium">
             <span className="hover:underline cursor-pointer" onClick={() => navigate("/chef/blog-listing")}>
               Blogs
-            </span> 
+            </span>
             / <span className="text-gray-700">blog details</span>
           </p>
         </div>
@@ -97,7 +100,7 @@ export default function BlogDetailPage() {
           {/* Main Image */}
           <div className="px-10 pb-8">
             <div className="relative rounded-2xl overflow-hidden shadow-xl">
-              <img 
+              <img
                 src={blog.coverImage}
                 alt={blog.title}
                 className="w-full h-96 object-cover"
@@ -120,7 +123,7 @@ export default function BlogDetailPage() {
           {/* Action Buttons */}
           <div className="px-10 pb-10 flex gap-4">
             <button
-            disabled={!isVerifiedUser}
+              disabled={!isVerifiedUser}
               onClick={() => navigate(`/blog-edit/${blogId}`)}
               className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl hover:shadow-xl hover:scale-105 transition-all shadow-lg flex items-center gap-2"
             >
@@ -143,7 +146,7 @@ export default function BlogDetailPage() {
             <div className="grid grid-cols-3 gap-6">
 
               {/* Likes */}
-              {/* {/* <div className="bg-gradient-to-br from-red-50 to-pink-100 rounded-2xl p-6 border border-pink-200 hover:shadow-lg transition-all">
+          {/* {/* <div className="bg-gradient-to-br from-red-50 to-pink-100 rounded-2xl p-6 border border-pink-200 hover:shadow-lg transition-all">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center">
                     <Heart className="w-6 h-6 text-white" />

@@ -1,9 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { Conversation } from '@/types/chat';
 import { useChatStore } from '@/store/chatStore';
+import { useAuthStore } from '@/store/authStore';
 import MessageBubble from './MessageBubble';
 import { useSocket } from '@/context/SocketProvider';
-import { ArrowLeft, Send } from 'lucide-react';
+import { ArrowLeft, Send, Paperclip, Smile, X } from 'lucide-react';
+import EmojiPicker from 'emoji-picker-react';
+import { getSignedUrlApi } from '@/api/fileApi';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 interface ChatBoxProps {
     conversation: Conversation;
@@ -12,17 +17,24 @@ interface ChatBoxProps {
 
 const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
     const { messages, loadMessages, sendMessage, addMessage, markAsRead, isTyping, setTyping } = useChatStore();
+    const { user } = useAuthStore();
     const { socket } = useSocket();
     const [messageInput, setMessageInput] = useState('');
     const [isSending, setIsSending] = useState(false);
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
+
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const emojiPickerRef = useRef<HTMLDivElement>(null);
 
     const otherUser = conversation.otherParticipant;
 
     useEffect(() => {
         if (conversation._id) {
             loadMessages(conversation._id);
+            // Only mark as read if there are unread messages from the other user
             markAsRead(conversation._id);
 
             socket?.emit('chat:join', conversation._id);
@@ -37,7 +49,15 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
         const handleNewMessage = (data: any) => {
             if (data.conversationId === conversation._id) {
                 addMessage(data.message);
-                markAsRead(conversation._id);
+
+                // Only mark as read if the message is NOT from me
+                const senderId = typeof data.message.senderId === 'object'
+                    ? data.message.senderId._id || data.message.senderId.id
+                    : data.message.senderId;
+
+                if (senderId && user?.id && senderId.toString() !== user.id) {
+                    markAsRead(conversation._id);
+                }
             }
         };
 
@@ -48,7 +68,12 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
 
         const handleMessageRead = (data: { conversationId: string, readBy: string }) => {
             if (data.conversationId === conversation._id) {
-                loadMessages(conversation._id); 
+                // Optimistically update messages to read
+                useChatStore.setState((state) => ({
+                    messages: state.messages.map(msg =>
+                        msg.status !== 'read' ? { ...msg, status: 'read' } : msg
+                    )
+                }));
             }
         };
 
@@ -76,6 +101,20 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
+
+    // Close emoji picker when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target as Node)) {
+                setShowEmojiPicker(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     const handleSendMessage = async () => {
         if (!messageInput.trim() || isSending) return;
@@ -111,6 +150,52 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             handleSendMessage();
+        }
+    };
+
+    const onEmojiClick = (emojiObject: { emoji: string }) => {
+        setMessageInput((prevInput) => prevInput + emojiObject.emoji);
+    };
+
+    const handleFileSelect = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        // Reset input
+        event.target.value = '';
+
+        setIsUploading(true);
+        try {
+            // 1. Get Signed URL
+            const { data } = await getSignedUrlApi(file.name, file.type);
+            const { uploadUrl, fileUrl } = data.data;
+
+            // 2. Upload to S3
+            // The signed URL allows PUT request with specific Content-Type
+            await axios.put(uploadUrl, file, {
+                headers: {
+                    'Content-Type': file.type
+                }
+            });
+
+            // 4. Determine Message Type
+            let messageType: 'image' | 'video' | 'audio' | 'file' = 'file';
+            if (file.type.startsWith('image/')) messageType = 'image';
+            else if (file.type.startsWith('video/')) messageType = 'video';
+            else if (file.type.startsWith('audio/')) messageType = 'audio';
+
+            // 5. Send Message
+            await sendMessage(conversation._id, '', fileUrl, messageType);
+
+        } catch (error) {
+            console.error('File upload failed:', error);
+            toast.error('Failed to upload file');
+        } finally {
+            setIsUploading(false);
         }
     };
 
@@ -170,20 +255,56 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
             </div>
 
             {/* Input */}
-            <div className="bg-white border-t border-gray-100 p-4 md:p-6">
-                <div className="flex items-center gap-3 bg-gray-50 p-2 pr-2 rounded-[2rem] border border-gray-200 focus-within:ring-2 focus-within:ring-green-100 focus-within:border-green-400 transition-all shadow-inner">
+            <div className="bg-white border-t border-gray-100 p-4 md:p-6 relative">
+                {/* Emoji Picker */}
+                {showEmojiPicker && (
+                    <div ref={emojiPickerRef} className="absolute bottom-full left-6 mb-2 z-50 shadow-2xl rounded-xl border border-gray-100">
+                        <div className="relative">
+                            <button
+                                onClick={() => setShowEmojiPicker(false)}
+                                className="absolute -top-2 -right-2 w-6 h-6 bg-white rounded-full shadow-md flex items-center justify-center text-gray-500 hover:text-red-500 hover:bg-red-50 transition-all z-10"
+                            >
+                                <X size={14} />
+                            </button>
+                            <EmojiPicker onEmojiClick={onEmojiClick} width={300} height={400} />
+                        </div>
+                    </div>
+                )}
+
+                <div className="flex items-center gap-2 bg-gray-50 p-2 pr-2 rounded-[2rem] border border-gray-200 focus-within:ring-2 focus-within:ring-green-100 focus-within:border-green-400 transition-all shadow-inner">
+                    <button
+                        onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                        className="p-2 text-gray-500 hover:text-yellow-500 hover:bg-yellow-50 rounded-full transition-all"
+                    >
+                        <Smile size={20} />
+                    </button>
+
+                    <button
+                        onClick={handleFileSelect}
+                        disabled={isUploading}
+                        className={`p-2 text-gray-500 hover:text-blue-500 hover:bg-blue-50 rounded-full transition-all ${isUploading ? 'animate-pulse opacity-50' : ''}`}
+                    >
+                        <Paperclip size={20} />
+                    </button>
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileUpload}
+                        className="hidden"
+                    />
+
                     <input
                         type="text"
                         value={messageInput}
                         onChange={handleInputChange}
                         onKeyPress={handleKeyPress}
-                        placeholder="Type your message..."
-                        className="flex-1 px-4 py-2 bg-transparent border-none focus:outline-none text-gray-700 placeholder-gray-400 font-medium"
-                        disabled={isSending}
+                        placeholder={isUploading ? "Uploading file..." : "Type your message..."}
+                        className="flex-1 px-2 py-2 bg-transparent border-none focus:outline-none text-gray-700 placeholder-gray-400 font-medium"
+                        disabled={isSending || isUploading}
                     />
                     <button
                         onClick={handleSendMessage}
-                        disabled={!messageInput.trim() || isSending}
+                        disabled={!messageInput.trim() || isSending || isUploading}
                         className="p-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-full hover:shadow-lg hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:scale-100"
                     >
                         <Send className="w-4 h-4 ml-0.5" />

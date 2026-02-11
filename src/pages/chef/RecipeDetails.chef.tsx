@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Clock, Users, Tag, Star, ChefHat, Edit2, Trash2, ChevronRight } from "lucide-react";
+import { Clock, Users, Tag, ChefHat, Edit2, Trash2, ChevronRight } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { deleteRecipeApi, getRecipeDetailApi } from "@/api/chefApi";
 import { showError } from "@/utils/toast";
+import { getErrorMessage, logError } from "@/utils/errorHandler";
 import { useAuthStore } from "@/store/authStore";
 import ChefReviewSection from "@/components/shared/ChefReviewSection";
 import ChefNavbar from "@/components/shared/chef/NavBar.chef";
@@ -10,25 +11,25 @@ import { useUserStore } from "@/store/userStore";
 
 export default function RecipeDetailPage() {
   const { id } = useParams();
-  const navigate=useNavigate()
-  const name=useAuthStore().user?.name
-  
+  const navigate = useNavigate()
+
   const [recipe, setRecipe] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-      const {isVerifiedUser}=useUserStore()
-  
-  if(!id)throw Error('no recipe found')
-  
+  const { isVerifiedUser } = useUserStore()
+
+  if (!id) throw Error('no recipe found')
+
 
   useEffect(() => {
-    
+
     async function fetchRecipe() {
       try {
         if (!id) return;
         const res = await getRecipeDetailApi(id);
         setRecipe(res.data.data);
-      } catch (error: any) {
-        showError(error.response?.data?.message || "Failed to load recipe");
+      } catch (error: unknown) {
+        logError(error);
+        showError(getErrorMessage(error, "Failed to load recipe"));
       } finally {
         setLoading(false);
       }
@@ -36,11 +37,11 @@ export default function RecipeDetailPage() {
 
     fetchRecipe();
   }, [id]);
-  console.log('recipe',recipe);
+  console.log('recipe', recipe);
 
-    console.log("asdfasdfa",recipe?.images[0])
+  console.log("asdfasdfa", recipe?.images[0])
 
-  
+
   // Loading state
   if (loading) {
     return (
@@ -57,24 +58,24 @@ export default function RecipeDetailPage() {
       </div>
     );
   }
-  const handleEditButton=async()=>{
-    navigate(`/recipe-edit/${id}`,{state:{recipeId:id}})
+  const handleEditButton = async () => {
+    navigate(`/recipe-edit/${id}`, { state: { recipeId: id } })
   }
-  const handleDelete=async(id:string)=>{
+  const handleDelete = async (id: string) => {
     await deleteRecipeApi(id)
     navigate('/recipes-listing')
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50">
-<ChefNavbar/>
+      <ChefNavbar />
       <main className="max-w-6xl mx-auto px-8 py-12">
-      {/* MAIN CONTENT */}
-              <div className="flex items-center gap-2 text-sm mb-8">
+        {/* MAIN CONTENT */}
+        <div className="flex items-center gap-2 text-sm mb-8">
           <a href="/chef/recipes-listing" className="text-green-600 font-semibold hover:underline">Recipe Lists</a>
           <ChevronRight className="w-4 h-4 text-gray-400" />
           <a href="/chef/" className="text-green-600 font-semibold hover:underline">{recipe?.title}</a>
-          </div>
+        </div>
 
         {/* TITLE SECTION */}
         <div className="mb-8">
@@ -136,17 +137,17 @@ export default function RecipeDetailPage() {
 
         {/* ACTION BUTTONS */}
         <div className="flex gap-4">
-          <button disabled={!isVerifiedUser} onClick={()=>handleEditButton()} className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl hover:scale-105 transition">
+          <button disabled={!isVerifiedUser} onClick={() => handleEditButton()} className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl hover:scale-105 transition">
             <Edit2 className="w-5 h-5" />
             Edit
           </button>
-          <button disabled={!isVerifiedUser} onClick={()=>handleDelete(id)} className="px-8 py-4 bg-white border-2 border-gray-300 text-gray-700 font-bold rounded-xl hover:bg-gray-50 hover:scale-105 transition">
+          <button disabled={!isVerifiedUser} onClick={() => handleDelete(id)} className="px-8 py-4 bg-white border-2 border-gray-300 text-gray-700 font-bold rounded-xl hover:bg-gray-50 hover:scale-105 transition">
             <Trash2 className="w-5 h-5" />
             Delete
           </button>
         </div>
 
-      <ChefReviewSection reviewableId={id} reviewableType="Recipe" />
+        <ChefReviewSection reviewableId={id} reviewableType="Recipe" />
       </main>
     </div>
   );

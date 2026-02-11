@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Award, Trophy, Lightbulb, MessageSquare, UserCircle, Pencil, Mail, ChevronRight, Home } from "lucide-react";
+import { Award, Trophy, Lightbulb, MessageSquare, Pencil, Mail, ChevronRight, Home } from "lucide-react";
 import {
   getChefProfileApi,
 } from "@/api/chefApi";
+import { getErrorMessage, logError } from "@/utils/errorHandler";
+import { showError } from "@/utils/toast";
 import { useAuthStore } from "@/store/authStore";
 import ChefNavbar from "@/components/shared/chef/NavBar.chef";
 import { useUserStore } from "@/store/userStore";
@@ -11,13 +13,12 @@ import ChefReviewSection from "@/components/shared/ChefReviewSection";
 import { getFollowersApi } from "@/api/followApi";
 
 export default function ChefProfilePage() {
-  const id = useAuthStore.getState().user?._id
+  const id = (useAuthStore.getState().user as any)?._id
   const navigate = useNavigate()
   const { setUserStore } = useUserStore()
 
   const [chef, setChef] = useState<any>(null);
   const [followers, setFollowers] = useState<any>(null);
-  const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
 
@@ -32,9 +33,9 @@ export default function ChefProfilePage() {
 
 
         setChef(chefRes.data.datas);
-        setReviews(chefRes.data.reviews || []);
-      } catch (error: any) {
-        // showError(error?.response?.data?.message || "Something went wrong");
+      } catch (error: unknown) {
+        logError(error);
+        showError(getErrorMessage(error, "Failed to load profile"));
       } finally {
         setLoading(false);
       }

@@ -4,6 +4,7 @@ import { createChefProfileApi } from "@/api/chefApi";
 import { showError, showSuccess } from "@/utils/toast";
 import { useNavigate } from "react-router-dom";
 import { useAwsS3Upload } from "@/components/shared/hooks/useAwsS3Upload";
+import { getErrorMessage, logError } from "@/utils/errorHandler";
 
 
 type FormErrors = {
@@ -42,9 +43,11 @@ export default function CreateChefProfile() {
     if (e.target.files) {
       const Image = e.target.files[0];
       const url = await uploadToS3(Image);
-      setImagePreview(url);
-      setForm((prev) => ({ ...prev, image: url }));
-      setErrors((prev) => ({ ...prev, image: undefined }));
+      if (url) {
+        setImagePreview(url);
+        setForm((prev) => ({ ...prev, image: url }));
+        setErrors((prev) => ({ ...prev, image: undefined }));
+      }
     }
   };
 
@@ -92,8 +95,9 @@ export default function CreateChefProfile() {
       const result = await createChefProfileApi(payload);
       showSuccess(result.data.message);
       navigate("/chef/profile");
-    } catch (error: any) {
-      showError(error.response.data.message);
+    } catch (error: unknown) {
+      logError(error);
+      showError(getErrorMessage(error));
     } finally {
       setLoading(false);
     }

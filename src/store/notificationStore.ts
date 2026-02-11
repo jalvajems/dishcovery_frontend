@@ -6,6 +6,7 @@ import {
     getUnreadNotificationCountApi,
     clearAllNotificationsApi
 } from '../api/notificationApi';
+import { logError } from '../utils/errorHandler';
 
 export interface INotification {
     _id: string;
@@ -48,7 +49,7 @@ export const useNotificationStore = create<INotificationStore>((set, get) => ({
             const response = await getUserNotificationsApi(limit, skip, filter);
             set({ notifications: response.data.data });
         } catch (error) {
-            console.error("Failed to fetch notifications", error);
+            logError(error, "Failed to fetch notifications");
         } finally {
             set({ isLoading: false });
         }
@@ -59,7 +60,7 @@ export const useNotificationStore = create<INotificationStore>((set, get) => ({
             const response = await getUnreadNotificationCountApi();
             set({ unreadCount: response.data.data.count });
         } catch (error) {
-            console.error("Failed to fetch unread count", error);
+            logError(error, "Failed to fetch unread count");
         }
     },
 
@@ -82,7 +83,7 @@ export const useNotificationStore = create<INotificationStore>((set, get) => ({
                 await markNotificationAsReadApi(id);
             }
         } catch (error) {
-            console.error("Failed to mark notification as read", error);
+            logError(error, "Failed to mark notification as read");
             // Revert on failure? For now simpler to just log
         }
     },
@@ -95,7 +96,7 @@ export const useNotificationStore = create<INotificationStore>((set, get) => ({
             }));
             await markAllNotificationsAsReadApi();
         } catch (error) {
-            console.error("Failed to mark all as read", error);
+            logError(error, "Failed to mark all as read");
         }
     },
 
@@ -104,7 +105,7 @@ export const useNotificationStore = create<INotificationStore>((set, get) => ({
             set({ notifications: [], unreadCount: 0 });
             await clearAllNotificationsApi();
         } catch (error) {
-            console.error("Failed to clear all notifications", error);
+            logError(error, "Failed to clear all notifications");
         }
     },
 

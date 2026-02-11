@@ -4,7 +4,7 @@ import ChefNavbar from "@/components/shared/chef/NavBar.chef";
 import Footer from "@/components/shared/chef/Footer";
 import Pagination from "@/components/shared/Pagination";
 import { getFoodieWalletApi } from "@/api/foodieApi";
-import ReusableTable, { type ITableColumn } from "@/components/shared/DataTable";
+import { logError } from "@/utils/errorHandler";
 
 // ---------------- TYPES ----------------
 interface FoodieWalletTransaction {
@@ -47,7 +47,7 @@ export default function FoodieWalletPage() {
       setTotalPages(res.data.totalPages || 1);
       setCurrentPage(page);
     } catch (error) {
-      console.error("Failed to fetch wallet", error);
+      logError(error, "Failed to fetch wallet");
     }
   }
 

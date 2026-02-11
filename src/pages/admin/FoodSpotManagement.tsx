@@ -13,6 +13,8 @@ import {
     adminUnapproveFoodSpotApi,
     adminFoodSpotListingApi,
 } from "@/api/adminApi";
+import { showError } from "@/utils/toast";
+import { getErrorMessage, logError } from "@/utils/errorHandler";
 
 type FoodSpot = {
     _id: string;
@@ -77,8 +79,10 @@ export default function FoodSpotManagement() {
                 await adminUnapproveFoodSpotApi(selectedSpot._id);
             }
             refetch();
-        } catch (error) {
-            console.error(error);
+            refetch();
+        } catch (error: unknown) {
+            logError(error);
+            showError(getErrorMessage(error));
         } finally {
             setModalOpen(false);
         }

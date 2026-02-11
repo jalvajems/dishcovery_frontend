@@ -25,8 +25,8 @@ const ChatList: React.FC<ChatListProps> = ({ conversations, activeConversationId
         if (text.length <= maxLength) return text;
         return text.substring(0, maxLength) + '...';
     };
-    console.log('--------',conversations);
-    
+    console.log('--------', conversations);
+
 
     return (
         <div className="h-full flex flex-col bg-gray-50/50">
@@ -51,8 +51,8 @@ const ChatList: React.FC<ChatListProps> = ({ conversations, activeConversationId
                                 key={conversation._id}
                                 onClick={() => onSelectConversation(conversation)}
                                 className={`p-4 cursor-pointer rounded-2xl transition-all duration-200 border border-transparent ${isActive
-                                        ? 'bg-white shadow-md border-gray-100 scale-[1.02]'
-                                        : 'hover:bg-white hover:shadow-sm hover:border-gray-100'
+                                    ? 'bg-white shadow-md border-gray-100 scale-[1.02]'
+                                    : 'hover:bg-white hover:shadow-sm hover:border-gray-100'
                                     }`}
                             >
                                 <div className="flex items-start gap-4">
@@ -78,7 +78,15 @@ const ChatList: React.FC<ChatListProps> = ({ conversations, activeConversationId
                                         <div className="flex justify-between items-center">
                                             <p className={`text-sm truncate font-medium ${isActive ? 'text-gray-600' : 'text-gray-400'}`}>
                                                 {conversation.lastMessage
-                                                    ? truncateMessage(conversation.lastMessage.content)
+                                                    ? (() => {
+                                                        const msg = conversation.lastMessage;
+                                                        if (msg.isDeletedForEveryone) return '🚫 This message was deleted';
+                                                        if (msg.messageType === 'image') return '📷 Image';
+                                                        if (msg.messageType === 'video') return '🎥 Video';
+                                                        if (msg.messageType === 'audio') return '🎵 Audio';
+                                                        if (msg.messageType === 'file') return '📎 File';
+                                                        return truncateMessage(msg.content);
+                                                    })()
                                                     : 'No messages yet'}
                                             </p>
 

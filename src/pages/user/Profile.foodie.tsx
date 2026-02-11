@@ -8,6 +8,7 @@ import { useUserStore } from "@/store/userStore";
 import { useAuthStore } from "@/store/authStore";
 import { logoutApi } from "@/api/authApi";
 import FoodieNavbar from "@/components/shared/foodie/Navbar.foodie";
+import { getErrorMessage } from "@/utils/errorHandler";
 
 export default function ProfileFoodie() {
   const [profile, setProfile] = useState<any>(null);
@@ -40,8 +41,8 @@ export default function ProfileFoodie() {
           const statsRes = await getFollowStatsApi(profileData.userId._id);
           setStats(statsRes.data.datas);
         }
-      } catch (error: any) {
-        showError(error.response?.data?.message || "Failed to load profile");
+      } catch (error: unknown) {
+        showError(getErrorMessage(error, "Failed to load profile"));
       } finally {
         setLoading(false);
       }

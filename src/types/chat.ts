@@ -9,10 +9,11 @@ export interface User {
 export interface Message {
     _id: string;
     conversationId: string;
-    senderId: string | User;
+    senderId: string;
     senderRole: 'chef' | 'foodie';
     content: string;
-    messageType: 'text' | 'image';
+    fileUrl?: string;
+    messageType: 'text' | 'image' | 'video' | 'audio' | 'file';
     status: 'sent' | 'delivered' | 'read';
     readBy: string[];
     deletedFor?: string[];
@@ -35,6 +36,8 @@ export interface Conversation {
 export interface SendMessagePayload {
     conversationId: string;
     content: string;
+    fileUrl?: string;
+    messageType?: 'text' | 'image' | 'video' | 'audio' | 'file';
 }
 
 export interface CreateConversationPayload {

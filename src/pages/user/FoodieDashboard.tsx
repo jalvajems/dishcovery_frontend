@@ -10,6 +10,7 @@ import { useUserStore } from '@/store/userStore';
 import ConfirmModal from '@/components/shared/ConfirmModal';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Clock, MapPin, ChefHat, BookOpen, Calendar } from 'lucide-react';
+import { logError } from '@/utils/errorHandler';
 
 interface Recipe {
   _id: string;
@@ -88,7 +89,7 @@ export default function FoodieDashboard() {
         setShowProfileModal(true);
       }
     } catch (error) {
-      console.error(error);
+      logError(error);
     }
   }
 
@@ -107,7 +108,7 @@ export default function FoodieDashboard() {
       setFoodSpots(spotsRes.data.data || spotsRes.data.datas || []);
       setWorkshops(workshopsRes.data.data || workshopsRes.data.datas || []);
     } catch (error) {
-      console.error("Error fetching dashboard data:", error);
+      logError(error, "Error fetching dashboard data");
     } finally {
       setLoading(false);
     }

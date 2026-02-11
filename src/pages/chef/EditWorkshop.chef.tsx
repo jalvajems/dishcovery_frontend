@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import ChefNavbar from '@/components/shared/chef/NavBar.chef';
 import { useAwsS3Upload } from '@/components/shared/hooks/useAwsS3Upload';
 import MapLocationPicker from '@/utils/MapLocationPicker';
+import { getErrorMessage, logError } from '@/utils/errorHandler';
 
 export default function EditWorkshopChef() {
     const { id } = useParams<{ id: string }>();
@@ -34,7 +35,7 @@ export default function EditWorkshopChef() {
     const { uploadToS3, loading: uploadLoading } = useAwsS3Upload();
     const [uploadedBanner, setUploadedBanner] = useState<string | null>(null);
 
-    const [errors, setErrors] = useState<any>({});
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     useEffect(() => {
         fetchWorkshop();
@@ -72,7 +73,7 @@ export default function EditWorkshopChef() {
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        const { name, value, type } = e.target as any;
+        const { name, value, type } = e.target;
         setFormData(prev => ({
             ...prev,
             [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked :
@@ -102,7 +103,7 @@ export default function EditWorkshopChef() {
     };
 
     const validate = () => {
-        const newErrors: any = {};
+        const newErrors: Record<string, string> = {};
         if (formData.title.length < 5) newErrors.title = "Title must be at least 5 chars";
         if (formData.description.length < 20) newErrors.description = "Description must be at least 20 chars";
         if (!formData.category) newErrors.category = "Category is required";
@@ -125,7 +126,26 @@ export default function EditWorkshopChef() {
 
         try {
             setSaving(true);
-            const payload: any = {
+            const payload: {
+                title: string;
+                description: string;
+                category: string;
+                date: string;
+                startTime: string;
+                duration: number;
+                participantLimit: number;
+                mode: string;
+                isFree: boolean;
+                price: number;
+                banner: string;
+                location?: {
+                    venueName: string;
+                    address: string;
+                    city: string;
+                    latitude: number;
+                    longitude: number;
+                };
+            } = {
                 title: formData.title,
                 description: formData.description,
                 category: formData.category,
@@ -152,8 +172,9 @@ export default function EditWorkshopChef() {
             await updateWorkshopApi(id!, payload);
             toast.success("Workshop updated successfully!");
             navigate(`/chef/workshop-detail/${id}`);
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || "Failed to update workshop");
+        } catch (error: unknown) {
+            logError(error);
+            toast.error(getErrorMessage(error, "Failed to update workshop"));
         } finally {
             setSaving(false);
         }

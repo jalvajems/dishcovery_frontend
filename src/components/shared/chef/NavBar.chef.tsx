@@ -3,12 +3,20 @@ import { NotificationBell } from "../NotificationBell";
 import Chatbot from "@/components/chat/Chatbot";
 import logo from "../../../assets/logo.png"
 import { getChefProfileApi } from "@/api/chefApi";
+import { getErrorMessage } from "@/utils/errorHandler";
 import { showError } from "@/utils/toast";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+
+interface Chef {
+  firstName: string;
+  lastName: string;
+  image: string;
+}
+
 export default function ChefNavbar() {
-  const [chef, setChef] = useState<any>(null);
+  const [chef, setChef] = useState<Chef | null>(null);
   const navigate = useNavigate()
   useEffect(() => {
     async function fetchData() {
@@ -17,8 +25,8 @@ export default function ChefNavbar() {
 
         setChef(chefRes.data.datas);
 
-      } catch (error: any) {
-        showError(error?.response?.data?.message || "Something went wrong");
+      } catch (error: unknown) {
+        showError(getErrorMessage(error, "Something went wrong"));
       }
     }
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { adminGetDashboardStatsApi, adminGetGrowthDataApi } from "@/api/adminApi";
+import { logError } from "@/utils/errorHandler";
 
 interface DashboardStats {
   totalUsers: number;
@@ -42,7 +43,7 @@ export default function DashboardContent() {
           setGrowthData(growthResponse.data.data);
         }
       } catch (error) {
-        console.error("Error fetching dashboard data:", error);
+        logError(error, "Error fetching dashboard data");
       } finally {
         setLoading(false);
       }

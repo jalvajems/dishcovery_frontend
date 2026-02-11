@@ -14,6 +14,7 @@ import {
     AlertCircle
 } from "lucide-react";
 import { toast } from "react-toastify";
+import { getErrorMessage, logError } from "@/utils/errorHandler";
 
 export default function WorkshopDetailAdmin() {
     const { id } = useParams<{ id: string }>();
@@ -32,8 +33,9 @@ export default function WorkshopDetailAdmin() {
             if (!id) return;
             const response = await getWorkshopByIdApi(id);
             setWorkshop(response.data.data);
-        } catch (error) {
-            toast.error("Failed to fetch workshop details");
+        } catch (error: unknown) {
+            logError(error);
+            toast.error(getErrorMessage(error, "Failed to fetch workshop details"));
         } finally {
             setLoading(false);
         }
@@ -44,8 +46,8 @@ export default function WorkshopDetailAdmin() {
             await approveWorkshopApi(id!);
             toast.success("Workshop approved successfully");
             fetchWorkshop();
-        } catch (error) {
-            toast.error("Failed to approve workshop");
+        } catch (error: unknown) {
+            toast.error(getErrorMessage(error, "Failed to approve workshop"));
         }
     };
 
@@ -59,8 +61,8 @@ export default function WorkshopDetailAdmin() {
             toast.success("Workshop rejected");
             setShowRejectModal(false);
             fetchWorkshop();
-        } catch (error) {
-            toast.error("Failed to reject workshop");
+        } catch (error: unknown) {
+            toast.error(getErrorMessage(error, "Failed to reject workshop"));
         }
     };
 

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { ArrowRight, Search } from 'lucide-react';
 import { getAllRecipesFoodieApi } from '@/api/foodieApi';
+import { showError } from '@/utils/toast';
+import { getErrorMessage } from "@/utils/errorHandler";
 import { useNavigate } from 'react-router-dom';
 import Pagination from '@/components/shared/Pagination';
 import SearchBar from '@/components/shared/SearchBar';
@@ -24,10 +26,13 @@ export default function RecipeListing() {
   }, [currentPage, limit, searchQuery, filter])
   async function fetchRecipes() {
 
-    const result = await getAllRecipesFoodieApi(currentPage, limit, searchQuery, filter)
-
-    setRecipes(result.data.datas)
-    setTotalPages(result.data.total)
+    try {
+      const result = await getAllRecipesFoodieApi(currentPage, limit, searchQuery, filter)
+      setRecipes(result.data.datas)
+      setTotalPages(result.data.total)
+    } catch (error: unknown) {
+      showError(getErrorMessage(error, "Failed to load recipes"));
+    }
 
 
   }

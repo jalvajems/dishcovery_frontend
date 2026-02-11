@@ -7,6 +7,7 @@ import { getFoodSpotDetailApi } from '@/api/foodieApi';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import FoodieNavbar from '@/components/shared/foodie/Navbar.foodie';
 import ReviewSection from '@/components/shared/ReviewPage';
+import { logError } from '@/utils/errorHandler';
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
@@ -81,7 +82,7 @@ export const MyFoodSpotDetailPage: React.FC = () => {
           setFoodSpot(res.data);
         }
       } catch (error) {
-        console.error("Failed to fetch food spot details:", error);
+        logError(error, "Failed to fetch food spot details");
       } finally {
         setLoading(false);
       }
@@ -304,7 +305,8 @@ export const MyFoodSpotDetailPage: React.FC = () => {
                       }}
                       style={{ width: '100%', height: '100%' }}
                       mapStyle="mapbox://styles/mapbox/streets-v11"
-                      accessToken={mapboxgl.accessToken}
+                      tabIndex={0}
+                      accessToken={mapboxgl.accessToken || ""}
                       scrollZoom={false}
                     >
                       <Marker longitude={lng} latitude={lat} color="#10B981" />

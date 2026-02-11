@@ -5,12 +5,14 @@ import ChatBox from '@/components/chat/ChatBox';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MessageSquare } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
+import { useSocket } from '@/context/SocketProvider';
 
 const ChatPage: React.FC = () => {
     const { conversationId } = useParams<{ conversationId?: string }>();
     const navigate = useNavigate();
     const { user } = useAuthStore();
     const { conversations, activeConversation, setActiveConversation, loadConversations } = useChatStore();
+    const { socket } = useSocket();
     const [isMobileView, setIsMobileView] = useState(false);
 
     const basePath = user?.role === 'chef' ? '/chef/chat' : '/foodie/chat';
@@ -18,6 +20,20 @@ const ChatPage: React.FC = () => {
     useEffect(() => {
         loadConversations();
     }, []);
+
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleMessage = () => {
+            loadConversations();
+        };
+
+        socket.on('chat:conversation-update', handleMessage);
+
+        return () => {
+            socket.off('chat:conversation-update', handleMessage);
+        };
+    }, [socket, loadConversations]);
 
     useEffect(() => {
         const checkMobileView = () => {

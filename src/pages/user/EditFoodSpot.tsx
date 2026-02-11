@@ -19,6 +19,7 @@ import {
   getFoodSpotDetailApi
 } from "@/api/foodieApi";
 import { showError, showSuccess } from "@/utils/toast";
+import { getErrorMessage } from "@/utils/errorHandler";
 import { useAwsS3Upload } from "@/components/shared/hooks/useAwsS3Upload";
 import FoodieNavbar from "@/components/shared/foodie/Navbar.foodie";
 
@@ -82,8 +83,8 @@ export default function EditFoodSpot() {
         });
 
         setLoading(false);
-      } catch (error) {
-        showError("Failed to load food spot details");
+      } catch (error: unknown) {
+        showError(getErrorMessage(error, "Failed to load food spot details"));
         navigate("/foodie/spot-listing");
       }
     };
@@ -167,8 +168,8 @@ export default function EditFoodSpot() {
       await editFoodSpotApi(id, payload);
       showSuccess("Food spot updated successfully");
       navigate("/foodie/spot-listing");
-    } catch (error: any) {
-      showError(error.response?.data?.message || "Update failed");
+    } catch (error: unknown) {
+      showError(getErrorMessage(error, "Update failed"));
     }
   };
 

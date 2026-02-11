@@ -23,6 +23,7 @@ import {
     ShieldCheck,
     Users
 } from 'lucide-react';
+import { logError } from '@/utils/errorHandler';
 import { followChefApi, unfollowChefApi, checkIsFollowingApi, getFollowStatsApi } from '@/api/followApi';
 import FoodieNavbar from '@/components/shared/foodie/Navbar.foodie';
 import ReviewSection from '@/components/shared/ReviewPage';
@@ -74,7 +75,7 @@ export default function ChefDetail() {
             setIsFollowing(isFollowingRes.data.datas);
             setStats(statsRes.data.datas);
         } catch (error) {
-            console.error('Error fetching chef details:', error);
+            logError(error, 'Error fetching chef details');
         } finally {
             setLoading(false);
         }
@@ -94,7 +95,7 @@ export default function ChefDetail() {
                 setStats(prev => ({ ...prev, followers: prev.followers + 1 }));
             }
         } catch (error) {
-            console.error('Error toggling follow:', error);
+            logError(error, 'Error toggling follow');
         } finally {
             setFollowLoading(false);
         }
@@ -109,7 +110,7 @@ export default function ChefDetail() {
             } else if (activeTab === 'blogs') {
                 response = await getChefBlogsApi(id!, currentPage, limit, '');
             } else if (activeTab === 'workshops') {
-                response = await getChefWorkshopsApi(id!, currentPage, limit,'','');
+                response = await getChefWorkshopsApi(id!, currentPage, limit, '', '');
             }
 
             if (response) {
@@ -117,12 +118,12 @@ export default function ChefDetail() {
                 setTotalPages(response.data.totalPages);
             }
         } catch (error) {
-            console.error(`Error fetching ${activeTab}:`, error);
+            logError(error, `Error fetching ${activeTab}`);
         } finally {
             setActivityLoading(false);
         }
     };
-console.log("----",activities);
+    console.log("----", activities);
 
     const handleTabChange = (tab: ActiveTab) => {
         setActiveTab(tab);
@@ -215,7 +216,7 @@ console.log("----",activities);
                                             const conversation = await useChatStore.getState().createOrGetConversation(chefUserId, 'chef');
                                             if (conversation) navigate(`/foodie/chat/${conversation._id}`);
                                         } catch (error) {
-                                            console.error('Error creating conversation:', error);
+                                            logError(error, 'Error creating conversation');
                                         }
                                     }}
                                     className="py-3 px-4 rounded-xl font-bold text-sm bg-blue-600 text-white hover:bg-blue-700 hover:shadow-blue-200 hover:-translate-y-0.5 transition-all flex justify-center items-center gap-2 shadow-sm"
@@ -409,7 +410,7 @@ function ActivityCard({ item, type, navigate }: any) {
         >
             <div className="relative h-48 overflow-hidden">
                 <img
-                    src={item.images || item.coverImage|| item.banner || 'https://images.unsplash.com/photo-1495195129352-aed325a55b65?w=400&h=300&fit=crop'}
+                    src={item.images || item.coverImage || item.banner || 'https://images.unsplash.com/photo-1495195129352-aed325a55b65?w=400&h=300&fit=crop'}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     alt={item.title}
                 />

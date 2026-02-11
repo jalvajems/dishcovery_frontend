@@ -12,6 +12,7 @@ import ReviewSection from '@/components/shared/ReviewPage';
 import Map, { Marker } from 'react-map-gl/mapbox';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { getErrorMessage } from '@/utils/errorHandler';
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
@@ -33,7 +34,7 @@ export default function WorkshopDetailFoodie() {
                 const res = await getWorkshopByIdApi(id);
                 setWorkshop(res.data.data);
             } catch (error) {
-                toast.error("Failed to load workshop details");
+                toast.error(getErrorMessage(error, "Failed to load workshop details"));
             } finally {
                 setLoading(false);
             }
@@ -56,8 +57,8 @@ export default function WorkshopDetailFoodie() {
                 toast.success("Workshop booked successfully!");
                 navigate('/foodie/my-workshops');
             }
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || "Failed to book workshop");
+        } catch (error: unknown) {
+            toast.error(getErrorMessage(error, "Failed to book workshop"));
         } finally {
             setBookingLoading(false);
         }

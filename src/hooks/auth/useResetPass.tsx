@@ -1,5 +1,7 @@
 import { resetPassApi } from "@/api/authApi";
 import { useOtpStore } from "@/store/authStore";
+import { getErrorMessage } from "@/utils/errorHandler";
+import { showError } from "@/utils/toast";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -52,8 +54,8 @@ export const useResetPass = () => {
 
       await resetPassApi({ email: email, newPass: formData.newPassword, confirmPass: formData.confirmPassword })
       navigate('/login')
-    } catch (error) {
-
+    } catch (error: unknown) {
+      showError(getErrorMessage(error, "Failed to reset password"));
     }
   };
 

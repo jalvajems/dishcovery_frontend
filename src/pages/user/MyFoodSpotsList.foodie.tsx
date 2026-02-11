@@ -10,6 +10,7 @@ import { showError } from '@/utils/toast';
 import { getAllMyFoodSpotApi } from '@/api/foodieApi';
 import Pagination from '@/components/shared/Pagination';
 import SearchBar from '@/components/shared/SearchBar';
+import { getErrorMessage } from '@/utils/errorHandler';
 
 export default function MyFoodSpotList() {
   const navigate = useNavigate();
@@ -29,8 +30,8 @@ export default function MyFoodSpotList() {
       const res = await getAllMyFoodSpotApi(currentPage, limit, searchQuery);
       setTotalPages(res.data.totalCount)
       setFoodSpots(res.data.data)
-    } catch (error: any) {
-      showError(error.response?.data?.message || `Something went wrong:${error}`)
+    } catch (error: unknown) {
+      showError(getErrorMessage(error));
     }
   }
   console.log('spots', foodSpots);

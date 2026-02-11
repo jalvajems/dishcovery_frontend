@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { MapPin, Star, ArrowRight, ChefHat } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getChefsApi } from '@/api/foodieApi';
+import { logError } from '@/utils/errorHandler';
 import Pagination from '@/components/shared/Pagination';
 import SearchBar from '@/components/shared/SearchBar';
 
@@ -26,7 +27,7 @@ export default function ChefList() {
             setChefs(response.data.datas);
             setTotalPages(response.data.totalPages);
         } catch (error) {
-            console.error('Error fetching chefs:', error);
+            logError(error, 'Error fetching chefs');
         } finally {
             setLoading(false);
         }

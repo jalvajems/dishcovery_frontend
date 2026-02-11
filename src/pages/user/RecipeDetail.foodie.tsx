@@ -6,6 +6,7 @@ import { showError } from '@/utils/toast';
 import ReviewSection from '@/components/shared/ReviewPage';
 import API from '@/api/apiInstance';
 import FoodieNavbar from '@/components/shared/foodie/Navbar.foodie';
+import { getErrorMessage, logError } from '@/utils/errorHandler';
 
 export default function RecipeDetailFoodie() {
   const { id } = useParams();
@@ -20,8 +21,8 @@ export default function RecipeDetailFoodie() {
         const res = await getRecipeDetailFoodieApi(id);
         setRecipe(res.data.data);
         setIsSaved(res.data.isSaved);
-      } catch (error: any) {
-        showError(error.response?.data?.message || "Failed to load recipe");
+      } catch (error: unknown) {
+        showError(getErrorMessage(error, "Failed to load recipe"));
       }
     }
     fetchRecipe();
@@ -36,7 +37,7 @@ export default function RecipeDetailFoodie() {
         const related = result.data.relatedData?.filter((r: any) => r._id !== recipe._id) || [];
         setRelatedRecipes(related.slice(0, 3));
       } catch (error) {
-        console.error("Error fetching related recipes:", error);
+        logError(error, "Error fetching related recipes");
       }
     }
     fetchRelatedRecipes();
@@ -47,7 +48,7 @@ export default function RecipeDetailFoodie() {
       const res = await API.post("/foodie/toggle-save-recipe", { recipeId: recipe?._id });
       setIsSaved(res.data.isSaved);
     } catch (err) {
-      console.error(err);
+      logError(err);
     }
   };
 

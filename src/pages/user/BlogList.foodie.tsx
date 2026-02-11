@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Search, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getBlogsFoodieApi } from '@/api/foodieApi';
 import { showError } from '@/utils/toast';
+import { getErrorMessage } from '@/utils/errorHandler';
 import { useNavigate } from 'react-router-dom';
 import Pagination from '@/components/shared/Pagination';
 import SearchBar from '@/components/shared/SearchBar';
@@ -31,8 +32,8 @@ export default function BlogListFoodie() {
             setBlogs(result.data.datas);
             setTotalPages(result.data.totalCount);
 
-        } catch (error: any) {
-            showError(error.response?.data?.message || "Failed to load blogs");
+        } catch (error: unknown) {
+            showError(getErrorMessage(error, "Failed to load blogs"));
         }
     }
 
@@ -72,21 +73,21 @@ export default function BlogListFoodie() {
 
                 {/* Category Tags */}
                 <div className="flex gap-4 mb-10 overflow-x-auto pb-2 hide-scrollbar">
-                    {["","Healthy Eating", "International Cuisine","Seasonal","Budget Friendly",].map((category, index) => (
-                            <button
-                                key={index}
-                                onClick={() => {
-                                    setFilter(category);
-                                    setCurrentPage(1);
-                                }}
-                                className={`px-6 py-3 font-semibold rounded-xl transition-all shadow-lg border ${filter === category
-                                    ? 'bg-green-600 text-white border-green-600'
-                                    : 'bg-white/90 text-gray-700 border-gray-200 hover:bg-green-100 hover:text-green-700 hover:scale-105'
-                                    }`}
-                            >
-                                {category || 'All Stories'}
-                            </button>
-                        ))}
+                    {["", "Healthy Eating", "International Cuisine", "Seasonal", "Budget Friendly",].map((category, index) => (
+                        <button
+                            key={index}
+                            onClick={() => {
+                                setFilter(category);
+                                setCurrentPage(1);
+                            }}
+                            className={`px-6 py-3 font-semibold rounded-xl transition-all shadow-lg border ${filter === category
+                                ? 'bg-green-600 text-white border-green-600'
+                                : 'bg-white/90 text-gray-700 border-gray-200 hover:bg-green-100 hover:text-green-700 hover:scale-105'
+                                }`}
+                        >
+                            {category || 'All Stories'}
+                        </button>
+                    ))}
                 </div>
 
                 {/* Food Blog Section */}

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getFoodieProfileForChefApi } from '@/api/followApi';
 import { MapPin, Mail, ArrowLeft, Heart, MessageSquare } from 'lucide-react';
 import ChefNavbar from '@/components/shared/chef/NavBar.chef';
+import { getErrorMessage, logError } from '@/utils/errorHandler';
 import { showError } from '@/utils/toast';
 import { useChatStore } from '@/store/chatStore';
 
@@ -22,8 +23,9 @@ export default function FoodieProfileDetail() {
         try {
             const response = await getFoodieProfileForChefApi(id!);
             setProfile(response.data.datas.data);
-        } catch (error: any) {
-            showError(error.response?.data?.message || "Failed to fetch foodie profile");
+        } catch (error: unknown) {
+            logError(error);
+            showError(getErrorMessage(error, "Failed to fetch foodie profile"));
         } finally {
             setLoading(false);
         }

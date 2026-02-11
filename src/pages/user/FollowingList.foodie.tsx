@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getFollowingApi } from '@/api/followApi';
 import { MapPin, ArrowRight, ArrowLeft, Users, Search, X } from 'lucide-react';
 import { showError } from '@/utils/toast';
+import { getErrorMessage } from "@/utils/errorHandler";
 import SearchBar from '@/components/shared/SearchBar';
 import Pagination from '@/components/shared/Pagination';
 
@@ -28,8 +29,8 @@ export default function FollowingList() {
             const response = await getFollowingApi(page, limit, searchQuery);
             setFollowing(response.data.datas);
             setTotal(response.data.total);
-        } catch (error: any) {
-            showError(error.response?.data?.message || "Failed to fetch followed chefs");
+        } catch (error: unknown) {
+            showError(getErrorMessage(error, "Failed to fetch followed chefs"));
         } finally {
             setLoading(false);
         }
@@ -46,7 +47,7 @@ export default function FollowingList() {
         <div className="min-h-screen bg-white text-gray-900 pb-20 font-sans">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-              
+
 
                 {/* Hero Banner Section */}
                 <div className="relative h-[40vh] md:h-[50vh] rounded-[2.5rem] overflow-hidden mb-8 shadow-2xl uppercase group ring-1 ring-black/5">

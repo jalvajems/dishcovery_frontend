@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Upload, X, Tag, BookOpen, FileText, Image } from "lucide-react";
 import { createBlogApi } from "@/api/chefApi";
 import { showError, showSuccess } from "@/utils/toast";
+import { getErrorMessage, logError } from "@/utils/errorHandler";
 import { useAwsS3Upload } from "@/components/shared/hooks/useAwsS3Upload";
 import { useNavigate } from "react-router-dom";
 import ChefNavbar from "@/components/shared/chef/NavBar.chef";
@@ -90,9 +91,9 @@ const AddNewBlog: React.FC = () => {
       const response = await createBlogApi(payload);
       showSuccess(response.data.message || "Blog created successfully!");
       navigate("/chef/blog-listing");
-    } catch (error: any) {
-      showError(error.response?.data?.message);
-      console.error(error);
+    } catch (error: unknown) {
+      logError(error);
+      showError(getErrorMessage(error));
     }
   };
 

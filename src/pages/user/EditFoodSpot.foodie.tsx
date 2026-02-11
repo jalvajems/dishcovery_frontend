@@ -19,6 +19,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import MapLocationPicker from "@/utils/MapLocationPicker";
 import { editFoodSpotApi, getFoodSpotDetailApi } from "@/api/foodieApi";
 import { showError, showSuccess } from "@/utils/toast";
+import { getErrorMessage, logError } from "@/utils/errorHandler";
 import { useAwsS3Upload } from "@/components/shared/hooks/useAwsS3Upload";
 import FoodieNavbar from "@/components/shared/foodie/Navbar.foodie";
 import { useNavigate, useParams } from "react-router-dom";
@@ -102,9 +103,9 @@ export default function EditFoodSpot() {
                     fullAddress: spot.address.fullAddress,
                 });
             }
-        } catch (err) {
+        } catch (err: unknown) {
             showError("Failed to fetch food spot details");
-            console.error(err);
+            logError(err);
         } finally {
             setLoading(false);
         }
@@ -191,8 +192,8 @@ export default function EditFoodSpot() {
                 showSuccess("Food spot updated successfully!");
                 navigate(`/foodie/spot-listing`); // Or back to detail page
             }
-        } catch (err: any) {
-            showError(err?.response?.data?.message || "Something went wrong");
+        } catch (err: unknown) {
+            showError(getErrorMessage(err));
         } finally {
             setIsSubmitting(false);
         }

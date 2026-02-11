@@ -4,6 +4,8 @@ import SearchFilterBar from "@/components/shared/admin/SearchFilterBar";
 import Pagination from "@/components/shared/Pagination";
 import { useAdminTable } from "@/components/shared/hooks/useAdminTable";
 import { getAllWorkshopsAdminApi } from "@/api/workshopApi";
+import { logError, getErrorMessage } from "@/utils/errorHandler";
+import { showError } from "@/utils/toast";
 import { Eye } from "lucide-react";
 
 type Workshop = {
@@ -34,33 +36,45 @@ export default function WorkshopManagement() {
         updateFilter,
     } = useAdminTable<Workshop>({
         fetchApi: async (page, limit, search, filters) => {
-            const response = await getAllWorkshopsAdminApi();
-            const allData = response.data.data;
+            try {
+                const response = await getAllWorkshopsAdminApi();
+                const allData = response.data.data;
 
-            let filtered = allData;
-            if (search) {
-                filtered = filtered.filter((w: any) =>
-                    w.title.toLowerCase().includes(search.toLowerCase()) ||
-                    w.chefId?.name.toLowerCase().includes(search.toLowerCase())
-                );
-            }
-            if (filters.status && filters.status !== 'all') {
-                filtered = filtered.filter((w: any) => w.status === filters.status);
-            }
-            if (filters.mode && filters.mode !== 'all') {
-                filtered = filtered.filter((w: any) => w.mode === filters.mode);
-            }
-
-            const startIndex = (page - 1) * limit;
-            const paginated = filtered.slice(startIndex, startIndex + limit);
-
-            return {
-                data: {
-                    data: paginated,
-                    total: filtered.length,
-                    totalPages: Math.ceil(filtered.length / limit)
+                let filtered = allData;
+                if (search) {
+                    filtered = filtered.filter((w: any) =>
+                        w.title.toLowerCase().includes(search.toLowerCase()) ||
+                        w.chefId?.name.toLowerCase().includes(search.toLowerCase())
+                    );
                 }
-            };
+                if (filters.status && filters.status !== 'all') {
+                    filtered = filtered.filter((w: any) => w.status === filters.status);
+                }
+                if (filters.mode && filters.mode !== 'all') {
+                    filtered = filtered.filter((w: any) => w.mode === filters.mode);
+                }
+
+                const startIndex = (page - 1) * limit;
+                const paginated = filtered.slice(startIndex, startIndex + limit);
+
+                return {
+                    data: {
+                        data: paginated,
+                        total: filtered.length,
+                        totalPages: Math.ceil(filtered.length / limit)
+                    }
+                };
+            } catch (error: unknown) {
+                logError(error, "Failed to fetch workshops");
+                showError(getErrorMessage(error, "Failed to load workshops"));
+                return {
+                    data: {
+                        data: [],
+                        total: 0,
+                        totalPages: 0
+                    }
+                };
+            }
         },
         filters: [
             { key: "status", defaultValue: "all" },

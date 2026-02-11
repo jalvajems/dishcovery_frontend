@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { Upload, MapPin, Phone, BookOpen, UserCircle } from "lucide-react";
 import { getChefProfileApi, updateChefProfileApi } from "@/api/chefApi";
 import { showError, showSuccess } from "@/utils/toast";
+import { getErrorMessage, logError } from "@/utils/errorHandler";
 import { useNavigate } from "react-router-dom";
 import { useAwsS3Upload } from "@/components/shared/hooks/useAwsS3Upload";
 
@@ -83,8 +84,8 @@ export default function ChefProfileEdit() {
 
         setImagePreview(profile.image || null);
 
-      } catch (err) {
-        console.error(err);
+      } catch (err: unknown) {
+        logError(err);
       }
     }
     fetchProfile();
@@ -160,9 +161,9 @@ export default function ChefProfileEdit() {
       const res = await updateChefProfileApi(payload)
       showSuccess(res.data.message || 'updated successfully')
       navigate('/chef/profile')
-    } catch (err: any) {
-      console.error(err);
-      showError(err?.response?.data?.message || 'failed to updated')
+    } catch (err: unknown) {
+      logError(err);
+      showError(getErrorMessage(err, 'Failed to update profile'))
     }
   };
 

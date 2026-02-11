@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import Pagination from '@/components/shared/Pagination';
 import { getAllRecipeApi } from '@/api/chefApi';
-import { useAuthStore } from '@/store/authStore';
 import { showError } from '@/utils/toast';
+import { getErrorMessage, logError } from '@/utils/errorHandler';
 import { useNavigate } from 'react-router-dom';
 import SearchBar from '@/components/shared/SearchBar';
 import { useUserStore } from '@/store/userStore';
@@ -11,7 +11,6 @@ import { useUserStore } from '@/store/userStore';
 export default function RecipeListing() {
 
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState('Cards');
   const [recipes, setRecipes] = useState([])
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -39,11 +38,9 @@ export default function RecipeListing() {
       setTotalPages(res.data.totalPages)
       console.log(res.data.data)
 
-    } catch (error: any) {
-      const message = error.response?.data?.message
-      // showError(message)
-      console.log(message);
-
+    } catch (error: unknown) {
+      logError(error);
+      showError(getErrorMessage(error));
     }
 
   }

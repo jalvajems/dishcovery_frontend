@@ -11,6 +11,8 @@ import {
   adminBlockBlogApi,
   adminUnblockBlogApi,
 } from "@/api/adminApi";
+import { showError } from "@/utils/toast";
+import { getErrorMessage } from "@/utils/errorHandler";
 
 type Blog = {
   _id: string;
@@ -21,7 +23,7 @@ type Blog = {
   };
   shortDescription: string;
   status: "active" | "blocked";
-  isBlocked:boolean;
+  isBlocked: boolean;
   isDraft: boolean;
   coverImage: string;
   createdAt: string;
@@ -44,8 +46,7 @@ export default function BlogManagement() {
     },
     filters: [{ key: "status", defaultValue: "all" }],
   });
-  ('blogs:',blogs);
-  
+
 
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedBlog, setSelectedBlog] = useState<Blog | null>(null);
@@ -60,11 +61,15 @@ export default function BlogManagement() {
   const handleConfirm = async () => {
     if (!selectedBlog || !actionType) return;
 
-    if (actionType === "BLOCK") await adminBlockBlogApi(selectedBlog._id);
-    if (actionType === "UNBLOCK") await adminUnblockBlogApi(selectedBlog._id);
+    try {
+      if (actionType === "BLOCK") await adminBlockBlogApi(selectedBlog._id);
+      if (actionType === "UNBLOCK") await adminUnblockBlogApi(selectedBlog._id);
 
-    setModalOpen(false);
-    refetch()
+      setModalOpen(false);
+      refetch();
+    } catch (error: unknown) {
+      showError(getErrorMessage(error, "Failed to update blog status"));
+    }
   };
 
   const columns: ITableColumn<Blog>[] = [
@@ -102,9 +107,8 @@ export default function BlogManagement() {
       label: "Status",
       render: (b) => (
         <button
-          className={`px-3 py-1 rounded ${
-            b.isBlocked? "bg-red-200" : "bg-green-200"
-          }`}
+          className={`px-3 py-1 rounded ${b.isBlocked ? "bg-red-200" : "bg-green-200"
+            }`}
           onClick={() =>
             openConfirm(b, b.isBlocked ? "UNBLOCK" : "BLOCK")
           }

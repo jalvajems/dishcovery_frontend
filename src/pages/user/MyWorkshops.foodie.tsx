@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Calendar, Clock, MapPin, Video, ArrowRight, Play, CheckCircle2 } from 'lucide-react';
+import { getErrorMessage, logError } from '@/utils/errorHandler';
 import { getMyBookingsApi, cancelBookingApi } from '@/api/bookingApi';
 import { useNavigate } from 'react-router-dom';
 import Pagination from '@/components/shared/Pagination';
@@ -31,7 +32,7 @@ export default function MyWorkshopsFoodie() {
             const res = await getMyBookingsApi();
             setAllWorkshops(res.data.data || []);
         } catch (error) {
-            console.error("Failed to fetch my workshops");
+            logError(error, "Failed to fetch my workshops");
         } finally {
             setLoading(false);
         }
@@ -72,8 +73,8 @@ export default function MyWorkshopsFoodie() {
             await cancelBookingApi(selectedBookingId);
             toast.success("Booking cancelled successfully");
             fetchMyWorkshops(); // Refresh list
-        } catch (err: any) {
-            toast.error(err.response?.data?.message || "Failed to cancel");
+        } catch (err: unknown) {
+            toast.error(getErrorMessage(err, "Failed to cancel"));
         } finally {
             setIsCancelModalOpen(false);
             setSelectedBookingId(null);

@@ -20,6 +20,7 @@ import { toast } from "react-toastify";
 import Map, { Marker, NavigationControl } from 'react-map-gl/mapbox';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { getErrorMessage, logError } from "@/utils/errorHandler";
 
 // Ensure Mapbox token is set
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
@@ -45,9 +46,9 @@ export default function FoodSpotDetailAdmin() {
             } else if (response.data) {
                 setFoodSpot(response.data);
             }
-        } catch (error) {
-            console.error("Failed to fetch food spot details:", error);
-            toast.error("Failed to fetch food spot details");
+        } catch (error: unknown) {
+            logError(error);
+            toast.error(getErrorMessage(error, "Failed to fetch food spot details"));
         } finally {
             setLoading(false);
         }
@@ -58,8 +59,9 @@ export default function FoodSpotDetailAdmin() {
             await adminApproveFoodSpotApi(id!);
             toast.success("Food Spot approved successfully");
             fetchFoodSpot();
-        } catch (error) {
-            toast.error("Failed to approve food spot");
+            fetchFoodSpot();
+        } catch (error: unknown) {
+            toast.error(getErrorMessage(error, "Failed to approve food spot"));
         }
     };
 
@@ -73,8 +75,9 @@ export default function FoodSpotDetailAdmin() {
             toast.success("Food Spot rejected/unapproved");
             setShowRejectModal(false);
             fetchFoodSpot();
-        } catch (error) {
-            toast.error("Failed to reject food spot");
+            fetchFoodSpot();
+        } catch (error: unknown) {
+            toast.error(getErrorMessage(error, "Failed to reject food spot"));
         }
     };
 
@@ -83,8 +86,9 @@ export default function FoodSpotDetailAdmin() {
             await adminUnapproveFoodSpotApi(id!);
             toast.success("Food Spot unapproved successfully");
             fetchFoodSpot();
-        } catch (error) {
-            toast.error("Failed to unapprove food spot");
+            fetchFoodSpot();
+        } catch (error: unknown) {
+            toast.error(getErrorMessage(error, "Failed to unapprove food spot"));
         }
     };
 
@@ -218,7 +222,7 @@ export default function FoodSpotDetailAdmin() {
                                     }}
                                     style={{ width: '100%', height: '100%' }}
                                     mapStyle="mapbox://styles/mapbox/streets-v11"
-                                    accessToken={mapboxgl.accessToken}
+                                    accessToken={mapboxgl.accessToken || undefined}
                                     scrollZoom={false}
                                 >
                                     <Marker longitude={lng} latitude={lat} color="#10B981" />

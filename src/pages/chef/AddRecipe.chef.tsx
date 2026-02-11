@@ -3,6 +3,7 @@ import { Upload, ChevronDown, Plus, X } from 'lucide-react';
 import { addRecipePageApi } from '@/api/chefApi';
 import { useAuthStore } from '@/store/authStore';
 import { showError, showSuccess } from '@/utils/toast';
+import { getErrorMessage, logError } from '@/utils/errorHandler';
 import { useAwsS3Upload } from '@/components/shared/hooks/useAwsS3Upload';
 import ChefNavbar from '@/components/shared/chef/NavBar.chef';
 import { useNavigate } from 'react-router-dom';
@@ -18,22 +19,22 @@ export default function AddRecipe() {
     isDraft: true
   });
   type FormErrors = {
-  title?: string;
-  cuisine?: string;
-  cookingTime?: string;
-  ingredients?: string;
-  steps?: string;
-  image?: string;
-};
+    title?: string;
+    cuisine?: string;
+    cookingTime?: string;
+    ingredients?: string;
+    steps?: string;
+    image?: string;
+  };
 
-const [errors, setErrors] = useState<FormErrors>({});
+  const [errors, setErrors] = useState<FormErrors>({});
 
   const [ingredients, setIngredients] = useState(['']);
   const [steps, setSteps] = useState(['']);
-  const [uploadedImages, setUploadedImages] = useState<string|null>(null);
-  const navigate=useNavigate()
-      const {isVerifiedUser}=useUserStore()
-  
+  const [uploadedImages, setUploadedImages] = useState<string | null>(null);
+  const navigate = useNavigate()
+  const { isVerifiedUser } = useUserStore()
+
 
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -44,14 +45,14 @@ const [errors, setErrors] = useState<FormErrors>({});
     }));
   };
 
-  const {uploadToS3,fileUrl,loading,error}=useAwsS3Upload()
+  const { uploadToS3 } = useAwsS3Upload()
 
-  const handleFileUpload = async(e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      
-      const Image=e.target.files?.[0]
-      const url=await uploadToS3(Image)
-      
+
+      const Image = e.target.files?.[0]
+      const url = await uploadToS3(Image)
+
       setUploadedImages(url)
 
     }
@@ -86,54 +87,55 @@ const [errors, setErrors] = useState<FormErrors>({});
   };
 
   const validateForm = () => {
-  const newErrors: FormErrors = {};
+    const newErrors: FormErrors = {};
 
-  if (!formData.title.trim()) {
-    newErrors.title = "Recipe name is required";
-  }
+    if (!formData.title.trim()) {
+      newErrors.title = "Recipe name is required";
+    }
 
-  if (!formData.cuisine) {
-    newErrors.cuisine = "Please select a cuisine";
-  }
+    if (!formData.cuisine) {
+      newErrors.cuisine = "Please select a cuisine";
+    }
 
-  if (!formData.cookingTime || isNaN(Number(formData.cookingTime))) {
-    newErrors.cookingTime = "Enter a valid cooking time";
-  }
+    if (!formData.cookingTime || isNaN(Number(formData.cookingTime))) {
+      newErrors.cookingTime = "Enter a valid cooking time";
+    }
 
-  if (ingredients.filter(i => i.trim()).length === 0) {
-    newErrors.ingredients = "At least one ingredient is required";
-  }
+    if (ingredients.filter(i => i.trim()).length === 0) {
+      newErrors.ingredients = "At least one ingredient is required";
+    }
 
-  if (steps.filter(s => s.trim()).length === 0) {
-    newErrors.steps = "At least one step is required";
-  }
+    if (steps.filter(s => s.trim()).length === 0) {
+      newErrors.steps = "At least one step is required";
+    }
 
-  setErrors(newErrors);
+    setErrors(newErrors);
 
-  return Object.keys(newErrors).length === 0;
-};
+    return Object.keys(newErrors).length === 0;
+  };
 
 
-  const handleSaveRecipe = async() => {
-     if (!validateForm()) return;
+  const handleSaveRecipe = async () => {
+    if (!validateForm()) return;
     try {
-      const recipeData={
-      chefId: useAuthStore.getState().user?._id,
-      title: formData.title,
-      cuisine: formData.cuisine,
-      cookingTime: Number(formData.cookingTime) || 0,
-      tags: formData.tags ? [formData.tags] : [],
-      dietType: formData.dietType ? [formData.dietType] : [],
-      ingredients: ingredients.filter(i => i.trim() !== ''),
-      images:uploadedImages,
-      steps: steps.filter(s => s.trim() !== ''),
-      isDraft: formData.isDraft
+      const recipeData = {
+        chefId: (useAuthStore.getState().user as unknown as { _id: string })?._id,
+        title: formData.title,
+        cuisine: formData.cuisine,
+        cookingTime: Number(formData.cookingTime) || 0,
+        tags: formData.tags ? [formData.tags] : [],
+        dietType: formData.dietType ? [formData.dietType] : [],
+        ingredients: ingredients.filter(i => i.trim() !== ''),
+        images: uploadedImages,
+        steps: steps.filter(s => s.trim() !== ''),
+        isDraft: formData.isDraft
       }
-      const result=await addRecipePageApi(recipeData)
+      const result = await addRecipePageApi(recipeData)
       showSuccess(result.data.message)
       navigate('/chef/recipes-listing')
-    } catch (error:any) {
-      showError(error.responnse?.data?.message||'ivalid credential ')
+    } catch (error: unknown) {
+      logError(error);
+      showError(getErrorMessage(error, 'Failed to save recipe'))
     }
   };
 
@@ -142,7 +144,7 @@ const [errors, setErrors] = useState<FormErrors>({});
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50">
-           <ChefNavbar/>
+      <ChefNavbar />
 
       <main className="max-w-3xl mx-auto px-8 py-12">
         <h1 className="text-4xl font-bold mb-8 bg-gradient-to-r from-gray-900 via-green-700 to-emerald-700 bg-clip-text text-transparent">
@@ -156,10 +158,10 @@ const [errors, setErrors] = useState<FormErrors>({});
                 Recipe Name
               </label>
               {errors.title && (
-  <p className="text-red-500 text-sm mb-1 font-medium">
-    {errors.title}
-  </p>
-)}
+                <p className="text-red-500 text-sm mb-1 font-medium">
+                  {errors.title}
+                </p>
+              )}
               <input
                 type="text"
                 id="title"
@@ -176,10 +178,10 @@ const [errors, setErrors] = useState<FormErrors>({});
                 Category / Cuisine
               </label>
               {errors.cuisine && (
-  <p className="text-red-500 text-sm mb-1 font-medium">
-    {errors.cuisine}
-  </p>
-)}
+                <p className="text-red-500 text-sm mb-1 font-medium">
+                  {errors.cuisine}
+                </p>
+              )}
               <div className="relative">
                 <select
                   id="cuisine"
@@ -206,10 +208,10 @@ const [errors, setErrors] = useState<FormErrors>({});
                 Cooking Time
               </label>
               {errors.cookingTime && (
-  <p className="text-red-500 text-sm mb-1 font-medium">
-    {errors.cookingTime}
-  </p>
-)}
+                <p className="text-red-500 text-sm mb-1 font-medium">
+                  {errors.cookingTime}
+                </p>
+              )}
               <input
                 type="text"
                 id="cookingTime"
@@ -249,10 +251,10 @@ const [errors, setErrors] = useState<FormErrors>({});
                   Ingredients
                 </label>
                 {errors.ingredients && (
-  <p className="text-red-500 text-sm mb-2 font-medium">
-    {errors.ingredients}
-  </p>
-)}
+                  <p className="text-red-500 text-sm mb-2 font-medium">
+                    {errors.ingredients}
+                  </p>
+                )}
 
                 <button
                   onClick={addIngredient}
@@ -288,13 +290,13 @@ const [errors, setErrors] = useState<FormErrors>({});
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="block text-sm font-bold text-gray-900">
-                  Steps 
+                  Steps
                 </label>
                 {errors.steps && (
-  <p className="text-red-500 text-sm mb-2 font-medium">
-    {errors.steps}
-  </p>
-)}
+                  <p className="text-red-500 text-sm mb-2 font-medium">
+                    {errors.steps}
+                  </p>
+                )}
                 <button
                   onClick={addStep}
                   className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:shadow-lg hover:scale-105 transition-all font-semibold"
@@ -351,14 +353,14 @@ const [errors, setErrors] = useState<FormErrors>({});
                   <p className="text-gray-700 font-semibold mb-1">Drag and drop images here</p>
                   <p className="text-gray-500 text-sm">Or click to browse</p>
                   {uploadedImages && (
-  <div className="mt-4 flex justify-center">
-    <img 
-      src={uploadedImages} 
-      alt="Preview"
-      className="w-40 h-40 object-cover rounded-xl shadow-md"
-    />
-  </div>
-)}
+                    <div className="mt-4 flex justify-center">
+                      <img
+                        src={uploadedImages}
+                        alt="Preview"
+                        className="w-40 h-40 object-cover rounded-xl shadow-md"
+                      />
+                    </div>
+                  )}
 
                 </label>
               </div>
@@ -412,7 +414,7 @@ const [errors, setErrors] = useState<FormErrors>({});
                 Cancel
               </button>
               <button
-              disabled={!isVerifiedUser}
+                disabled={!isVerifiedUser}
                 onClick={handleSaveRecipe}
                 className="flex-1 px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl hover:shadow-xl hover:scale-105 transition-all shadow-lg"
               >
@@ -432,22 +434,22 @@ const [errors, setErrors] = useState<FormErrors>({});
             <a href="#" className="text-green-600 hover:text-green-700 font-medium transition-colors">Terms & Conditions</a>
             <a href="#" className="text-green-600 hover:text-green-700 font-medium transition-colors">Privacy Policy</a>
           </div>
-          
+
           <div className="flex justify-center gap-4 mb-6">
             <a href="#" className="p-3 bg-green-100 text-green-600 rounded-full hover:bg-green-600 hover:text-white transition-all">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/>
+                <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z" />
               </svg>
             </a>
             <a href="#" className="p-3 bg-green-100 text-green-600 rounded-full hover:bg-green-600 hover:text-white transition-all">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-                <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" fill="white"/>
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" fill="white" />
               </svg>
             </a>
             <a href="#" className="p-3 bg-green-100 text-green-600 rounded-full hover:bg-green-600 hover:text-white transition-all">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/>
+                <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" />
               </svg>
             </a>
           </div>

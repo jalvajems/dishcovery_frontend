@@ -1,6 +1,7 @@
 // src/hooks/auth/useAdminLogin.ts
 import { adminLoginApi, loginApi } from "@/api/authApi";
 import { showError, showSuccess } from "@/utils/toast";
+import { getErrorMessage } from "@/utils/errorHandler";
 import { useAuthStore } from "@/store/authStore";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -66,9 +67,8 @@ export const useAdminLogin = () => {
       showSuccess("Admin Login Successful");
       navigate("/admin-dashboard");
 
-    } catch (error: any) {
-      const message =
-        error.response?.data?.message || "Login failed. Please try again.";
+    } catch (error: unknown) {
+      const message = getErrorMessage(error, "Login failed. Please try again.");
       showError(message);
     }
   };

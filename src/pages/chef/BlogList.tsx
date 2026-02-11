@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { getMyBlogsChefApi } from "@/api/chefApi";
 import { useNavigate } from "react-router-dom";
-import { Home, BookOpen, Utensils, FileText, MessageCircle, User, Search, Bell, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { BookOpen, Plus } from 'lucide-react';
+import { getErrorMessage, logError } from "@/utils/errorHandler";
+import { showError } from "@/utils/toast";
 import Pagination from "@/components/shared/Pagination";
 import SearchBar from "@/components/shared/SearchBar";
 import { useUserStore } from "@/store/userStore";
 
 export default function BlogListChef() {
-  const [activeTab, setActiveTab] = useState('Published');
   const [searchQuery, setSearchQuery] = useState('')
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -24,17 +25,18 @@ export default function BlogListChef() {
 
   useEffect(() => {
     fetchBlogs();
-  }, [activeTab, searchQuery, currentPage, limit]);
+  }, [searchQuery, currentPage, limit]);
 
   async function fetchBlogs() {
 
     try {
       setLoading(true);
-      const filter = activeTab === "Published" ? "published" : "draft";
       const res = await getMyBlogsChefApi(currentPage, limit, searchQuery);
       setTotalPages(res.data.totalCount)
       setBlogs(res.data.datas);
-    } catch (err) {
+    } catch (err: unknown) {
+      logError(err);
+      showError(getErrorMessage(err, "Failed to load blogs"));
     } finally {
       setLoading(false);
     }
