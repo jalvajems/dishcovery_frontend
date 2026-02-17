@@ -5,6 +5,7 @@ import Footer from "@/components/shared/chef/Footer";
 import Pagination from "@/components/shared/Pagination";
 import { getFoodieWalletApi } from "@/api/foodieApi";
 import { logError } from "@/utils/errorHandler";
+import ReusableTable from "@/components/shared/DataTable";
 
 // ---------------- TYPES ----------------
 interface FoodieWalletTransaction {

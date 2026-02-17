@@ -1,8 +1,8 @@
 import { BOOKING_ROUTES } from "@/components/shared/constants/routes/booking.routes";
 import API from "./apiInstance";
 
-export const bookWorkshopApi = (workshopId: string) => {
-    return API.post(BOOKING_ROUTES.BOOK(workshopId));
+export const bookWorkshopApi = (workshopId: string, ticketCount: number = 1) => {
+    return API.post(BOOKING_ROUTES.BOOK(workshopId), { ticketCount });
 };
 
 export const getMyBookingsApi = () => {

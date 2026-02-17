@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Calendar, Clock, MapPin, Users, ArrowRight, ShieldCheck, Zap, X, Loader2 } from 'lucide-react';
 import { getWorkshopByIdApi } from '@/api/workshopApi';
 import { bookWorkshopApi } from '@/api/bookingApi';
+import { Minus, Plus } from 'lucide-react';
 import FoodieNavbar from '@/components/shared/foodie/Navbar.foodie';
 import { toast } from 'react-toastify';
 import { loadStripe } from '@stripe/stripe-js';
@@ -26,6 +27,7 @@ export default function WorkshopDetailFoodie() {
     const [bookingLoading, setBookingLoading] = useState(false);
     const [showCheckout, setShowCheckout] = useState(false);
     const [clientSecret, setClientSecret] = useState<string | null>(null);
+    const [ticketCount, setTicketCount] = useState(1);
 
     useEffect(() => {
         async function fetchDetails() {
@@ -46,7 +48,7 @@ export default function WorkshopDetailFoodie() {
     const handleBooking = async () => {
         try {
             setBookingLoading(true);
-            const res = await bookWorkshopApi(id!);
+            const res = await bookWorkshopApi(id!, ticketCount);
 
             if (res.data.clientSecret) {
                 // Paid workshop
@@ -258,8 +260,33 @@ export default function WorkshopDetailFoodie() {
                                     <p className="text-[10px] font-black text-400 uppercase tracking-widest mb-1">
                                         {workshop.isFree ? 'IT IS FREE!!' : 'REFUND IS NOT AVAILABLE!!'}
                                     </p>
-
                                 </div>
+
+                                {workshop.mode === 'OFFLINE' && !workshop.isBooked && (
+                                    <div className="flex justify-between items-center py-4 border-b border-gray-50 mb-6">
+                                        <div className="flex items-center gap-3 text-gray-500">
+                                            <Users size={18} />
+                                            <span className="text-sm font-bold">Tickets</span>
+                                        </div>
+                                        <div className="flex items-center gap-3 bg-gray-50 p-1 rounded-xl">
+                                            <button
+                                                onClick={() => setTicketCount(Math.max(1, ticketCount - 1))}
+                                                disabled={ticketCount <= 1}
+                                                className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white text-gray-400 hover:text-gray-900 transition-all disabled:opacity-50 disabled:hover:bg-transparent"
+                                            >
+                                                <Minus size={14} />
+                                            </button>
+                                            <span className="w-4 text-center font-black text-gray-900">{ticketCount}</span>
+                                            <button
+                                                onClick={() => setTicketCount(Math.min(5, Math.min(ticketCount + 1, workshop.participantLimit - (workshop.participantsCount || 0))))}
+                                                disabled={ticketCount >= 5 || ticketCount >= (workshop.participantLimit - (workshop.participantsCount || 0))}
+                                                className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white text-gray-400 hover:text-gray-900 transition-all disabled:opacity-50 disabled:hover:bg-transparent"
+                                            >
+                                                <Plus size={14} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
 
                                 <div className="mb-10 text-center bg-gray-50 p-6 rounded-3xl border border-gray-100">
                                     <div className="flex items-center justify-center gap-2 mb-1">
@@ -276,7 +303,7 @@ export default function WorkshopDetailFoodie() {
                                         )}
                                     </div>
                                     <p className="text-4xl font-black text-gray-900">
-                                        {workshop.isFree ? 'Join Free' : `₹${workshop.price}`}
+                                        {workshop.isFree ? 'Join Free' : `₹${workshop.price * ticketCount}`}
                                     </p>
 
                                 </div>
@@ -339,7 +366,7 @@ export default function WorkshopDetailFoodie() {
                         <Elements stripe={stripePromise} options={{ clientSecret }}>
                             <CheckoutForm
                                 clientSecret={clientSecret}
-                                amount={workshop.price}
+                                amount={workshop.price * ticketCount}
                                 onSuccess={() => {
                                     setShowCheckout(false);
                                     navigate('/foodie/my-workshops');

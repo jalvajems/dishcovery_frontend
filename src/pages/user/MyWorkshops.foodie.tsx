@@ -206,7 +206,7 @@ export default function MyWorkshopsFoodie() {
                                                     </button>
                                                 ) : (
                                                     <button
-                                                        onClick={() => navigate(`/foodie/workshop-detail/${workshop._id}`)}
+                                                        onClick={() => navigate(`/foodie/booked-workshop-detail/${workshop._id}`)}
                                                         className="flex-1 flex items-center justify-center gap-3 py-4 bg-gray-900 text-white rounded-2xl font-black hover:bg-green-600 transition-all"
                                                     >
                                                         <ArrowRight size={18} />

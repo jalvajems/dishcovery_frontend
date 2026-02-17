@@ -24,6 +24,7 @@ import WorkshopSummary from '@/pages/shared/WorkshopSummary';
 import FoodieWalletPage from '@/pages/user/Wallet.foodie';
 import FollowingList from '@/pages/user/FollowingList.foodie';
 import ChatPage from '@/pages/shared/ChatPage';
+import BookedWorkshopDetailFoodie from '@/pages/user/BookedWorkshopDetail.foodie';
 
 import ProtectedRoute from './Protected.routes';
 import MyFoodSpotDetailPage from '@/pages/user/MyFoodSpotDetail.foodie';
@@ -59,6 +60,7 @@ function UserRouter() {
                 <Route path='/foodie/foodspot-edit/:id' element={<EditFoodSpot />} />
 
                 <Route path="/foodie/workshop-detail/:id" element={<WorkshopDetailFoodie />} />
+                <Route path="/foodie/booked-workshop-detail/:id" element={<BookedWorkshopDetailFoodie />} />
                 <Route path="/foodie/live-session/:workshopId" element={<LiveSession />} />
                 <Route path="/foodie/workshop-summary/:workshopId" element={<WorkshopSummary />} />
                 <Route path="/foodie/chef/:id" element={<ChefDetail />} />
