@@ -12,10 +12,14 @@ import { getErrorMessage } from '@/utils/errorHandler';
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
+import type { IWorkshopPopulated } from '@/types/workshop.types';
+
+// ... imports
+
 export default function BookedWorkshopDetailFoodie() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const [workshop, setWorkshop] = useState<any>(null);
+    const [workshop, setWorkshop] = useState<IWorkshopPopulated | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -33,8 +37,8 @@ export default function BookedWorkshopDetailFoodie() {
         fetchDetails();
         window.scrollTo(0, 0);
     }, [id]);
-    console.log('workshop=====',workshop);
-    
+    console.log('workshop=====', workshop);
+
 
     if (loading) {
         return (
@@ -49,7 +53,7 @@ export default function BookedWorkshopDetailFoodie() {
 
     if (!workshop) return <div className="p-20 text-center">Workshop not found</div>;
 
-    const myBooking = workshop.myBooking;
+
 
     return (
         <div className="min-h-screen bg-[#fcfcfc]">
@@ -255,7 +259,7 @@ export default function BookedWorkshopDetailFoodie() {
                                     </div>
 
                                     {/* Ticket Count Display for Offline */}
-                                    {workshop.mode === 'OFFLINE'  && (
+                                    {workshop.mode === 'OFFLINE' && (
                                         <div className="flex justify-between items-center py-3 border-b border-gray-50">
                                             <div className="flex items-center gap-3 text-gray-500">
                                                 <Ticket size={16} />
@@ -269,7 +273,7 @@ export default function BookedWorkshopDetailFoodie() {
                                         <div className="flex items-center gap-3 text-gray-500">
                                             <span className="text-sm font-bold">Amount Paid</span>
                                         </div>
-                                        <p className="font-black text-gray-900">₹{ workshop.participantsCount * workshop.price|| 0}</p>
+                                        <p className="font-black text-gray-900">₹{workshop.participantsCount * workshop.price || 0}</p>
                                     </div>
                                 </div>
 
@@ -283,7 +287,7 @@ export default function BookedWorkshopDetailFoodie() {
                                     </p>
                                 </div>
 
-                               
+
                             </div>
                         </div>
                     </div>
@@ -293,7 +297,13 @@ export default function BookedWorkshopDetailFoodie() {
     );
 }
 
-function HighlightCard({ icon: Icon, label, value }: any) {
+interface HighlightCardProps {
+    icon: React.ElementType;
+    label: string;
+    value: string | number;
+}
+
+function HighlightCard({ icon: Icon, label, value }: HighlightCardProps) {
     return (
         <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-lg shadow-gray-50 hover:-translate-y-1 transition-all">
             <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center text-green-600 mb-4 border border-green-100">

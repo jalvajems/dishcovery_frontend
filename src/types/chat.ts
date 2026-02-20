@@ -9,7 +9,7 @@ export interface User {
 export interface Message {
     _id: string;
     conversationId: string;
-    senderId: string;
+    senderId: string | User;
     senderRole: 'chef' | 'foodie';
     content: string;
     fileUrl?: string;
@@ -53,4 +53,9 @@ export interface ChatState {
     typingUserId: string | null;
     loading: boolean;
     error: string | null;
+}
+
+export interface SocketMessagePayload {
+    conversationId: string;
+    message: Message;
 }

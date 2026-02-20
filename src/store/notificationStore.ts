@@ -8,18 +8,7 @@ import {
 } from '../api/notificationApi';
 import { logError } from '../utils/errorHandler';
 
-export interface INotification {
-    _id: string;
-    recipientId: string;
-    recipientRole: string;
-    title: string;
-    message: string;
-    type: string;
-    workshopId?: string;
-    sessionId?: string;
-    isRead: boolean;
-    createdAt: string;
-}
+import type { INotification } from '@/types/notification.types';
 
 interface INotificationStore {
     notifications: INotification[];

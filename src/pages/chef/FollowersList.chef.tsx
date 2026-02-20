@@ -7,9 +7,11 @@ import { getErrorMessage, logError } from '@/utils/errorHandler';
 import { showError } from '@/utils/toast';
 import Pagination from '@/components/shared/Pagination';
 
+import type { IFollower } from "@/types/follower.types";
+
 export default function FollowersList() {
     const navigate = useNavigate();
-    const [followers, setFollowers] = useState<any[]>([]);
+    const [followers, setFollowers] = useState<IFollower[]>([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [total, setTotal] = useState(0);
@@ -92,7 +94,7 @@ export default function FollowersList() {
                 ) : (
                     <>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                            {followers.map((follow: any) => (
+                            {followers.map((follow: IFollower) => (
                                 <div
                                     key={follow._id}
                                     onClick={() => navigate(`/chef/foodie-profile/${follow.followerId?._id}`)}

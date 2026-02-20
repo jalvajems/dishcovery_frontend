@@ -8,10 +8,12 @@ import { useNavigate } from 'react-router-dom';
 import SearchBar from '@/components/shared/SearchBar';
 import { useUserStore } from '@/store/userStore';
 
+import type { IRecipe } from "@/types/recipe.types";
+
 export default function RecipeListing() {
 
   const navigate = useNavigate()
-  const [recipes, setRecipes] = useState([])
+  const [recipes, setRecipes] = useState<IRecipe[]>([])
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const limit = 5;
@@ -33,7 +35,7 @@ export default function RecipeListing() {
     try {
 
       const res = await getAllRecipeApi(currentPage, limit, searchQuery);
-      setRecipes(res.data.data)
+      setRecipes(res.data.data as IRecipe[])
 
       setTotalPages(res.data.totalPages)
       console.log(res.data.data)
@@ -121,7 +123,7 @@ export default function RecipeListing() {
             </button>
           </div>
         ) : (
-          recipes.map((recipe: any) => (
+          recipes.map((recipe: IRecipe) => (
             <div
               key={recipe.title}
               className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 group"
@@ -129,7 +131,7 @@ export default function RecipeListing() {
               <div className="flex gap-6">
                 <div className="w-48 h-48 rounded-2xl overflow-hidden shadow-lg flex-shrink-0">
                   <img
-                    src={recipe.images}
+                    src={recipe.images[0]}
                     alt={recipe.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />

@@ -6,19 +6,25 @@ import {
 } from "@/api/chefApi";
 import { getErrorMessage, logError } from "@/utils/errorHandler";
 import { showError } from "@/utils/toast";
-import { useAuthStore } from "@/store/authStore";
+
 import ChefNavbar from "@/components/shared/chef/NavBar.chef";
 import { useUserStore } from "@/store/userStore";
 import ChefReviewSection from "@/components/shared/ChefReviewSection";
 import { getFollowersApi } from "@/api/followApi";
 
+import type { IChefProfile } from "@/types/profile.types";
+import type { IFollower } from "@/types/follower.types";
+import { useAuthStore } from "@/store/authStore";
+import type { AuthUser } from "@/api/apiInstance"; // Ensure AuthUser is exported from apiInstance or create a shared type
+
 export default function ChefProfilePage() {
-  const id = (useAuthStore.getState().user as any)?._id
+  const user = useAuthStore.getState().user as AuthUser | null;
+  const id = user?._id || user?.id;
   const navigate = useNavigate()
   const { setUserStore } = useUserStore()
 
-  const [chef, setChef] = useState<any>(null);
-  const [followers, setFollowers] = useState<any>(null);
+  const [chef, setChef] = useState<IChefProfile | null>(null);
+  const [followers, setFollowers] = useState<IFollower[]>([]);
   const [loading, setLoading] = useState(true);
 
 
@@ -27,12 +33,12 @@ export default function ChefProfilePage() {
     async function fetchData() {
       try {
         const chefRes = await getChefProfileApi()
-        const followers = await getFollowersApi()
-        console.log("--------fff", followers);
-        setFollowers(followers.data.datas)
+        const followersRes = await getFollowersApi()
+        console.log("--------fff", followersRes);
+        setFollowers(followersRes.data.datas as IFollower[])
 
 
-        setChef(chefRes.data.datas);
+        setChef(chefRes.data.datas as IChefProfile);
       } catch (error: unknown) {
         logError(error);
         showError(getErrorMessage(error, "Failed to load profile"));
@@ -46,8 +52,9 @@ export default function ChefProfilePage() {
   console.log('chef', chef);
 
   useEffect(() => {
-    setUserStore(chef?.chefId?.name, chef?.chefId?.email, chef?.image)
-
+    if (chef) {
+      setUserStore(chef.chefId.name, chef.chefId.email, chef.image || '');
+    }
   }, [chef])
 
   if (loading)

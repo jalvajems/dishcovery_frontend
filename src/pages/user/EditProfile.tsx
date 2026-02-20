@@ -2,18 +2,17 @@ import { useEffect, useState } from "react";
 import { getFoodieProfileApi, updateFoodieProfileApi } from "@/api/foodieApi";
 import { showError, showSuccess } from "@/utils/toast";
 import { getErrorMessage, logError } from "@/utils/errorHandler";
-import { User, Mail, Phone, MapPin, FileText, Image as ImageIcon, Heart } from "lucide-react";
+import { User, Phone, MapPin, FileText, Image as ImageIcon, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAwsS3Upload } from "@/components/shared/hooks/useAwsS3Upload";
 
 export default function FoodieEditProfile() {
     const navigate = useNavigate()
     const [name, setName] = useState("");
-    const [email, setEmail] = useState("");
 
     const [phone, setPhone] = useState("");
     const [location, setLocation] = useState("");
-    const [preferences, setPreferences] = useState([]);
+    const [preferences, setPreferences] = useState<string[]>([]);
     const [bio, setBio] = useState("");
     const [image, setImage] = useState<string | null>(null);
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -26,7 +25,6 @@ export default function FoodieEditProfile() {
                 const profile = res.data.data.data;
 
                 setName(profile.userId?.name ?? "");
-                setEmail(profile.userId?.email ?? "");
                 setPhone(profile.phone ?? "");
                 setLocation(profile.location ?? "");
                 setPreferences(profile.preferences ?? []);
@@ -46,7 +44,7 @@ export default function FoodieEditProfile() {
     const { uploadToS3 } = useAwsS3Upload()
 
 
-    const handleImageChange = async (e) => {
+    const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
 
             const Image = e.target.files?.[0]
@@ -91,11 +89,11 @@ export default function FoodieEditProfile() {
 
 
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!validateForm()) {
-            showError("Ivalid Credentials");
+            showError("Invalid Credentials");
             return;
         }
 

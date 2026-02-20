@@ -72,7 +72,7 @@ export default function ReusableTable<T>({
               >
                 {columns.map((col) => (
                   <td key={String(col.key)} className="px-6 py-5">
-                    {col.render ? col.render(row) : (row[col.key as keyof T] as any)}
+                    {col.render ? col.render(row) : (row[col.key as keyof T] as unknown as React.ReactNode)}
                   </td>
                 ))}
 

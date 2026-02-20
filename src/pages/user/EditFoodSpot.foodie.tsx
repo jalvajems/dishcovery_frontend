@@ -23,6 +23,7 @@ import { getErrorMessage, logError } from "@/utils/errorHandler";
 import { useAwsS3Upload } from "@/components/shared/hooks/useAwsS3Upload";
 import FoodieNavbar from "@/components/shared/foodie/Navbar.foodie";
 import { useNavigate, useParams } from "react-router-dom";
+import type { IFoodSpot } from "@/types/foodSpot.types";
 
 interface FoodItem {
     name: string;
@@ -71,7 +72,7 @@ export default function EditFoodSpot() {
     const fetchFoodSpot = async (spotId: string) => {
         try {
             const { data } = await getFoodSpotDetailApi(spotId);
-            const spot = data.data; // Adjust based on API response structure
+            const spot: IFoodSpot = data.data; // Adjust based on API response structure
 
             setForm({
                 name: spot.name,
@@ -85,7 +86,7 @@ export default function EditFoodSpot() {
             setCoverImage(spot.coverImage);
 
             if (spot.exploredFoods?.length) {
-                setFoods(spot.exploredFoods.map((f: any) => ({
+                setFoods(spot.exploredFoods.map((f) => ({
                     name: f.name,
                     price: f.price?.toString() || "",
                     image: f.image || ""

@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getFollowingApi } from '@/api/followApi';
-import { MapPin, ArrowRight, ArrowLeft, Users, Search, X } from 'lucide-react';
+import { MapPin, ArrowRight, Users, Search } from 'lucide-react';
 import { showError } from '@/utils/toast';
 import { getErrorMessage } from "@/utils/errorHandler";
 import SearchBar from '@/components/shared/SearchBar';
 import Pagination from '@/components/shared/Pagination';
+import type { IFollowing } from '@/types/follower.types';
 
 export default function FollowingList() {
     const navigate = useNavigate();
-    const [following, setFollowing] = useState<any[]>([]);
+    const [following, setFollowing] = useState<IFollowing[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
@@ -115,7 +116,7 @@ export default function FollowingList() {
                 ) : (
                     <>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {following.map((follow: any) => (
+                            {following.map((follow) => (
                                 <div
                                     key={follow._id}
                                     onClick={() => navigate(`/foodie/chef/${follow.followingId?._id}`)}

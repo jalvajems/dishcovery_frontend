@@ -8,11 +8,13 @@ import Pagination from "@/components/shared/Pagination";
 import SearchBar from "@/components/shared/SearchBar";
 import { useUserStore } from "@/store/userStore";
 
+import type { IBlog, IBlogListResponse } from "@/types/blog.types";
+
 export default function BlogListChef() {
   const [searchQuery, setSearchQuery] = useState('')
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [blogs, setBlogs] = useState([]);
+  const [blogs, setBlogs] = useState<IBlog[]>([]);
   const [loading, setLoading] = useState(true);
   const limit = 5
   const navigate = useNavigate();
@@ -124,7 +126,7 @@ export default function BlogListChef() {
         </div>
       ) : (
         <div className="space-y-6 mb-8">
-          {blogs.map((blog: any) => (
+          {blogs.map((blog: IBlog) => (
             <div key={blog._id} className="bg-white p-6 rounded-2xl shadow-lg">
               <div className="flex gap-6">
                 <img src={blog.coverImage} className="w-64 h-48 rounded-xl object-cover" />

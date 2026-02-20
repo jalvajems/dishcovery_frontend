@@ -7,10 +7,12 @@ import { getErrorMessage, logError } from '@/utils/errorHandler';
 import { showError } from '@/utils/toast';
 import { useChatStore } from '@/store/chatStore';
 
+import type { IFoodieProfile } from "@/types/profile.types";
+
 export default function FoodieProfileDetail() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const [profile, setProfile] = useState<any>(null);
+    const [profile, setProfile] = useState<IFoodieProfile | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -22,7 +24,7 @@ export default function FoodieProfileDetail() {
     const fetchProfile = async () => {
         try {
             const response = await getFoodieProfileForChefApi(id!);
-            setProfile(response.data.datas.data);
+            setProfile(response.data.datas.data as IFoodieProfile);
         } catch (error: unknown) {
             logError(error);
             showError(getErrorMessage(error, "Failed to fetch foodie profile"));
@@ -87,17 +89,13 @@ export default function FoodieProfileDetail() {
                                                 console.log('Profile data:', profile);
                                                 console.log('userId object:', profile.userId);
 
-                                                // Try different possible structures
-                                                let foodieUserId = profile.userId?._id || profile.userId?.id || profile.userId;
-
-                                                // If userId is a string, use it directly
-                                                if (typeof foodieUserId === 'object') {
-                                                    foodieUserId = foodieUserId._id || foodieUserId.id;
-                                                }
+                                                // Try different possible structures (though interface says it's an object)
+                                                // We can safely assume it's the object structure if we follow the interface, but keeping safe check
+                                                const foodieUserId = profile.userId?._id;
 
                                                 console.log('Foodie User ID:', foodieUserId);
 
-                                                if (!foodieUserId || typeof foodieUserId !== 'string') {
+                                                if (!foodieUserId) {
                                                     console.error('Foodie ID not found or invalid', profile);
                                                     alert('Unable to start conversation. User ID not found.');
                                                     return;
@@ -144,7 +142,7 @@ export default function FoodieProfileDetail() {
                                     <h3 className="font-bold text-gray-900 text-lg">Interests</h3>
                                 </div>
                                 <div className="flex flex-wrap gap-2 pl-14">
-                                    {profile.preferences?.length > 0 ? (
+                                    {profile.preferences && profile.preferences.length > 0 ? (
                                         profile.preferences.map((pref: string, idx: number) => (
                                             <span key={idx} className="px-3 py-1 bg-white border border-green-100 text-green-700 rounded-lg text-xs font-bold">
                                                 {pref}

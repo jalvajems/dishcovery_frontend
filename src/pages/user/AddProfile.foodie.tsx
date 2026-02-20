@@ -5,13 +5,12 @@ import { getErrorMessage } from "@/utils/errorHandler";
 import { MapPin, Phone, User, FileText, Image as ImageIcon, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAwsS3Upload } from "@/components/shared/hooks/useAwsS3Upload";
-import { useUserStore } from "@/store/userStore";
 
 export default function FoodieAddProfile() {
   const navigate = useNavigate()
   const [phone, setPhone] = useState("");
   const [location, setLocation] = useState("");
-  const [preferences, setPreferences] = useState([]);
+  const [preferences, setPreferences] = useState<string[]>([]);
   const [bio, setBio] = useState("");
   const [image, setImage] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -20,7 +19,7 @@ export default function FoodieAddProfile() {
   const { uploadToS3 } = useAwsS3Upload()
 
 
-  const handleImageChange = async (e) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
 
       const Image = e.target.files?.[0]
@@ -64,7 +63,7 @@ export default function FoodieAddProfile() {
   };
 
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) {
       showError("Ivalid Credentials");

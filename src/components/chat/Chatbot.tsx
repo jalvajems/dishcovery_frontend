@@ -173,19 +173,19 @@ const Chatbot: React.FC = () => {
                                                     <ReactMarkdown
                                                         remarkPlugins={[remarkGfm]}
                                                         components={{
-                                                            p: (props: any) => <p className="mb-1 last:mb-0">{props.children}</p>,
-                                                            ul: (props: any) => <ul className="list-disc ml-4 mb-2 space-y-1">{props.children}</ul>,
-                                                            ol: (props: any) => <ol className="list-decimal ml-4 mb-2 space-y-1">{props.children}</ol>,
-                                                            li: (props: any) => <li className="pl-1">{props.children}</li>,
-                                                            h1: (props: any) => <h1 className="text-sm font-bold mb-1 mt-1">{props.children}</h1>,
-                                                            h2: (props: any) => <h2 className="text-xs font-bold mb-1 mt-1">{props.children}</h2>,
-                                                            h3: (props: any) => <h3 className="text-xs font-bold mb-1 mt-1">{props.children}</h3>,
-                                                            code: (props: any) => <code className="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded text-[10px] font-mono">{props.children}</code>,
-                                                            blockquote: (props: any) => <blockquote className="border-l-2 border-emerald-500 pl-2 italic my-1 text-gray-600 dark:text-gray-400">{props.children}</blockquote>,
-                                                            table: (props: any) => <div className="overflow-x-auto my-1"><table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-[10px] border border-gray-200 dark:border-gray-700 rounded-lg">{props.children}</table></div>,
-                                                            th: (props: any) => <th className="px-1 py-0.5 bg-gray-50 dark:bg-gray-800 text-left font-semibold text-gray-900 dark:text-gray-200">{props.children}</th>,
-                                                            td: (props: any) => <td className="px-1 py-0.5 border-t border-gray-200 dark:border-gray-700">{props.children}</td>,
-                                                            strong: (props: any) => <strong className="font-semibold text-gray-900 dark:text-white">{props.children}</strong>,
+                                                            p: ({ children }: React.ComponentPropsWithoutRef<'p'>) => <p className="mb-1 last:mb-0">{children}</p>,
+                                                            ul: ({ children }: React.ComponentPropsWithoutRef<'ul'>) => <ul className="list-disc ml-4 mb-2 space-y-1">{children}</ul>,
+                                                            ol: ({ children }: React.ComponentPropsWithoutRef<'ol'>) => <ol className="list-decimal ml-4 mb-2 space-y-1">{children}</ol>,
+                                                            li: ({ children }: React.ComponentPropsWithoutRef<'li'>) => <li className="pl-1">{children}</li>,
+                                                            h1: ({ children }: React.ComponentPropsWithoutRef<'h1'>) => <h1 className="text-sm font-bold mb-1 mt-1">{children}</h1>,
+                                                            h2: ({ children }: React.ComponentPropsWithoutRef<'h2'>) => <h2 className="text-xs font-bold mb-1 mt-1">{children}</h2>,
+                                                            h3: ({ children }: React.ComponentPropsWithoutRef<'h3'>) => <h3 className="text-xs font-bold mb-1 mt-1">{children}</h3>,
+                                                            code: ({ children }: React.ComponentPropsWithoutRef<'code'>) => <code className="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded text-[10px] font-mono">{children}</code>,
+                                                            blockquote: ({ children }: React.ComponentPropsWithoutRef<'blockquote'>) => <blockquote className="border-l-2 border-emerald-500 pl-2 italic my-1 text-gray-600 dark:text-gray-400">{children}</blockquote>,
+                                                            table: ({ children }: React.ComponentPropsWithoutRef<'table'>) => <div className="overflow-x-auto my-1"><table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-[10px] border border-gray-200 dark:border-gray-700 rounded-lg">{children}</table></div>,
+                                                            th: ({ children }: React.ComponentPropsWithoutRef<'th'>) => <th className="px-1 py-0.5 bg-gray-50 dark:bg-gray-800 text-left font-semibold text-gray-900 dark:text-gray-200">{children}</th>,
+                                                            td: ({ children }: React.ComponentPropsWithoutRef<'td'>) => <td className="px-1 py-0.5 border-t border-gray-200 dark:border-gray-700">{children}</td>,
+                                                            strong: ({ children }: React.ComponentPropsWithoutRef<'strong'>) => <strong className="font-semibold text-gray-900 dark:text-white">{children}</strong>,
                                                         }}
                                                     >
                                                         {msg.text}

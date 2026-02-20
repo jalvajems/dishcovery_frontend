@@ -7,6 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import Pagination from '@/components/shared/Pagination';
 import SearchBar from '@/components/shared/SearchBar';
 
+import type { IRecipe } from '@/types/recipe.types';
+
 export default function RecipeListing() {
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState('');
@@ -14,7 +16,7 @@ export default function RecipeListing() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const limit = 2
-  const [recipes, setRecipes] = useState([]);
+  const [recipes, setRecipes] = useState<IRecipe[]>([]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
@@ -36,12 +38,10 @@ export default function RecipeListing() {
 
 
   }
-  const handleViewButton = async (id: any) => {
+  const handleViewButton = async (id: string) => {
 
     navigate(`/foodie/recipe-detail/${id}`)
   }
-
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50 p-8">
       <div className="max-w-6xl mx-auto">
@@ -62,17 +62,18 @@ export default function RecipeListing() {
             </p>
 
             {/* Search Bar */}
-            <SearchBar
-              placeholder="Search recipes, cuisine..."
-              onSearch={(value) => {
-                setSearchQuery(value);
-                setCurrentPage(1); // reset to page 1 for search
-              }}
-            />
+            <div className="w-full max-w-2xl">
+              <SearchBar
+                placeholder="Search recipes, cuisine..."
+                onSearch={(value) => {
+                  setSearchQuery(value);
+                  setCurrentPage(1); // reset to page 1 for search
+                }}
+              />
+            </div>
 
           </div>
         </div>
-
 
         {/* Recipes Section */}
         <div className="mb-12">
@@ -125,44 +126,46 @@ export default function RecipeListing() {
             </div>
           ) : (
             <div className="space-y-8">
-              {recipes.map((recipe: any) => (
-                <div
-                  key={recipe._id}
-                  className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-100 group"
-                >
-                  <div className="flex gap-6 items-center">
-                    <div className="flex-1">
-                      {recipe.tags && (
-                        <span className="inline-block px-4 py-1.5 bg-green-100 text-green-700 rounded-lg font-semibold text-sm mb-3">
-                          {recipe.tags}
-                        </span>
-                      )}
-                      <h3 className="text-3xl font-bold text-gray-900 mb-3 group-hover:text-green-700 transition-colors">
-                        {recipe.title}
-                      </h3>
+              {recipes.map((recipe) => {
+                const mainImage = Array.isArray(recipe.images) && recipe.images.length > 0 ? recipe.images[0] : (recipe.images as unknown as string) || '';
+                return (
+                  <div
+                    key={recipe._id}
+                    className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-100 group"
+                  >
+                    <div className="flex gap-6 items-center">
+                      <div className="flex-1">
+                        {recipe.tags && (
+                          <span className="inline-block px-4 py-1.5 bg-green-100 text-green-700 rounded-lg font-semibold text-sm mb-3">
+                            {recipe.tags}
+                          </span>
+                        )}
+                        <h3 className="text-3xl font-bold text-gray-900 mb-3 group-hover:text-green-700 transition-colors">
+                          {recipe.title}
+                        </h3>
 
-                      <button onClick={() => { handleViewButton(recipe._id) }} className="flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-green-100 hover:text-green-700 hover:scale-105 transition-all">
-                        View Details
-                        <ArrowRight className="w-5 h-5" />
-                      </button>
-                    </div>
-                    <div className="w-72 h-56 rounded-2xl overflow-hidden shadow-lg flex-shrink-0">
-                      <img
-                        src={recipe.images}
-                        alt={recipe.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
+                        <button onClick={() => { handleViewButton(recipe._id) }} className="flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-green-100 hover:text-green-700 hover:scale-105 transition-all">
+                          View Details
+                          <ArrowRight className="w-5 h-5" />
+                        </button>
+                      </div>
+                      <div className="w-72 h-56 rounded-2xl overflow-hidden shadow-lg flex-shrink-0">
+                        <img
+                          src={mainImage}
+                          alt={recipe.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>
 
         {/* Pagination */}
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-gray-100">
-
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}

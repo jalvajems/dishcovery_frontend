@@ -9,13 +9,15 @@ import Pagination from '@/components/shared/Pagination';
 import SearchBar from '@/components/shared/SearchBar';
 import { getErrorMessage } from '@/utils/errorHandler';
 
+import type { IFoodSpot } from '@/types/foodSpot.types';
+
 export default function FoodSpotListing() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('')
   const [filter, setFilter] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1);
-  const [spots, setSpots] = useState([])
+  const [spots, setSpots] = useState<IFoodSpot[]>([])
   const limit = 4;
 
   const handlePageChange = (page: number) => {
@@ -100,7 +102,7 @@ export default function FoodSpotListing() {
 
           {/* Spot Cards */}
           <div className="space-y-8">
-            {spots.map((spot: any) => (
+            {spots.map((spot) => (
               <div
                 key={spot._id}
                 className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-100 group"

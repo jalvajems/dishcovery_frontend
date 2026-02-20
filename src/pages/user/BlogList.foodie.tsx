@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Search, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { getBlogsFoodieApi } from '@/api/foodieApi';
 import { showError } from '@/utils/toast';
 import { getErrorMessage } from '@/utils/errorHandler';
@@ -7,12 +7,14 @@ import { useNavigate } from 'react-router-dom';
 import Pagination from '@/components/shared/Pagination';
 import SearchBar from '@/components/shared/SearchBar';
 
+import type { IBlog } from '@/types/blog.types';
+
 export default function BlogListFoodie() {
     const navigate = useNavigate()
     const [searchQuery, setSearchQuery] = useState('');
     const [filter, setFilter] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const [blogs, setBlogs] = useState([]);
+    const [blogs, setBlogs] = useState<IBlog[]>([]);
     const [totalPages, setTotalPages] = useState(1);
     const limit = 3;
 
@@ -91,7 +93,7 @@ export default function BlogListFoodie() {
                 </div>
 
                 {/* Food Blog Section */}
-                {blogs.map((blog: any) => (
+                {blogs.map((blog: IBlog) => (
                     <div
                         key={blog._id}
                         className="bg-white/90 backdrop-blur-sm rounded-2xl m-6 p-6 shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-100 group "

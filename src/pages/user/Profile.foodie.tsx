@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { LogOut, Pencil, Heart, Users, MapPin, Mail, Phone, Settings, ChevronRight, Home } from "lucide-react";
 import { getFoodieProfileApi, getSavedRecipeApi } from "@/api/foodieApi";
-import { getFollowingApi, getFollowStatsApi } from "@/api/followApi";
+import { getFollowingApi } from "@/api/followApi";
 import { showError } from "@/utils/toast";
 import { useNavigate } from "react-router-dom";
 import { useUserStore } from "@/store/userStore";
@@ -9,13 +9,15 @@ import { useAuthStore } from "@/store/authStore";
 import { logoutApi } from "@/api/authApi";
 import FoodieNavbar from "@/components/shared/foodie/Navbar.foodie";
 import { getErrorMessage } from "@/utils/errorHandler";
+import type { IFoodieProfile } from "@/types/profile.types";
+import type { IFollower } from "@/types/follower.types";
+import type { IRecipe } from "@/types/recipe.types";
 
 export default function ProfileFoodie() {
-  const [profile, setProfile] = useState<any>(null);
-  const [followedChefs, setFollowedChefs] = useState<any[]>([]);
+  const [profile, setProfile] = useState<IFoodieProfile | null>(null);
+  const [followedChefs, setFollowedChefs] = useState<IFollower[]>([]);
 
-  const [savedRecipe, setSavedRecipe] = useState<any>(null);
-  const [stats, setStats] = useState({ followers: 0, following: 0 });
+  const [savedRecipe, setSavedRecipe] = useState<{ savedRecipes: IRecipe[] } | null>(null);
   const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
@@ -37,10 +39,7 @@ export default function ProfileFoodie() {
         setSavedRecipe(recipeRes.data.data);
         const response = await getFollowingApi();
         setFollowedChefs(response.data.datas);
-        if (profileData.userId?._id) {
-          const statsRes = await getFollowStatsApi(profileData.userId._id);
-          setStats(statsRes.data.datas);
-        }
+        // Stats fetching removed as state was unused
       } catch (error: unknown) {
         showError(getErrorMessage(error, "Failed to load profile"));
       } finally {
@@ -50,7 +49,7 @@ export default function ProfileFoodie() {
   }, []);
 
   useEffect(() => {
-    setUserStore(profile?.userId?.name, profile?.userId?.email, profile?.image)
+    setUserStore(profile?.userId?.name || '', profile?.userId?.email || '', profile?.image || '')
 
   }, [profile])
 
@@ -201,9 +200,9 @@ export default function ProfileFoodie() {
               <h2 className="text-2xl font-black text-gray-900 mb-6 flex items-center gap-2">
                 <Settings className="text-emerald-600" size={24} /> My Food Preferences
               </h2>
-              {profile.preferences?.length > 0 ? (
+              {profile.preferences && profile.preferences.length > 0 ? (
                 <div className="flex flex-wrap gap-3">
-                  {profile.preferences.map((pref: string, idx: number) => (
+                  {profile.preferences?.map((pref: string, idx: number) => (
                     <span
                       key={idx}
                       className="px-6 py-2.5 bg-white border-2 border-emerald-100 text-emerald-700 font-bold rounded-2xl text-sm shadow-sm hover:shadow-md hover:border-emerald-400 transition-all cursor-default"
@@ -238,14 +237,14 @@ export default function ProfileFoodie() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {savedRecipe.savedRecipes.map((recipe: any) => (
+                  {savedRecipe.savedRecipes.map((recipe: IRecipe) => (
                     <div
                       key={recipe._id}
                       className="group bg-white rounded-[2rem] shadow-sm hover:shadow-xl border border-gray-100 overflow-hidden transition-all duration-300"
                     >
                       <div className="h-48 overflow-hidden relative">
                         <img
-                          src={recipe.images}
+                          src={recipe.images?.[0] || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c'}
                           onClick={() => navigate(`/foodie/recipe-detail/${recipe._id}`)}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 cursor-pointer"
                           alt={recipe.title}

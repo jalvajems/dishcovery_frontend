@@ -2,6 +2,21 @@ import { useAuthStore } from '@/store/authStore';
 import axios from 'axios'
 import type { InternalAxiosRequestConfig } from "axios";
 
+export interface AuthUser {
+    _id?: string;
+    id?: string;
+    name: string;
+    email: string;
+    role: string;
+    isBlocked?: boolean;
+}
+
+export interface AuthResponse {
+    accessToken: string;
+    user: AuthUser;
+    role?: string;
+}
+
 const API = axios.create({
     baseURL: '/api',
     withCredentials: true
@@ -32,15 +47,16 @@ API.interceptors.response.use(
         if (error.response?.status === 401 && !original._retry) {
 
             original._retry = true;
+
             try {
 
-                const { data } = await API.post('/auth/refresh');
+                const { data } = await API.post<AuthResponse>('/auth/refresh');
 
                 const mappedUser = {
-                    id: (data.user as any)?._id || data.user?.id,
-                    name: data.user?.name,
-                    email: data.user?.email,
-                    role: data.user?.role || data.role
+                    id: data.user._id || data.user.id || '',
+                    name: data.user.name,
+                    email: data.user.email,
+                    role: (data.user.role || data.role) as 'user' | 'chef' | 'admin'
                 };
 
                 useAuthStore.getState().login(data.accessToken, mappedUser);

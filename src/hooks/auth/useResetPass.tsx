@@ -28,7 +28,10 @@ export const useResetPass = () => {
 
   };
   const validate = () => {
-    let tempErrors: any = {};
+    let tempErrors = {
+      newPassword: "",
+      confirmPassword: "",
+    };
 
     if (!formData.newPassword.trim()) {
       tempErrors.newPassword = "New password is required";

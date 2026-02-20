@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Wallet, Calendar, ArrowDownToLine, TrendingUp, DollarSign } from "lucide-react";
 import ChefNavbar from "@/components/shared/chef/NavBar.chef";
 import Footer from "@/components/shared/chef/Footer";
 import Pagination from "@/components/shared/Pagination";
 import { getFoodieWalletApi } from "@/api/foodieApi";
 import { logError } from "@/utils/errorHandler";
-import ReusableTable from "@/components/shared/DataTable";
+import ReusableTable, { type ITableColumn } from "@/components/shared/DataTable";
 
 // ---------------- TYPES ----------------
 interface FoodieWalletTransaction {
@@ -60,7 +60,7 @@ export default function FoodieWalletPage() {
     {
       key: "workshopId",
       label: "Workshop",
-      render: (row: any) => (
+      render: (row: FoodieWalletTransaction) => (
         <div className="flex items-center gap-3">
           <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${row.type === 'REFUND' ? 'bg-indigo-100' : 'bg-emerald-100'}`}>
             <DollarSign className={`w-5 h-5 ${row.type === 'REFUND' ? 'text-indigo-600' : 'text-emerald-600'}`} />
@@ -76,7 +76,7 @@ export default function FoodieWalletPage() {
     {
       key: 'host',
       label: 'Hosted By',
-      render: (row: any) => (
+      render: (row: FoodieWalletTransaction) => (
         <div className="flex items-center gap-2">
           <span className="font-medium text-gray-700">
             {row.workshopId?.chefId?.name || 'Unknown Chef'}
@@ -87,7 +87,7 @@ export default function FoodieWalletPage() {
     {
       key: "amount",
       label: "Amount",
-      render: (row) => (
+      render: (row: FoodieWalletTransaction) => (
         <span className={`text-lg font-bold ${row.type === 'REFUND' ? 'text-indigo-600' : 'text-emerald-600'}`}>
           ₹{row.amount.toLocaleString()}
         </span>
@@ -96,7 +96,7 @@ export default function FoodieWalletPage() {
     {
       key: 'type',
       label: 'Type',
-      render: (row: any) => (
+      render: (row: FoodieWalletTransaction) => (
         <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${row.type === 'REFUND' ? 'bg-indigo-50 text-indigo-700' : 'bg-emerald-50 text-emerald-700'}`}>
           {row.type === 'REFUND' ? 'Refund' : 'Payment'}
         </span>
@@ -105,7 +105,7 @@ export default function FoodieWalletPage() {
     {
       key: "createdAt",
       label: "Date",
-      render: (row) => (
+      render: (row: FoodieWalletTransaction) => (
         <div className="flex items-center gap-2 text-sm text-gray-600">
           <Calendar className="w-4 h-4" />
           {new Date(row.createdAt).toLocaleDateString()}
@@ -115,7 +115,7 @@ export default function FoodieWalletPage() {
     {
       key: "status",
       label: "Status",
-      render: (row) => (
+      render: (row: FoodieWalletTransaction) => (
         <span className={`px-3 py-1 rounded-full text-xs font-medium ${row.status === "SUCCESS" ? "bg-green-100 text-green-700" :
           row.status === "PENDING" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"
           }`}>

@@ -35,11 +35,14 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
+import type { IWorkshop } from "@/types/workshop.types";
+import type { IBooking } from "@/types/booking.types";
+
 export default function WorkshopDetailChef() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const [workshop, setWorkshop] = useState<any>(null);
-    const [participants, setParticipants] = useState<any[]>([]);
+    const [workshop, setWorkshop] = useState<IWorkshop | null>(null);
+    const [participants, setParticipants] = useState<IBooking[]>([]);
     const [loading, setLoading] = useState(true);
 
     const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -58,7 +61,7 @@ export default function WorkshopDetailChef() {
     const fetchWorkshop = async () => {
         try {
             const response = await getWorkshopByIdApi(id!);
-            setWorkshop(response.data.data);
+            setWorkshop(response.data.data as IWorkshop);
         } catch (error: unknown) {
             logError(error);
             toast.error(getErrorMessage(error, "Failed to fetch workshop details"));
@@ -70,7 +73,7 @@ export default function WorkshopDetailChef() {
     const fetchParticipants = async () => {
         try {
             const response = await getWorkshopParticipantsApi(id!);
-            setParticipants(response.data.data);
+            setParticipants(response.data.data as IBooking[]);
         } catch (error: unknown) {
             logError(error);
             console.error("Failed to fetch participants");
@@ -210,14 +213,14 @@ export default function WorkshopDetailChef() {
                                 <div className="flex items-center gap-2 text-gray-400 font-medium">
                                     <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-bold">{workshop.category}</span>
                                     <span>•</span>
-                                    <span>Created {new Date(workshop.createdAt).toLocaleDateString()}</span>
+                                    <span>Created {new Date(workshop.date as string | Date).toLocaleDateString()}</span>
                                 </div>
                             </div>
 
                             <div className="flex gap-3">
                                 {canEdit && (
                                     <button
-                                        onClick={() => navigate(`/chef/workshop-edit/${workshop._id}`)}
+                                        onClick={() => navigate(`/chef/workshop-edit/${workshop._id!}`)}
                                         className="flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-2xl font-bold hover:bg-gray-800 transition-all shadow-xl"
                                     >
                                         <Edit2 className="w-4 h-4" />
@@ -321,7 +324,7 @@ export default function WorkshopDetailChef() {
                                 </div>
                             ) : (
                                 <div className="space-y-4">
-                                    {participants.map((booking) => (
+                                    {participants.map((booking: IBooking) => (
                                         <div key={booking._id} className="p-6 bg-white rounded-3xl border border-gray-100 shadow-sm flex items-center justify-between group hover:border-green-200 transition-all">
                                             <div className="flex items-center gap-4">
                                                 <div className="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center text-green-600 font-black">
@@ -560,13 +563,13 @@ export default function WorkshopDetailChef() {
                         <div className="relative z-10 pt-10 mt-10 border-t border-gray-100">
                             <div className="flex items-center justify-between text-[10px] font-black text-gray-400 uppercase tracking-widest">
                                 <span>Workshop Studio</span>
-                                <span>ID: {workshop._id.slice(-8)}</span>
+                                <span>ID: {workshop._id?.slice(-8)}</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div >
-            <ChefReviewSection reviewableId={workshop._id} reviewableType="Workshop" />
+            <ChefReviewSection reviewableId={workshop._id!} reviewableType="Workshop" />
 
 
 

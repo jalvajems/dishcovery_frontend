@@ -6,9 +6,11 @@ import { useNavigate } from 'react-router-dom';
 import Pagination from '@/components/shared/Pagination';
 import SearchBar from '@/components/shared/SearchBar';
 
+import type { IWorkshopPopulated } from '@/types/workshop.types';
+
 export default function WorkshopDiscovery() {
     const navigate = useNavigate();
-    const [workshops, setWorkshops] = useState([]);
+    const [workshops, setWorkshops] = useState<IWorkshopPopulated[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [modeFilter, setModeFilter] = useState("all");
@@ -97,7 +99,7 @@ export default function WorkshopDiscovery() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {workshops.map((w: any) => (
+                        {workshops.map((w) => (
                             <div
                                 key={w._id}
                                 className="group bg-white rounded-[2.5rem] overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 border border-gray-50 flex flex-col h-full"

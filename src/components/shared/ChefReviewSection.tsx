@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { Star, ThumbsUp, ThumbsDown, Filter } from "lucide-react";
-import { getReviewsApi, likeReviewApi, dislikeReviewApi } from "@/api/reviewApi";
+import { Star, ThumbsUp, ThumbsDown } from "lucide-react";
+import { getReviewsApi } from "@/api/reviewApi";
+import type { IReview } from "@/types/review.types";
 
 type ReviewableType = "Recipe" | "Blog" | "Workshop" | "FoodSpot" | "Chef";
 
@@ -10,9 +11,20 @@ interface ChefReviewProps {
 }
 
 export default function ChefReviewSection({ reviewableId, reviewableType }: ChefReviewProps) {
-  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<IReview[]>([]);
   const [loading, setLoading] = useState(false);
   const [sortBy, setSortBy] = useState("latest");
+
+  const getUserName = (user: IReview['userId']) => {
+    if (!user) return "Anonymous";
+    if (typeof user === 'string') return "Unknown User";
+    return user.name;
+  };
+
+  const getUserAvatar = (user: IReview['userId']) => {
+    if (!user || typeof user === 'string') return "/default-avatar.png";
+    return user.avatar || "/default-avatar.png";
+  };
 
   const loadReviews = async () => {
     if (!reviewableId) return;
@@ -22,24 +34,24 @@ export default function ChefReviewSection({ reviewableId, reviewableType }: Chef
       const res = await getReviewsApi(reviewableId, reviewableType);
 
       let data = res.data.data;
-        
-        if (Array.isArray(data)){
-            
-            setReviews(data);
-        } 
-        else if (Array.isArray(data?.data)){
-            setReviews(data.data);
-        } 
-        else{
-            setReviews([]);
-        } 
-        
+
+      if (Array.isArray(data)) {
+
+        setReviews(data);
+      }
+      else if (Array.isArray(data?.data)) {
+        setReviews(data.data);
+      }
+      else {
+        setReviews([]);
+      }
+
     } catch (err) {
-        console.error("Review fetch failed", err);
+      console.error("Review fetch failed", err);
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-};
+  };
 
   useEffect(() => {
     loadReviews();
@@ -74,16 +86,15 @@ export default function ChefReviewSection({ reviewableId, reviewableType }: Chef
           {[...Array(5)].map((_, i) => (
             <Star
               key={i}
-              className={`w-6 h-6 ${
-                i < Math.round(averageRating) ? "fill-amber-400 text-amber-400" : "text-gray-300"
-              }`}
+              className={`w-6 h-6 ${i < Math.round(averageRating) ? "fill-amber-400 text-amber-400" : "text-gray-300"
+                }`}
             />
           ))}
         </div>
         <p className="text-gray-600 text-sm">({reviews.length} reviews)</p>
       </div>
 
-      
+
       {/* REVIEW LIST */}
       {loading ? (
         <div>Loading reviews...</div>
@@ -95,12 +106,12 @@ export default function ChefReviewSection({ reviewableId, reviewableType }: Chef
             <div key={r._id} className="bg-gray-50 p-6 rounded-xl shadow">
               <div className="flex items-center gap-4 mb-2">
                 <img
-                  src={r.userId?.avatar || "/default-avatar.png"}
-                  alt={r.userId?.name}
+                  src={getUserAvatar(r.userId)}
+                  alt={getUserName(r.userId)}
                   className="w-12 h-12 rounded-full object-cover"
                 />
                 <div>
-                  <div className="font-semibold">{r.userId?.name || "Anonymous"}</div>
+                  <div className="font-semibold">{getUserName(r.userId)}</div>
                   <div className="text-xs text-gray-500">
                     {new Date(r.createdAt).toLocaleString()}
                   </div>
@@ -111,9 +122,8 @@ export default function ChefReviewSection({ reviewableId, reviewableType }: Chef
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className={`w-4 h-4 ${
-                      i < r.rating ? "fill-amber-400 text-amber-400" : "text-gray-300"
-                    }`}
+                    className={`w-4 h-4 ${i < r.rating ? "fill-amber-400 text-amber-400" : "text-gray-300"
+                      }`}
                   />
                 ))}
               </div>

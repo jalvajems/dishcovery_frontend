@@ -8,19 +8,7 @@ import { logError, getErrorMessage } from "@/utils/errorHandler";
 import { showError } from "@/utils/toast";
 import { Eye } from "lucide-react";
 
-type Workshop = {
-    _id: string;
-    title: string;
-    chefId: {
-        _id: string;
-        name: string;
-    };
-    mode: "ONLINE" | "OFFLINE";
-    price: number;
-    isFree: boolean;
-    date: string;
-    status: string;
-};
+import type { IWorkshopPopulated } from "@/types/workshop.types";
 
 export default function WorkshopManagement() {
     const navigate = useNavigate();
@@ -34,7 +22,7 @@ export default function WorkshopManagement() {
         setSearchInput,
         filters,
         updateFilter,
-    } = useAdminTable<Workshop>({
+    } = useAdminTable<IWorkshopPopulated>({
         fetchApi: async (page, limit, search, filters) => {
             try {
                 const response = await getAllWorkshopsAdminApi();
@@ -42,16 +30,16 @@ export default function WorkshopManagement() {
 
                 let filtered = allData;
                 if (search) {
-                    filtered = filtered.filter((w: any) =>
+                    filtered = filtered.filter((w: IWorkshopPopulated) =>
                         w.title.toLowerCase().includes(search.toLowerCase()) ||
                         w.chefId?.name.toLowerCase().includes(search.toLowerCase())
                     );
                 }
                 if (filters.status && filters.status !== 'all') {
-                    filtered = filtered.filter((w: any) => w.status === filters.status);
+                    filtered = filtered.filter((w: IWorkshopPopulated) => w.status === filters.status);
                 }
                 if (filters.mode && filters.mode !== 'all') {
-                    filtered = filtered.filter((w: any) => w.mode === filters.mode);
+                    filtered = filtered.filter((w: IWorkshopPopulated) => w.mode === filters.mode);
                 }
 
                 const startIndex = (page - 1) * limit;
@@ -93,7 +81,7 @@ export default function WorkshopManagement() {
         }
     };
 
-    const columns: ITableColumn<Workshop>[] = [
+    const columns: ITableColumn<IWorkshopPopulated>[] = [
         { key: "title", label: "Title" },
         {
             key: "chefId",

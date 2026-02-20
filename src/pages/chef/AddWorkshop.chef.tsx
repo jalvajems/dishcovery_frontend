@@ -7,6 +7,7 @@ import ChefNavbar from '@/components/shared/chef/NavBar.chef';
 import { useAwsS3Upload } from '@/components/shared/hooks/useAwsS3Upload';
 import MapLocationPicker from '@/utils/MapLocationPicker';
 import { getErrorMessage, logError } from '@/utils/errorHandler';
+import type { ICreateWorkshop, WorkshopMode } from '@/types/workshop.types';
 
 export default function AddWorkshopChef() {
     const navigate = useNavigate();
@@ -112,7 +113,11 @@ export default function AddWorkshopChef() {
 
         try {
             setLoading(true);
-            const payload = {
+
+
+            // ...
+
+            const payload: ICreateWorkshop = {
                 title: formData.title,
                 description: formData.description,
                 category: formData.category,
@@ -120,22 +125,18 @@ export default function AddWorkshopChef() {
                 startTime: formData.startTime,
                 duration: formData.duration,
                 participantLimit: formData.participantLimit,
-                mode: formData.mode,
+                mode: formData.mode as WorkshopMode,
                 isFree: formData.isFree,
                 price: formData.isFree ? 0 : formData.price,
                 banner: formData.banner,
-                location: undefined as any
-            };
-
-            if (formData.mode === 'OFFLINE') {
-                payload.location = {
+                location: formData.mode === 'OFFLINE' ? {
                     venueName: formData.venueName,
                     address: formData.address,
                     city: formData.city,
                     latitude: formData.latitude,
                     longitude: formData.longitude
-                };
-            }
+                } : undefined
+            };
 
             await createWorkshopApi(payload);
             toast.success("Workshop created as DRAFT!");

@@ -129,7 +129,7 @@ export default function Signup() {
                 type="checkbox"
                 id="terms"
                 checked={agreedToTerms}
-                onChange={(e) => setAgreedToTerms(e.target.checked)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAgreedToTerms(e.target.checked)}
                 className="w-4 h-4 text-green-500 border-gray-300 rounded focus:ring-green-500"
               />
               <label htmlFor="terms" className="text-sm text-gray-700">

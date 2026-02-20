@@ -6,6 +6,7 @@ import { showError, showSuccess } from "@/utils/toast";
 import { getErrorMessage } from "@/utils/errorHandler";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import type { AuthResponse } from "@/api/apiInstance";
 
 export const useLogin = () => {
 
@@ -56,18 +57,18 @@ export const useLogin = () => {
     const isValid = validateForm();
     if (!isValid) return;
     try {
-      const { data } = await loginApi({ email: formData.email, password: formData.password });
+      const { data } = await loginApi({ email: formData.email, password: formData.password }) as { data: AuthResponse };
 
       if (data.user.isBlocked) {
         showError('user is blocked!!')
         return;
       }
       const mappedUser = {
-        id: (data.user as any)._id || data.user.id,
-        _id: (data.user as any)._id || data.user.id,
+        id: data.user._id || data.user.id || '',
+        _id: data.user._id || data.user.id || '',
         name: data.user.name,
         email: data.user.email,
-        role: data.user.role
+        role: data.user.role as 'user' | 'chef' | 'admin'
       };
 
       login(data.accessToken, mappedUser);

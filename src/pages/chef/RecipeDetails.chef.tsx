@@ -4,16 +4,18 @@ import { useNavigate, useParams } from "react-router-dom";
 import { deleteRecipeApi, getRecipeDetailApi } from "@/api/chefApi";
 import { showError } from "@/utils/toast";
 import { getErrorMessage, logError } from "@/utils/errorHandler";
-import { useAuthStore } from "@/store/authStore";
+
 import ChefReviewSection from "@/components/shared/ChefReviewSection";
 import ChefNavbar from "@/components/shared/chef/NavBar.chef";
 import { useUserStore } from "@/store/userStore";
 
+import type { IRecipe } from "@/types/recipe.types";
+
 export default function RecipeDetailPage() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate()
 
-  const [recipe, setRecipe] = useState<any>(null);
+  const [recipe, setRecipe] = useState<IRecipe | null>(null);
   const [loading, setLoading] = useState(true);
   const { isVerifiedUser } = useUserStore()
 
@@ -26,7 +28,7 @@ export default function RecipeDetailPage() {
       try {
         if (!id) return;
         const res = await getRecipeDetailApi(id);
-        setRecipe(res.data.data);
+        setRecipe(res.data.data as IRecipe);
       } catch (error: unknown) {
         logError(error);
         showError(getErrorMessage(error, "Failed to load recipe"));
@@ -122,7 +124,7 @@ export default function RecipeDetailPage() {
         <div className="bg-white/90 rounded-2xl shadow-xl p-8 mb-10">
           <h2 className="text-2xl font-bold mb-6">Steps</h2>
           <div className="space-y-6">
-            {recipe.steps?.map((step: any, i: number) => (
+            {recipe.steps?.map((step: string, i: number) => (
               <div key={i} className="flex gap-6">
                 <div className="w-12 h-12 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
                   {i + 1}
@@ -155,7 +157,14 @@ export default function RecipeDetailPage() {
 }
 
 /* Small reusable detail item */
-function DetailItem({ icon, label, value }: any) {
+/* Small reusable detail item */
+interface DetailItemProps {
+  icon: React.ReactNode;
+  label: string;
+  value: string | number | undefined;
+}
+
+function DetailItem({ icon, label, value }: DetailItemProps) {
   return (
     <div className="flex items-center justify-between py-3 border-b border-gray-200">
       <span className="text-green-600 font-semibold flex items-center gap-2">

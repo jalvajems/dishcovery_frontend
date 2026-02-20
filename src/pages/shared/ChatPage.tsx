@@ -7,6 +7,8 @@ import { MessageSquare } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useSocket } from '@/context/SocketProvider';
 
+import type { Conversation } from "@/types/chat";
+
 const ChatPage: React.FC = () => {
     const { conversationId } = useParams<{ conversationId?: string }>();
     const navigate = useNavigate();
@@ -48,14 +50,14 @@ const ChatPage: React.FC = () => {
 
     useEffect(() => {
         if (conversationId && conversations.length > 0) {
-            const conversation = conversations.find(c => c._id === conversationId);
+            const conversation = conversations.find((c: Conversation) => c._id === conversationId);
             if (conversation) {
                 setActiveConversation(conversation);
             }
         }
     }, [conversationId, conversations]);
 
-    const handleSelectConversation = (conversation: any) => {
+    const handleSelectConversation = (conversation: Conversation) => {
         setActiveConversation(conversation);
         navigate(`${basePath}/${conversation._id}`);
     };

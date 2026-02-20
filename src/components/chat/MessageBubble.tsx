@@ -17,12 +17,14 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
     const [showConfirm, setShowConfirm] = useState(false);
     const [confirmAction, setConfirmAction] = useState<{ forEveryone: boolean } | null>(null);
 
-    const getUserId = (u: any): string => {
+    type UserIdentity = string | { _id?: string; id?: string } | null | undefined;
+
+    const getUserId = (u: UserIdentity): string => {
         if (!u) return '';
         if (typeof u === 'string') return u;
-        if (typeof u._id === 'string') return u._id;
-        if (typeof u.id === 'string') return u.id;
-        return String(u);
+        if (u._id) return u._id;
+        if (u.id) return u.id;
+        return '';
     };
 
     const senderIdStr = getUserId(message.senderId);

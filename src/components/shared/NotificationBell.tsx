@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Bell, Check } from 'lucide-react';
 import { useNotificationStore } from '@/store/notificationStore';
 import { useNavigate } from 'react-router-dom';
+import type { INotification } from '@/types/notification.types';
 
 export const NotificationBell = () => {
     const {
@@ -45,7 +46,7 @@ export const NotificationBell = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const handleNotificationClick = async (notification: any) => {
+    const handleNotificationClick = async (notification: INotification) => {
         if (!notification.isRead) {
             await markAsRead(notification._id);
         }

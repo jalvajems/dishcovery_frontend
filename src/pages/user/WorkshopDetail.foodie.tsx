@@ -19,10 +19,12 @@ mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
+import type { IWorkshopPopulated } from '@/types/workshop.types';
+
 export default function WorkshopDetailFoodie() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const [workshop, setWorkshop] = useState<any>(null);
+    const [workshop, setWorkshop] = useState<IWorkshopPopulated | null>(null);
     const [loading, setLoading] = useState(true);
     const [bookingLoading, setBookingLoading] = useState(false);
     const [showCheckout, setShowCheckout] = useState(false);
@@ -44,6 +46,8 @@ export default function WorkshopDetailFoodie() {
         fetchDetails();
         window.scrollTo(0, 0);
     }, [id]);
+
+    // ... (rest of the component logic)
 
     const handleBooking = async () => {
         try {
@@ -345,7 +349,7 @@ export default function WorkshopDetailFoodie() {
                 </div>
             </div>
 
-            <ReviewSection reviewableId={workshop._id} reviewableType='Workshop' />
+            <ReviewSection reviewableId={workshop._id!} reviewableType='Workshop' />
             {/* Checkout Modal */}
             {showCheckout && clientSecret && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
@@ -381,7 +385,13 @@ export default function WorkshopDetailFoodie() {
     );
 }
 
-function HighlightCard({ icon: Icon, label, value }: any) {
+interface HighlightCardProps {
+    icon: any;
+    label: string;
+    value: string | number;
+}
+
+function HighlightCard({ icon: Icon, label, value }: HighlightCardProps) {
     return (
         <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-xl shadow-gray-50 hover:-translate-y-1 transition-all">
             <div className="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 mb-6 border border-green-100">

@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import { Star, ThumbsUp, ThumbsDown } from "lucide-react";
 import { getReviewsApi, postReviewApi, likeReviewApi, dislikeReviewApi } from "@/api/reviewApi";
 import { showError } from "@/utils/toast";
+import { getErrorMessage } from "@/utils/errorHandler";
+import type { IReview } from "@/types/review.types";
 
 type ReviewableType = "Recipe" | "Blog" | "Workshop" | "FoodSpot" | "Chef";
 
 interface ReviewSectionProps {
-    reviewableId?: string; 
+    reviewableId?: string;
     reviewableType: ReviewableType;
 }
 
@@ -14,7 +16,7 @@ export default function ReviewSection({ reviewableId, reviewableType }: ReviewSe
     const [selectedRating, setSelectedRating] = useState<number>(0);
     const [hoverRating, setHoverRating] = useState<number>(0);
     const [reviewText, setReviewText] = useState<string>("");
-    const [reviews, setReviews] = useState<any[]>([]);
+    const [reviews, setReviews] = useState<IReview[]>([]);
     const [loading, setLoading] = useState(false);
 
     const loadReviews = async (id?: string) => {
@@ -58,9 +60,10 @@ export default function ReviewSection({ reviewableId, reviewableType }: ReviewSe
             setReviewText("");
             await loadReviews(reviewableId);
 
-        } catch (err: any) {
+        } catch (err: unknown) {
+            const message = getErrorMessage(err, 'Failed to post review');
             console.error(err);
-            showError(err.response?.message || 'failed to post review')
+            showError(message);
         }
     };
 
@@ -95,8 +98,8 @@ export default function ReviewSection({ reviewableId, reviewableType }: ReviewSe
                             <Star
                                 size={32}
                                 className={`transition-colors duration-200 ${(hoverRating || selectedRating) >= star
-                                        ? "fill-yellow-400 text-yellow-400"
-                                        : "text-gray-300"
+                                    ? "fill-yellow-400 text-yellow-400"
+                                    : "text-gray-300"
                                     }`}
                             />
                         </button>

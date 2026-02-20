@@ -8,18 +8,27 @@ import API from '@/api/apiInstance';
 import FoodieNavbar from '@/components/shared/foodie/Navbar.foodie';
 import { getErrorMessage, logError } from '@/utils/errorHandler';
 
+import type { IRecipe } from '@/types/recipe.types';
+
+// ... imports
+
 export default function RecipeDetailFoodie() {
   const { id } = useParams();
   const [isSaved, setIsSaved] = useState(false);
-  const [recipe, setRecipe] = useState<any>(null);
-  const [relatedRecipes, setRelatedRecipes] = useState<any[]>([]);
+  const [recipe, setRecipe] = useState<IRecipe | null>(null);
+  const [relatedRecipes, setRelatedRecipes] = useState<IRecipe[]>([]);
 
   useEffect(() => {
     async function fetchRecipe() {
       try {
         if (!id) return;
         const res = await getRecipeDetailFoodieApi(id);
-        setRecipe(res.data.data);
+        const data = res.data.data;
+        // Ensure legacy support if images is sometimes a string (though type says string[])
+        if (typeof data.images === 'string') {
+          data.images = [data.images];
+        }
+        setRecipe(data);
         setIsSaved(res.data.isSaved);
       } catch (error: unknown) {
         showError(getErrorMessage(error, "Failed to load recipe"));
@@ -33,8 +42,8 @@ export default function RecipeDetailFoodie() {
     if (!recipe?.cuisine) return;
     async function fetchRelatedRecipes() {
       try {
-        const result = await getRelatedRecipesApi(recipe.cuisine);
-        const related = result.data.relatedData?.filter((r: any) => r._id !== recipe._id) || [];
+        const result = await getRelatedRecipesApi(recipe!.cuisine);
+        const related = result.data.relatedData?.filter((r: IRecipe) => r._id !== recipe!._id) || [];
         setRelatedRecipes(related.slice(0, 3));
       } catch (error) {
         logError(error, "Error fetching related recipes");
@@ -60,6 +69,9 @@ export default function RecipeDetailFoodie() {
     );
   }
 
+  // Safe image access
+  const mainImage = Array.isArray(recipe.images) && recipe.images.length > 0 ? recipe.images[0] : (recipe.images as unknown as string) || '';
+
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-800">
       <FoodieNavbar />
@@ -67,7 +79,7 @@ export default function RecipeDetailFoodie() {
       {/* Hero Header */}
       <div className="relative h-[500px] w-full bg-gray-900 group">
         <img
-          src={recipe.images}
+          src={mainImage}
           alt={recipe.title}
           className="w-full h-full object-cover opacity-60 group-hover:opacity-50 transition-all duration-700"
         />
@@ -90,12 +102,12 @@ export default function RecipeDetailFoodie() {
           <div className="flex items-center gap-6 text-gray-300">
             <span className="flex items-center gap-2 text-lg">
               <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold">
-                {recipe.chefId.name.charAt(0)}
+                {recipe.chefId?.name.charAt(0)}
               </div>
-              by <span className="text-white hover:text-emerald-400 cursor-pointer underline-offset-4 hover:underline transition-colors">{recipe.chefId.name}</span>
+              by <span className="text-white hover:text-emerald-400 cursor-pointer underline-offset-4 hover:underline transition-colors">{recipe.chefId?.name}</span>
             </span>
             <span className="hidden md:inline-block">•</span>
-            <span>{new Date(recipe.createdAt).toLocaleDateString()}</span>
+            <span>{recipe.createdAt ? new Date(recipe.createdAt).toLocaleDateString() : ''}</span>
           </div>
         </div>
       </div>
@@ -126,7 +138,7 @@ export default function RecipeDetailFoodie() {
               </h2>
               <div className="bg-white p-8 rounded-2xl shadow-sm border-l-4 border-emerald-500">
                 <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                  {recipe.ingredients.map((item: string, idx: number) => (
+                  {recipe.ingredients?.map((item: string, idx: number) => (
                     <li key={idx} className="flex items-center gap-3 text-gray-700 bg-emerald-50/50 p-3 rounded-lg hover:bg-emerald-100/50 transition-colors">
                       <CheckCircle2 size={20} className="text-emerald-500 flex-shrink-0" />
                       <span className="font-medium">{item}</span>
@@ -142,10 +154,10 @@ export default function RecipeDetailFoodie() {
                 <span className="text-emerald-600"></span> Instructions
               </h2>
               <div className="space-y-8">
-                {recipe.steps.map((step: string, idx: number) => (
+                {recipe.steps?.map((step: string, idx: number) => (
                   <div key={idx} className="relative pl-10 group">
                     {/* Connecting Line */}
-                    {idx !== recipe.steps.length - 1 && (
+                    {idx !== (recipe.steps?.length || 0) - 1 && (
                       <div className="absolute left-[19px] top-10 w-0.5 h-full bg-gray-200 group-hover:bg-emerald-200 transition-colors"></div>
                     )}
 
@@ -165,7 +177,7 @@ export default function RecipeDetailFoodie() {
 
             {/* Reviews */}
             <div className="pt-10">
-              <ReviewSection reviewableId={id} reviewableType="Recipe" />
+              <ReviewSection reviewableId={id!} reviewableType="Recipe" />
             </div>
 
           </div>
@@ -204,24 +216,27 @@ export default function RecipeDetailFoodie() {
             {relatedRecipes.length > 0 && (
               <div className='space-y-4'>
                 <h3 className="text-xl font-bold text-gray-900 border-l-4 border-emerald-500 pl-3">More Like This</h3>
-                {relatedRecipes.map((r) => (
-                  <Link to={`/foodie/recipe/${r._id}`} key={r._id} className="block group">
-                    <div className="flex gap-4 bg-white p-3 rounded-xl shadow-sm border border-transparent hover:border-emerald-200 transition-all hover:bg-emerald-50/30">
-                      <img src={r.images} alt={r.title} className="w-24 h-24 object-cover rounded-lg flex-shrink-0" />
-                      <div className='flex flex-col justify-center gap-1'>
-                        <h4 className="font-bold text-gray-800 line-clamp-2 leading-tight group-hover:text-emerald-700 transition-colors">
-                          {r.title}
-                        </h4>
-                        <div className='flex items-center gap-2 text-xs text-gray-500'>
-                          <Clock size={12} /> {r.cookingTime} min
-                        </div>
-                        <div className='flex items-center gap-1 text-xs font-semibold text-emerald-600 mt-1'>
-                          <span className="hover:underline">View Recipe</span> <ArrowRight size={12} />
+                {relatedRecipes.map((r) => {
+                  const rImage = Array.isArray(r.images) && r.images.length > 0 ? r.images[0] : (r.images as unknown as string) || '';
+                  return (
+                    <Link to={`/foodie/recipe/${r._id}`} key={r._id} className="block group">
+                      <div className="flex gap-4 bg-white p-3 rounded-xl shadow-sm border border-transparent hover:border-emerald-200 transition-all hover:bg-emerald-50/30">
+                        <img src={rImage} alt={r.title} className="w-24 h-24 object-cover rounded-lg flex-shrink-0" />
+                        <div className='flex flex-col justify-center gap-1'>
+                          <h4 className="font-bold text-gray-800 line-clamp-2 leading-tight group-hover:text-emerald-700 transition-colors">
+                            {r.title}
+                          </h4>
+                          <div className='flex items-center gap-2 text-xs text-gray-500'>
+                            <Clock size={12} /> {r.cookingTime} min
+                          </div>
+                          <div className='flex items-center gap-1 text-xs font-semibold text-emerald-600 mt-1'>
+                            <span className="hover:underline">View Recipe</span> <ArrowRight size={12} />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </Link>
-                ))}
+                    </Link>
+                  )
+                })}
               </div>
             )}
 
@@ -233,7 +248,14 @@ export default function RecipeDetailFoodie() {
   );
 }
 
-function StatBox({ icon: Icon, label, value, color = "text-emerald-600" }: any) {
+interface StatBoxProps {
+  icon: any; // Lucide icon type
+  label: string;
+  value: string | number;
+  color?: string;
+}
+
+function StatBox({ icon: Icon, label, value, color = "text-emerald-600" }: StatBoxProps) {
   return (
     <div className="flex flex-col items-center justify-center p-3 text-center">
       <Icon className={`w-6 h-6 mb-2 ${color}`} />

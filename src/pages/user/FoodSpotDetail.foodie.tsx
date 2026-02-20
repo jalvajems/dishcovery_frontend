@@ -9,6 +9,8 @@ import FoodieNavbar from '@/components/shared/foodie/Navbar.foodie';
 import ReviewSection from '@/components/shared/ReviewPage';
 import { logError } from '@/utils/errorHandler';
 
+import type { IFoodSpot } from '@/types/foodSpot.types';
+
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
 const isFoodSpotOpen = (openTime: string, closeTime: string) => {
@@ -30,43 +32,10 @@ const isFoodSpotOpen = (openTime: string, closeTime: string) => {
   return currentMinutes >= openTotal && currentMinutes <= closeTotal;
 };
 
-interface FoodSpot {
-  _id: string;
-  name: string;
-  coverImage: string;
-  description: string;
-  images: string[];
-  address: {
-    placeName: string;
-    city: string;
-    state: string;
-    country: string;
-    fullAddress: string;
-  };
-  location: {
-    type: string;
-    coordinates: number[];
-  };
-  openingHours: {
-    open: string;
-    close: string;
-    isOpenNow: boolean;
-  };
-  speciality: string[];
-  tags: string[];
-  likesCount: number;
-  savesCount: number;
-  foodieId: {
-    id: string;
-    name: string;
-  };
-  exploredFoods: any[];
-}
-
 export const FoodSpotDetailPage: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [foodSpot, setFoodSpot] = useState<FoodSpot | null>(null);
+  const [foodSpot, setFoodSpot] = useState<IFoodSpot | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -122,7 +91,6 @@ export const FoodSpotDetailPage: React.FC = () => {
     openingHours,
     speciality,
     tags,
-    likesCount,
     location
   } = foodSpot;
 
@@ -246,7 +214,7 @@ export const FoodSpotDetailPage: React.FC = () => {
 
               {foodSpot.exploredFoods && foodSpot.exploredFoods.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {foodSpot.exploredFoods.map((food: any, idx) => (
+                  {foodSpot.exploredFoods.map((food, idx) => (
                     <div key={idx} className="group bg-white border border-gray-100 rounded-3xl p-4 hover:shadow-xl transition-all duration-300 flex gap-5 items-center">
                       <div className="w-24 h-24 bg-gray-100 rounded-2xl flex-shrink-0 overflow-hidden shadow-inner relative">
                         {food.image ? (
@@ -294,7 +262,6 @@ export const FoodSpotDetailPage: React.FC = () => {
                       }}
                       style={{ width: '100%', height: '100%' }}
                       mapStyle="mapbox://styles/mapbox/streets-v11"
-                      tabIndex={0}
                       accessToken={mapboxgl.accessToken || ""}
                       scrollZoom={false}
                     >

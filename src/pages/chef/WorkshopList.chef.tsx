@@ -7,10 +7,12 @@ import { toast } from 'react-toastify';
 import { getErrorMessage, logError } from '@/utils/errorHandler';
 import Pagination from '@/components/shared/Pagination';
 
+import type { IWorkshop } from "@/types/workshop.types";
+
 export default function WorkshopListChef() {
     const navigate = useNavigate();
     const { isVerifiedUser } = useUserStore();
-    const [workshops, setWorkshops] = useState([]);
+    const [workshops, setWorkshops] = useState<IWorkshop[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
@@ -33,7 +35,7 @@ export default function WorkshopListChef() {
         try {
             setLoading(true);
             const res = await getChefWorkshopsApi(currentPage, limit, searchQuery, activeTab);
-            setWorkshops(res.data.datas || []);
+            setWorkshops(res.data.datas as IWorkshop[]);
             setTotalPages(res.data.totalPages || 1);
         } catch (error: unknown) {
             logError(error);
@@ -83,7 +85,7 @@ export default function WorkshopListChef() {
     };
 
     const getStatusBadge = (status: string) => {
-        const styles: any = {
+        const styles: Record<string, string> = {
             DRAFT: "bg-gray-100 text-gray-700 border-gray-200",
             PENDING_APPROVAL: "bg-yellow-100 text-yellow-700 border-yellow-200",
             APPROVED: "bg-green-100 text-green-700 border-green-200",
@@ -170,7 +172,7 @@ export default function WorkshopListChef() {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-                    {workshops.map((w: any) => (
+                    {workshops.map((w: IWorkshop) => (
                         <div key={w._id} className="group bg-white rounded-[2.5rem] p-4 shadow-xl hover:shadow-2xl transition-all duration-500 border border-gray-50 flex flex-col h-full relative overflow-hidden">
                             {/* Banner or Decorative background */}
                             {w.banner ? (
@@ -217,14 +219,14 @@ export default function WorkshopListChef() {
                                         {(w.status === 'DRAFT' || w.status === 'REJECTED') && (
                                             <>
                                                 <button
-                                                    onClick={(e) => { e.stopPropagation(); navigate(`/chef/workshop-edit/${w._id}`); }}
+                                                    onClick={(e) => { e.stopPropagation(); navigate(`/chef/workshop-edit/${w._id!}`); }}
                                                     className="p-3 bg-white text-gray-600 rounded-2xl hover:text-green-600 hover:shadow-md transition-all border border-gray-100"
                                                     title="Edit"
                                                 >
                                                     <Edit3 className="w-5 h-5" />
                                                 </button>
                                                 <button
-                                                    onClick={(e) => { e.stopPropagation(); handleSubmitForApproval(w._id); }}
+                                                    onClick={(e) => { e.stopPropagation(); handleSubmitForApproval(w._id!); }}
                                                     className="p-3 bg-green-600 text-white rounded-2xl hover:bg-green-700 hover:shadow-lg transition-all"
                                                     title="Submit for Approval"
                                                 >
@@ -234,7 +236,7 @@ export default function WorkshopListChef() {
                                         )}
                                         {(w.status === 'APPROVED' || w.status === 'UPCOMING') && (
                                             <button
-                                                onClick={(e) => handleOpenCancelModal(e, w._id)}
+                                                onClick={(e) => handleOpenCancelModal(e, w._id!)}
                                                 className="p-3 bg-red-50 text-red-600 rounded-2xl hover:bg-red-100 transition-all border border-red-100"
                                                 title="Cancel Workshop"
                                             >
@@ -247,7 +249,7 @@ export default function WorkshopListChef() {
                                             </span>
                                         )}
                                         <button
-                                            onClick={() => navigate(`/chef/workshop-detail/${w._id}`)}
+                                            onClick={() => navigate(`/chef/workshop-detail/${w._id!}`)}
                                             className="p-3 bg-black text-white rounded-2xl hover:bg-green-600 transition-all group/btn"
                                             title="Manage"
                                         >

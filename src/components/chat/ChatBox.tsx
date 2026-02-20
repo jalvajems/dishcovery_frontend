@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import type { Conversation } from '@/types/chat';
+import type { Conversation, SocketMessagePayload } from '@/types/chat';
 import { useChatStore } from '@/store/chatStore';
 import { useAuthStore } from '@/store/authStore';
 import MessageBubble from './MessageBubble';
@@ -46,16 +46,16 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
     }, [conversation._id]);
 
     useEffect(() => {
-        const handleNewMessage = (data: any) => {
+        const handleNewMessage = (data: SocketMessagePayload) => {
             if (data.conversationId === conversation._id) {
                 addMessage(data.message);
 
                 // Only mark as read if the message is NOT from me
-                const senderId = typeof data.message.senderId === 'object'
-                    ? data.message.senderId._id || data.message.senderId.id
-                    : data.message.senderId;
+                const senderId = typeof data.message.senderId === 'string'
+                    ? data.message.senderId
+                    : data.message.senderId._id;
 
-                if (senderId && user?.id && senderId.toString() !== user.id) {
+                if (senderId && user?.id && String(senderId) !== user.id) {
                     markAsRead(conversation._id);
                 }
             }

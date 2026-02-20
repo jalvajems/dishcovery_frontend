@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import {
-  Search,
   ArrowRight,
   Plus,
   MapPin
@@ -11,6 +10,7 @@ import { getAllMyFoodSpotApi } from '@/api/foodieApi';
 import Pagination from '@/components/shared/Pagination';
 import SearchBar from '@/components/shared/SearchBar';
 import { getErrorMessage } from '@/utils/errorHandler';
+import type { IFoodSpot } from '@/types/foodSpot.types';
 
 export default function MyFoodSpotList() {
   const navigate = useNavigate();
@@ -19,7 +19,7 @@ export default function MyFoodSpotList() {
 
   const [totalPages, setTotalPages] = useState(1);
   const limit = 1;
-  const [foodSpots, setFoodSpots] = useState([])
+  const [foodSpots, setFoodSpots] = useState<IFoodSpot[]>([])
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
@@ -122,23 +122,21 @@ export default function MyFoodSpotList() {
           </div>
         ) : (
           <div className="space-y-8">
-            {foodSpots.map((spot: any) => (
+            {foodSpots.map((spot) => (
               <div
                 key={spot._id}
                 className="bg-white/90 backdrop-blur rounded-2xl p-6 shadow-xl hover:shadow-2xl transition group"
               >
                 <div className="flex gap-6 items-center">
                   <div className="flex-1">
-                    {spot.badge && (
-                      <span className="inline-block mb-3 px-4 py-1.5 bg-green-100 text-green-700 rounded-lg font-semibold text-sm">
-                        {spot.badge}
-                      </span>
-                    )}
+                    <span className={`inline-block mb-3 px-4 py-1.5 rounded-lg font-semibold text-sm ${spot.isApproved ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                      {spot.isApproved ? 'Approved' : 'Pending'}
+                    </span>
                     <h3 className="text-3xl font-bold mb-3 group-hover:text-green-700 transition">
                       {spot.name}
                     </h3>
                     <p className="text-gray-600 mb-5 text-lg leading-relaxed">
-                      {spot.address.placeName} {spot.address.city}
+                      {spot.address?.placeName} {spot.address?.city}
                     </p>
                     <button onClick={() => navigate(`/foodie/myfoodspot/${spot._id}`)} className="flex items-center gap-2 px-6 py-3 bg-gray-100 rounded-xl font-semibold hover:bg-green-100 hover:text-green-700 transition">
                       View Details
@@ -149,7 +147,7 @@ export default function MyFoodSpotList() {
                   <div className="w-72 h-56 rounded-2xl overflow-hidden shadow-lg">
                     <img
                       src={spot.coverImage}
-                      alt={spot.title}
+                      alt={spot.name}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   </div>

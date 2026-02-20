@@ -30,12 +30,18 @@ import ReviewSection from '@/components/shared/ReviewPage';
 import Pagination from '@/components/shared/Pagination';
 import { useChatStore } from '@/store/chatStore';
 
+import type { IRecipe } from '@/types/recipe.types';
+import type { IBlog } from '@/types/blog.types';
+import type { IWorkshop } from '@/types/workshop.types';
+import type { IChefDetail } from '@/types/chef.types';
+
 type ActiveTab = 'recipes' | 'blogs' | 'workshops' | 'reviews';
+type ActivityItem = IRecipe | IBlog | IWorkshop;
 
 export default function ChefDetail() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const [chef, setChef] = useState<any>(null);
+    const [chef, setChef] = useState<IChefDetail | null>(null);
     const [isFollowing, setIsFollowing] = useState(false);
     const [stats, setStats] = useState({ followers: 0, following: 0 });
     const [loading, setLoading] = useState(true);
@@ -43,7 +49,7 @@ export default function ChefDetail() {
     const [activeTab, setActiveTab] = useState<ActiveTab>('recipes');
 
     // Activity states
-    const [activities, setActivities] = useState<any[]>([]);
+    const [activities, setActivities] = useState<ActivityItem[]>([]);
     const [activityLoading, setActivityLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -104,7 +110,7 @@ export default function ChefDetail() {
     const fetchActivities = async () => {
         setActivityLoading(true);
         try {
-            let response: any;
+            let response: { data: { datas: ActivityItem[]; totalPages: number } } | undefined;
             if (activeTab === 'recipes') {
                 response = await getChefRecipesApi(id!, currentPage, limit, '');
             } else if (activeTab === 'blogs') {
@@ -167,7 +173,7 @@ export default function ChefDetail() {
                             <div className="relative mb-6">
                                 <div className="w-40 h-40 rounded-full p-2 bg-white shadow-lg -mt-20">
                                     <img
-                                        src={chef.image || chef.chefId?.image || 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=400&h=400&fit=crop'}
+                                        src={chef.chefId?.image || 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=400&h=400&fit=crop'}
                                         alt={chef.chefId?.name}
                                         className="w-full h-full rounded-full object-cover"
                                     />
@@ -263,14 +269,14 @@ export default function ChefDetail() {
                         {/* Professional Details (Certificates, etc.) */}
                         <div className="space-y-4 animate-fade-in-up delay-200">
                             {/* Certificates */}
-                            {chef.certificates?.length > 0 && (
+                            {chef.certificates && chef.certificates.length > 0 && (
                                 <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100">
                                     <div className="flex items-center gap-3 mb-4 text-emerald-700">
                                         <Award className="w-5 h-5" />
                                         <h3 className="font-bold text-gray-900">Certificates</h3>
                                     </div>
                                     <ul className="space-y-2">
-                                        {chef.certificates.map((cert: string, idx: number) => (
+                                        {chef.certificates?.map((cert: string, idx: number) => (
                                             <li key={idx} className="text-sm text-gray-600 flex items-start gap-2">
                                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
                                                 {cert}
@@ -281,14 +287,14 @@ export default function ChefDetail() {
                             )}
 
                             {/* Achievements */}
-                            {chef.achievements?.length > 0 && (
+                            {chef.achievements && chef.achievements.length > 0 && (
                                 <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100">
                                     <div className="flex items-center gap-3 mb-4 text-amber-600">
                                         <Trophy className="w-5 h-5" />
                                         <h3 className="font-bold text-gray-900">Achievements</h3>
                                     </div>
                                     <ul className="space-y-2">
-                                        {chef.achievements.map((ach: string, idx: number) => (
+                                        {chef.achievements?.map((ach: string, idx: number) => (
                                             <li key={idx} className="text-sm text-gray-600 flex items-start gap-2">
                                                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 shrink-0" />
                                                 {ach}
@@ -299,14 +305,14 @@ export default function ChefDetail() {
                             )}
 
                             {/* Skills */}
-                            {chef.skills?.length > 0 && (
+                            {chef.skills && chef.skills.length > 0 && (
                                 <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100">
                                     <div className="flex items-center gap-3 mb-4 text-blue-600">
                                         <Zap className="w-5 h-5" />
                                         <h3 className="font-bold text-gray-900">Skills</h3>
                                     </div>
                                     <div className="flex flex-wrap gap-2">
-                                        {chef.skills.map((skill: string, idx: number) => (
+                                        {chef.skills?.map((skill: string, idx: number) => (
                                             <span key={idx} className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold border border-blue-100">
                                                 {skill}
                                             </span>
@@ -354,7 +360,7 @@ export default function ChefDetail() {
                                     ) : activities.length > 0 ? (
                                         <>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                {activities.map((item: any) => (
+                                                {activities.map((item: ActivityItem) => (
                                                     <ActivityCard
                                                         key={item._id}
                                                         item={item}
@@ -394,9 +400,23 @@ export default function ChefDetail() {
     );
 }
 
-function ActivityCard({ item, type, navigate }: any) {
+interface ActivityCardProps {
+    item: ActivityItem;
+    type: ActiveTab;
+    navigate: (path: string) => void;
+}
+
+function ActivityCard({ item, type, navigate }: ActivityCardProps) {
     const isWorkshop = type === 'workshops';
     const isBlog = type === 'blogs';
+
+    // Type guards or direct safe access
+    const title = item.title;
+    // Images handling: Workshop has 'banner', Blog has 'coverImage', Recipe has 'images[]'
+    const image = (item as IRecipe).images?.[0] || (item as IBlog).coverImage || (item as IWorkshop).banner || 'https://images.unsplash.com/photo-1495195129352-aed325a55b65?w=400&h=300&fit=crop';
+
+    // Category/Tag/Cuisine
+    const tag = (item as IWorkshop).category || (item as IBlog).tags?.[0] || (item as IRecipe).cuisine || 'General';
 
     return (
         <div
@@ -410,34 +430,34 @@ function ActivityCard({ item, type, navigate }: any) {
         >
             <div className="relative h-48 overflow-hidden">
                 <img
-                    src={item.images || item.coverImage || item.banner || 'https://images.unsplash.com/photo-1495195129352-aed325a55b65?w=400&h=300&fit=crop'}
+                    src={image}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                    alt={item.title}
+                    alt={title}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className="absolute top-4 left-4">
                     <span className="px-3 py-1.5 bg-white/90 backdrop-blur-md text-gray-900 rounded-lg text-xs font-bold shadow-sm">
-                        {isWorkshop ? item.category : isBlog ? item.tags?.[0] || 'Blog' : item.cuisine}
+                        {tag}
                     </span>
                 </div>
             </div>
 
             <div className="p-6">
                 <h4 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1 group-hover:text-emerald-600 transition-colors">
-                    {item.title}
+                    {title}
                 </h4>
 
                 <div className="flex items-center gap-4 text-sm text-gray-500 mb-6">
                     {isWorkshop ? (
                         <>
-                            <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg"><Clock size={14} className="text-emerald-500" /> {item.duration}m</span>
+                            <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg"><Clock size={14} className="text-emerald-500" /> {(item as IWorkshop).duration}m</span>
                             <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg"><Star size={14} className="text-amber-400 fill-amber-400" /> 4.9</span>
                         </>
                     ) : isBlog ? (
-                        <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg"><Calendar size={14} className="text-emerald-500" /> {new Date(item.createdAt).toLocaleDateString()}</span>
+                        <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg"><Calendar size={14} className="text-emerald-500" /> {new Date((item as IBlog).createdAt).toLocaleDateString()}</span>
                     ) : (
                         <>
-                            <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg"><Clock size={14} className="text-emerald-500" /> {item.cookingTime}m</span>
+                            <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg"><Clock size={14} className="text-emerald-500" /> {(item as IRecipe).cookingTime}m</span>
                             <span className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg"><Star size={14} className="text-amber-400 fill-amber-400" /> 4.8</span>
                         </>
                     )}

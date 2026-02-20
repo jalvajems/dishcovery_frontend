@@ -16,10 +16,20 @@ import {
 import { toast } from "react-toastify";
 import { getErrorMessage, logError } from "@/utils/errorHandler";
 
+import type { IWorkshop } from "@/types/workshop.types";
+
+interface IWorkshopDetail extends Omit<IWorkshop, 'chefId'> {
+    chefId: {
+        _id: string;
+        name: string;
+        avatar?: string;
+    };
+}
+
 export default function WorkshopDetailAdmin() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const [workshop, setWorkshop] = useState<any>(null);
+    const [workshop, setWorkshop] = useState<IWorkshopDetail | null>(null);
     const [loading, setLoading] = useState(true);
     const [rejectionReason, setRejectionReason] = useState("");
     const [showRejectModal, setShowRejectModal] = useState(false);
@@ -32,7 +42,7 @@ export default function WorkshopDetailAdmin() {
         try {
             if (!id) return;
             const response = await getWorkshopByIdApi(id);
-            setWorkshop(response.data.data);
+            setWorkshop(response.data.data as IWorkshopDetail);
         } catch (error: unknown) {
             logError(error);
             toast.error(getErrorMessage(error, "Failed to fetch workshop details"));

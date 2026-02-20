@@ -23,10 +23,22 @@ import { getErrorMessage } from "@/utils/errorHandler";
 import { useAwsS3Upload } from "@/components/shared/hooks/useAwsS3Upload";
 import FoodieNavbar from "@/components/shared/foodie/Navbar.foodie";
 
+import type { IFoodSpot } from "@/types/foodSpot.types";
+
 interface FoodItem {
   name: string;
   price: string;
   image: string;
+}
+
+interface LocationData {
+  lat: number;
+  lng: number;
+  placeName: string;
+  city: string;
+  state: string;
+  country: string;
+  fullAddress: string;
 }
 
 export default function EditFoodSpot() {
@@ -47,7 +59,7 @@ export default function EditFoodSpot() {
 
   const [coverImage, setCoverImage] = useState("");
   const [foods, setFoods] = useState<FoodItem[]>([]);
-  const [location, setLocation] = useState<any>(null);
+  const [location, setLocation] = useState<LocationData | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -55,7 +67,7 @@ export default function EditFoodSpot() {
     const fetchFoodSpot = async () => {
       try {
         const res = await getFoodSpotDetailApi(id);
-        const data = res.data.data || res.data;
+        const data: IFoodSpot = res.data.data || res.data;
 
         setForm({
           name: data.name,
@@ -66,21 +78,32 @@ export default function EditFoodSpot() {
           openingClose: data.openingHours?.close || "",
         });
 
+        setForm(prev => ({
+          ...prev,
+          openingOpen: data.openingHours?.open || "",
+          openingClose: data.openingHours?.close || ""
+        }));
+
         setCoverImage(data.coverImage);
 
-        setFoods(data.exploredFoods?.map((f: any) => ({
+        setFoods(data.exploredFoods?.map((f) => ({
           name: f.name,
           price: f.price ? String(f.price) : "",
           image: f.image || ""
         })) || []);
 
-        setLocation({
-          ...data.location,
-          ...data.address,
-          lat: data.location?.coordinates?.[1],
-          lng: data.location?.coordinates?.[0],
-          fullAddress: data.address?.fullAddress || data.address
-        });
+        if (data.location && data.address) {
+          setLocation({
+            lat: data.location.coordinates[1],
+            lng: data.location.coordinates[0],
+            placeName: data.address.placeName,
+            city: data.address.city,
+            state: data.address.state,
+            country: data.address.country,
+            fullAddress: data.address.fullAddress
+          });
+        }
+
 
         setLoading(false);
       } catch (error: unknown) {

@@ -6,14 +6,17 @@ import { getSessionInfoApi } from '@/api/sessionApi';
 import { toast } from 'react-toastify';
 import { useAuthStore } from '@/store/authStore';
 
+import type { IWorkshopPopulated } from '@/types/workshop.types';
+import type { ISession } from '@/types/session.types';
+
 const WorkshopSummary = () => {
     const { workshopId } = useParams<{ workshopId: string }>();
-    const {user}=useAuthStore()
+    const { user } = useAuthStore()
     const navigate = useNavigate();
-    const [workshop, setWorkshop] = useState<any>(null);
-    const [session, setSession] = useState<any>(null);
+    const [workshop, setWorkshop] = useState<IWorkshopPopulated | null>(null);
+    const [session, setSession] = useState<ISession | null>(null);
     const [loading, setLoading] = useState(true);
-    
+
     useEffect(() => {
         const fetchData = async () => {
             if (!workshopId) return;
@@ -22,8 +25,8 @@ const WorkshopSummary = () => {
                     getWorkshopByIdApi(workshopId),
                     getSessionInfoApi(workshopId)
                 ]);
-                
-                setWorkshop(wRes.data.data);
+
+                setWorkshop(wRes.data.data as IWorkshopPopulated);
                 setSession(sRes.data);
             } catch (error) {
                 console.error("Error fetching summary data:", error);
@@ -34,7 +37,7 @@ const WorkshopSummary = () => {
         };
         fetchData();
     }, [workshopId]);
-    const dateObj = new Date(session?.startedAt);
+    const dateObj = new Date(session?.startedAt || Date.now());
 
 
     if (loading) {
@@ -62,7 +65,7 @@ const WorkshopSummary = () => {
                     <div className="p-4 bg-gray-50 rounded-3xl border border-gray-100">
                         <Calendar className="text-indigo-600 mx-auto mb-2" size={20} />
                         <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Date</p>
-                        <p className="text-xs font-black text-gray-900">{workshop ? dateObj.toISOString().split('T')[0]: 'N/A'}</p>
+                        <p className="text-xs font-black text-gray-900">{workshop ? dateObj.toISOString().split('T')[0] : 'N/A'}</p>
                     </div>
                     <div className="p-4 bg-gray-50 rounded-3xl border border-gray-100">
                         <Clock className="text-orange-600 mx-auto mb-2" size={20} />
@@ -72,54 +75,54 @@ const WorkshopSummary = () => {
                     <div className="p-4 bg-gray-50 rounded-3xl border border-gray-100 col-span-2 md:col-span-1">
                         <UsersIcon className="text-green-600 mx-auto mb-2" size={20} />
                         <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Participants</p>
-                        <p className="text-xs font-black text-gray-900">{workshop.participantsCount|| 0} Joined</p>
+                        <p className="text-xs font-black text-gray-900">{workshop?.participantsCount || 0} Joined</p>
                     </div>
                 </div>
-{
-user=='user'?
-                <div className="grid grid-cols-2 gap-4 mb-10">
-                    <button 
-                    onClick={()=>navigate(`/foodie/workshop-detail/{workshopId}`)}
-                    className="flex flex-col items-center gap-3 p-6 bg-gray-50 rounded-3xl border border-gray-100 hover:bg-green-50 hover:border-green-100 transition-all group">
-                        <div className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <Star className="text-yellow-500" size={24} />
+                {
+                    user?.role === 'user' ?
+                        <div className="grid grid-cols-2 gap-4 mb-10">
+                            <button
+                                onClick={() => navigate(`/foodie/workshop-detail/{workshopId}`)}
+                                className="flex flex-col items-center gap-3 p-6 bg-gray-50 rounded-3xl border border-gray-100 hover:bg-green-50 hover:border-green-100 transition-all group">
+                                <div className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <Star className="text-yellow-500" size={24} />
+                                </div>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Rate Session</span>
+                            </button>
+                            <button
+                                onClick={() => navigate(`/foodie/workshop-detail/${workshopId}`)}
+                                className="flex flex-col items-center gap-3 p-6 bg-gray-50 rounded-3xl border border-gray-100 hover:bg-green-50 hover:border-green-100 transition-all group">
+                                <div className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <MessageSquare className="text-blue-500" size={24} />
+                                </div>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Feedback</span>
+                            </button>
                         </div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Rate Session</span>
-                    </button>
-                    <button
-                     onClick={()=>navigate(`/foodie/workshop-detail/${workshopId}`)}
-                     className="flex flex-col items-center gap-3 p-6 bg-gray-50 rounded-3xl border border-gray-100 hover:bg-green-50 hover:border-green-100 transition-all group">
-                        <div className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <MessageSquare className="text-blue-500" size={24} />
-                        </div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Feedback</span>
-                    </button>
-                </div>
-:
-<p>session done...</p>
-
-}
-
-                    {
-                    user=='chef'?
-                     <button
-                    onClick={() => navigate('/chef/dashboard')}
-                    className="w-full py-5 bg-gray-900 text-white rounded-2xl font-black shadow-xl shadow-gray-200 hover:bg-green-600 hover:-translate-y-1 transition-all active:scale-95 flex items-center justify-center gap-3"
-                >
-                    <Home size={20} />
-                    Back to Dashboard
-                </button>
-                :
-                <button
-                    onClick={() => navigate('/foodie/dashboard')}
-                    className="w-full py-5 bg-gray-900 text-white rounded-2xl font-black shadow-xl shadow-gray-200 hover:bg-green-600 hover:-translate-y-1 transition-all active:scale-95 flex items-center justify-center gap-3"
-                >
-                    <Home size={20} />
-                    Back to Dashboard
-                </button>
+                        :
+                        <p>session done...</p>
 
                 }
-               
+
+                {
+                    user?.role === 'chef' ?
+                        <button
+                            onClick={() => navigate('/chef/dashboard')}
+                            className="w-full py-5 bg-gray-900 text-white rounded-2xl font-black shadow-xl shadow-gray-200 hover:bg-green-600 hover:-translate-y-1 transition-all active:scale-95 flex items-center justify-center gap-3"
+                        >
+                            <Home size={20} />
+                            Back to Dashboard
+                        </button>
+                        :
+                        <button
+                            onClick={() => navigate('/foodie/dashboard')}
+                            className="w-full py-5 bg-gray-900 text-white rounded-2xl font-black shadow-xl shadow-gray-200 hover:bg-green-600 hover:-translate-y-1 transition-all active:scale-95 flex items-center justify-center gap-3"
+                        >
+                            <Home size={20} />
+                            Back to Dashboard
+                        </button>
+
+                }
+
             </div>
         </div>
     );

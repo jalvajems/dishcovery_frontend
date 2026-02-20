@@ -21,6 +21,7 @@ import Map, { Marker, NavigationControl } from 'react-map-gl/mapbox';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { getErrorMessage, logError } from "@/utils/errorHandler";
+import type { IFoodSpot } from "@/types/foodSpot.types";
 
 // Ensure Mapbox token is set
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
@@ -28,7 +29,7 @@ mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 export default function FoodSpotDetailAdmin() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const [foodSpot, setFoodSpot] = useState<any>(null);
+    const [foodSpot, setFoodSpot] = useState<IFoodSpot | null>(null);
     const [loading, setLoading] = useState(true);
     const [rejectionReason, setRejectionReason] = useState("");
     const [showRejectModal, setShowRejectModal] = useState(false);
@@ -43,8 +44,9 @@ export default function FoodSpotDetailAdmin() {
             const response = await getFoodSpotDetailApi(id);
             if (response.data && response.data.success) {
                 setFoodSpot(response.data.data);
-            } else if (response.data) {
-                setFoodSpot(response.data);
+            } else {
+                // Fallback or error handling
+                setFoodSpot(response.data.data);
             }
         } catch (error: unknown) {
             logError(error);

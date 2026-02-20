@@ -8,36 +8,7 @@ import ChefNavbar from "@/components/shared/chef/NavBar.chef";
 import Footer from "@/components/shared/chef/Footer";
 import ReusableTable, { type ITableColumn } from "@/components/shared/DataTable";
 
-// ---------------- TYPES ----------------
-interface ChefWalletTransaction {
-  _id: string;
-  amount: number;
-  createdAt: string;
-  workshopId: {
-    title: string;
-  };
-  bookingId?: {
-    foodieId?: {
-      name: string;
-      email: string;
-    }
-  };
-  type?: string;
-  status: string;
-}
-
-interface ChefWalletResponse {
-  balance: number;
-  pendingBalance: number;
-  transactions: ChefWalletTransaction[];
-  stats?: {
-    totalCredit: number;
-    totalDebit: number;
-    totalRefund: number;
-  };
-  totalPages?: number;
-  currentPage?: number;
-}
+import type { ChefWalletTransaction, ChefWalletResponse } from "@/types/wallet.types";
 
 export default function ChefWalletPage() {
   const [wallet, setWallet] = useState<ChefWalletResponse | null>(null);
@@ -65,7 +36,7 @@ export default function ChefWalletPage() {
     {
       key: "workshopId",
       label: "Workshop",
-      render: (row: any) => (
+      render: (row: ChefWalletTransaction) => (
         <div className="flex items-center gap-3">
           <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${row.type === 'REFUND' || row.type === 'DEBIT' ? 'bg-indigo-100' : 'bg-emerald-100'}`}>
             <DollarSign className={`w-5 h-5 ${row.type === 'REFUND' || row.type === 'DEBIT' ? 'text-indigo-600' : 'text-emerald-600'}`} />
@@ -78,9 +49,9 @@ export default function ChefWalletPage() {
       ),
     },
     {
-      key: "userId",
+      key: "bookingId", // Changed key to match data structure if needed, or keep 'userId' but row access is nested
       label: "User",
-      render: (row: any) => (
+      render: (row: ChefWalletTransaction) => (
         <div className="flex flex-col">
           <span className="font-medium text-gray-900">
             {row.bookingId?.foodieId?.name || 'Unknown User'}
@@ -103,7 +74,7 @@ export default function ChefWalletPage() {
     {
       key: 'type',
       label: 'Type',
-      render: (row: any) => (
+      render: (row: ChefWalletTransaction) => (
         <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${row.type === 'CREDIT' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
           {row.type}
         </span>

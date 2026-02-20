@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import io, { Socket } from 'socket.io-client';
-import type { Instance as PeerInstance } from 'simple-peer';
+import type { Instance as PeerInstance, SignalData } from 'simple-peer';
 import SimplePeer from 'simple-peer';
 import { useAuthStore } from '@/store/authStore';
 import { toast } from 'react-toastify';
@@ -13,8 +13,12 @@ import ConfirmModal from '@/components/shared/ConfirmModal';
 import { Buffer } from 'buffer';
 if (typeof window !== 'undefined') {
     window.Buffer = window.Buffer || Buffer;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     window.process = { env: {} } as any;
 }
+
+import type { IWorkshopPopulated } from "@/types/workshop.types";
+import type { AuthUser } from "@/api/apiInstance";
 
 interface PeerData {
     peerId: string;
@@ -31,12 +35,12 @@ const LiveSession = () => {
     const [remoteStreams, setRemoteStreams] = useState<{ [peerId: string]: MediaStream }>({});
     const [isMuted, setIsMuted] = useState(false);
     const [isVideoOff, setIsVideoOff] = useState(false);
-    const [sessionInfo, setSessionInfo] = useState<any>(null);
+    const [sessionInfo, setSessionInfo] = useState<IWorkshopPopulated | null>(null);
     const [chefPeer, setChefPeer] = useState<PeerData | null>(null);
     const [pinnedId, setPinnedId] = useState<string | null>(null);
     const [showExitModal, setShowExitModal] = useState(false);
-    const sessionInfoRef = useRef<any>(null);
-    const userRef = useRef<any>(user);
+    const sessionInfoRef = useRef<IWorkshopPopulated | null>(null);
+    const userRef = useRef<AuthUser | null>(user);
     const streamRef = useRef<MediaStream | null>(null);
 
     const socketRef = useRef<Socket | null>(null);
@@ -46,7 +50,7 @@ const LiveSession = () => {
     const checkIsHost = () => {
         return user?.role === 'chef';
     };
-    const normalizeId = (id: any) => id?.toString() || '';
+    const normalizeId = (id: string | undefined | null) => id?.toString() || '';
 
     useEffect(() => {
         streamRef.current = stream;
@@ -61,8 +65,8 @@ const LiveSession = () => {
         const initSession = async () => {
             try {
                 const info = await getSessionInfoApi(workshopId);
-                setSessionInfo(info.data);
-                sessionInfoRef.current = info.data;
+                setSessionInfo(info.data as IWorkshopPopulated);
+                sessionInfoRef.current = info.data as IWorkshopPopulated;
 
                 if (info.data?.status === 'COMPLETED') {
                     const rolePath = user?.role?.toLowerCase() === 'chef' ? 'chef' : 'foodie';
@@ -126,7 +130,7 @@ const LiveSession = () => {
                     return peer;
                 };
 
-                const addPeer = (incomingSignal: any, callerId: string, stream: MediaStream) => {
+                const addPeer = (incomingSignal: string | SimplePeer.SignalData, callerId: string, stream: MediaStream) => {
                     const peer = new SimplePeer({
                         initiator: false,
                         trickle: true,
@@ -185,7 +189,7 @@ const LiveSession = () => {
 
                 });
 
-                socketRef.current.on('webrtc-signal', (data: { from: string, signal: any }) => {
+                socketRef.current.on('webrtc-signal', (data: { from: string, signal: SignalData }) => {
                     const fromId = normalizeId(data.from);
 
                     const item = peersRef.current.find((p) => normalizeId(p.peerId) === fromId);
@@ -198,7 +202,7 @@ const LiveSession = () => {
                         setPeers((users) => [...users, { peerId: fromId, peer }]);
 
                         // Auto-pin Chef for Foodies
-                        const chefId = normalizeId(sessionInfoRef.current?.chefId?._id || sessionInfoRef.current?.chefId);
+                        const chefId = normalizeId(sessionInfoRef.current?.chefId?._id);
                         if (fromId === chefId) {
                             setChefPeer({ peerId: fromId, peer });
                             if (!checkIsHost()) {
@@ -258,7 +262,7 @@ const LiveSession = () => {
     // Auto-pin Chef when their stream arrives
     useEffect(() => {
         if (pinnedId) return;
-        const chefId = normalizeId(sessionInfoRef.current?.chefId?._id || sessionInfoRef.current?.chefId);
+        const chefId = normalizeId(sessionInfoRef.current?.chefId?._id);
         if (remoteStreams[chefId]) {
             setPinnedId(chefId);
         }
@@ -307,7 +311,7 @@ const LiveSession = () => {
     };
 
     const isChef = (id: string) => {
-        const chefId = normalizeId(sessionInfoRef.current?.chefId?._id || sessionInfoRef.current?.chefId);
+        const chefId = normalizeId(sessionInfoRef.current?.chefId?._id);
         return normalizeId(id) === chefId;
     };
 

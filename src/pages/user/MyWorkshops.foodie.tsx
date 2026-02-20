@@ -8,15 +8,17 @@ import Pagination from '@/components/shared/Pagination';
 import ConfirmModal from '@/components/shared/ConfirmModal';
 import { toast } from 'react-toastify';
 
+import type { IBookingPopulated } from '@/types/booking.types';
+
 export default function MyWorkshopsFoodie() {
     const navigate = useNavigate();
-    const [workshops, setWorkshops] = useState([]);
+    const [workshops, setWorkshops] = useState<IBookingPopulated[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const limit = 4;
     const [activeTab, setActiveTab] = useState('All');
-    const [allWorkshops, setAllWorkshops] = useState([]);
+    const [allWorkshops, setAllWorkshops] = useState<IBookingPopulated[]>([]);
 
     useEffect(() => {
         fetchMyWorkshops();
@@ -42,12 +44,12 @@ export default function MyWorkshopsFoodie() {
         let filtered = [...allWorkshops];
 
         if (activeTab === 'Upcoming') {
-            filtered = filtered.filter((booking: any) => {
+            filtered = filtered.filter((booking) => {
                 const w = booking.workshopId;
                 return w && (w.status === 'APPROVED' || w.status === 'LIVE' || w.status === 'UPCOMING') && booking.status !== 'CANCELLED';
             });
         } else if (activeTab === 'Past') {
-            filtered = filtered.filter((booking: any) => {
+            filtered = filtered.filter((booking) => {
                 const w = booking.workshopId;
                 return w && (w.status === 'COMPLETED' || w.status === 'CANCELLED' || w.status === 'EXPIRED' || booking.status === 'CANCELLED');
             });
@@ -129,7 +131,7 @@ export default function MyWorkshopsFoodie() {
                     </div>
                 ) : (
                     <div className="space-y-6">
-                        {workshops.map((booking: any) => {
+                        {workshops.map((booking) => {
                             const workshop = booking.workshopId;
                             if (!workshop) return null;
 

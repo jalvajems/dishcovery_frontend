@@ -8,11 +8,13 @@ import ChefReviewSection from '@/components/shared/ChefReviewSection';
 import ChefNavbar from '@/components/shared/chef/NavBar.chef';
 import { useUserStore } from '@/store/userStore';
 
+import type { IBlog } from "@/types/blog.types";
+
 export default function BlogDetailPage() {
   const { blogId } = useParams();
   const navigate = useNavigate();
 
-  const [blog, setBlog] = useState<any>(null);
+  const [blog, setBlog] = useState<IBlog | null>(null);
   const [loading, setLoading] = useState(true);
   const { isVerifiedUser } = useUserStore()
 
@@ -26,7 +28,7 @@ export default function BlogDetailPage() {
     try {
       if (!blogId) throw Error('blog id is not defined');
       const res = await getBlogDetailChefApi(blogId);
-      setBlog(res.data.data);
+      setBlog(res.data.data as IBlog);
       setLoading(false);
     } catch (error: unknown) {
       logError(error);

@@ -5,10 +5,15 @@ import { getChefsApi } from '@/api/foodieApi';
 import { logError } from '@/utils/errorHandler';
 import Pagination from '@/components/shared/Pagination';
 import SearchBar from '@/components/shared/SearchBar';
+import type { IChefDetail } from '@/types/chef.types';
 
 export default function ChefList() {
     const navigate = useNavigate();
-    const [chefs, setChefs] = useState([]);
+    const [chefs, setChefs] = useState<IChefDetail[]>([]);
+    // ...
+    // Note: I cannot replace the whole file easily. I will target chunks.
+    // Chunk 1: Import
+
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [filter, setFilter] = useState(""); // New state for filter
@@ -107,14 +112,14 @@ export default function ChefList() {
                 ) : (
                     <>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
-                            {chefs.map((chef: any) => (
+                            {chefs.map((chef) => (
                                 <div
                                     key={chef._id}
                                     className="bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-[0_20px_50px_rgb(0,0,0,0.08)] transition-all duration-500 border border-gray-100 group flex flex-col"
                                 >
                                     <div className="relative h-72 overflow-hidden bg-gray-100">
                                         <img
-                                            src={chef.image || chef.chefId?.image || 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=400&h=400&fit=crop'}
+                                            src={chef.chefId?.image || 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=400&h=400&fit=crop'}
                                             alt={chef.chefId?.name}
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                                         />
@@ -132,7 +137,7 @@ export default function ChefList() {
 
                                     <div className="p-6 flex-1 flex flex-col">
                                         <div className="flex flex-wrap gap-2 mb-8">
-                                            {chef.specialities.slice(0, 3).map((spec: string, idx: number) => (
+                                            {(chef.specialities || []).slice(0, 3).map((spec: string, idx: number) => (
                                                 <span
                                                     key={idx}
                                                     className="px-3 py-1 bg-gray-50 text-gray-600 rounded-xl text-xs font-bold border border-gray-100"
@@ -140,9 +145,9 @@ export default function ChefList() {
                                                     {spec}
                                                 </span>
                                             ))}
-                                            {chef.specialities.length > 3 && (
+                                            {(chef.specialities?.length || 0) > 3 && (
                                                 <span className="px-3 py-1 bg-gray-50 text-gray-400 rounded-xl text-xs font-bold border border-gray-100">
-                                                    +{chef.specialities.length - 3}
+                                                    +{(chef.specialities?.length || 0) - 3}
                                                 </span>
                                             )}
                                         </div>

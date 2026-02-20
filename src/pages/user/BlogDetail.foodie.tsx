@@ -7,9 +7,11 @@ import { getErrorMessage, logError } from '@/utils/errorHandler';
 import ReviewSection from '@/components/shared/ReviewPage';
 import FoodieNavbar from '@/components/shared/foodie/Navbar.foodie';
 
+import type { IBlog } from "@/types/blog.types";
+
 const BlogDetailPage: React.FC = () => {
-  const [blog, setBlog] = useState<any>(null);
-  const [relatedBlogs, setRelatedBlogs] = useState([]);
+  const [blog, setBlog] = useState<IBlog | null>(null);
+  const [relatedBlogs, setRelatedBlogs] = useState<IBlog[]>([]);
   const [likes, setLikes] = useState(234); // Mock likes for now as logic wasn't fully connected in original
   const [isLiked, setIsLiked] = useState(false);
   const { blogId } = useParams();
@@ -19,7 +21,7 @@ const BlogDetailPage: React.FC = () => {
       try {
         if (!blogId) return;
         const res = await getFoodieBlogDetailApi(blogId);
-        setBlog(res.data.data);
+        setBlog(res.data.data as IBlog);
       } catch (error: unknown) {
         showError(getErrorMessage(error, "Failed to fetch blog details"));
       }
@@ -32,8 +34,8 @@ const BlogDetailPage: React.FC = () => {
     if (!blog?.tags?.[0]) return;
     const fetchRelatedBlogs = async () => {
       try {
-        const res = await getRelatedBlogsApi(blog.tags[0]);
-        const related = res.data.relatedDatas?.filter((b: any) => b._id !== blog._id) || [];
+        const res = await getRelatedBlogsApi(blog.tags![0]);
+        const related = (res.data.relatedDatas || []).filter((b: IBlog) => b._id !== blog._id);
         setRelatedBlogs(related.slice(0, 3));
       } catch (error: unknown) {
         logError(error);
@@ -86,9 +88,9 @@ const BlogDetailPage: React.FC = () => {
           <div className="flex items-center gap-6 text-gray-300">
             <span className="flex items-center gap-2 text-lg">
               <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold">
-                {blog.chefId?.name?.charAt(0) || <User size={16} />}
+                {(typeof blog.chefId === 'object' && blog.chefId?.name?.charAt(0)) || <User size={16} />}
               </div>
-              <span className="text-white font-medium">{blog.chefId?.name}</span>
+              <span className="text-white font-medium">{typeof blog.chefId === 'object' ? blog.chefId?.name : 'Unknown Chef'}</span>
             </span>
             <span className="hidden md:inline-block">•</span>
             <span className="flex items-center gap-2">
@@ -142,10 +144,10 @@ const BlogDetailPage: React.FC = () => {
               <h4 className="font-semibold text-gray-900 mb-4">About the Author</h4>
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-xl">
-                  {blog.chefId?.name?.charAt(0)}
+                  {typeof blog.chefId === 'object' && blog.chefId?.name?.charAt(0)}
                 </div>
                 <div>
-                  <p className="font-bold text-gray-900">{blog.chefId?.name}</p>
+                  <p className="font-bold text-gray-900">{typeof blog.chefId === 'object' ? blog.chefId?.name : 'Unknown Chef'}</p>
                   <p className="text-sm text-gray-500">Chef & Content Creator</p>
                 </div>
               </div>
@@ -155,7 +157,7 @@ const BlogDetailPage: React.FC = () => {
             {relatedBlogs.length > 0 && (
               <div className='space-y-4'>
                 <h3 className="text-xl font-bold text-gray-900 border-l-4 border-emerald-500 pl-3">Related Reads</h3>
-                {relatedBlogs.map((b: any) => (
+                {relatedBlogs.map((b: IBlog) => (
                   <Link to={`/foodie/blog/${b._id}`} key={b._id} className="block group">
                     <div className="flex gap-4 bg-white p-3 rounded-xl shadow-sm border border-transparent hover:border-emerald-200 transition-all hover:bg-emerald-50/30">
                       <img src={b.coverImage} alt={b.title} className="w-24 h-24 object-cover rounded-lg flex-shrink-0" />
@@ -164,7 +166,7 @@ const BlogDetailPage: React.FC = () => {
                           {b.title}
                         </h4>
                         <div className='flex items-center gap-2 text-xs text-gray-500'>
-                          <Clock size={12} /> {new Date(b.createdAt).toLocaleDateString()}
+                          <Clock size={12} /> {new Date(b.createdAt as string | Date).toLocaleDateString()}
                         </div>
                         <div className='flex items-center gap-1 text-xs font-semibold text-emerald-600 mt-1'>
                           Read More <ArrowRight size={12} />

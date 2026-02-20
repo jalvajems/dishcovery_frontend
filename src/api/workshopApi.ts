@@ -1,12 +1,13 @@
+import type { ICreateWorkshop, IUpdateWorkshop } from "@/types/workshop.types";
 import { WORKSHOP_ROUTES } from "@/components/shared/constants/routes/workshop.routes";
 import API from "./apiInstance";
 
 
-export const createWorkshopApi = (data: any) => {
+export const createWorkshopApi = (data: ICreateWorkshop) => {
   return API.post(WORKSHOP_ROUTES.CHEF_CREATE, data);
 };
 
-export const updateWorkshopApi = (id: string, data: any) => {
+export const updateWorkshopApi = (id: string, data: IUpdateWorkshop) => {
   return API.put(WORKSHOP_ROUTES.CHEF_UPDATE(id), data);
 };
 
