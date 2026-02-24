@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 
 type FilterValue = string | number | boolean;
 
@@ -27,6 +27,12 @@ type UseAdminTableConfig<T> = {
 };
 
 export function useAdminTable<T>({ fetchApi, filters }: UseAdminTableConfig<T>) {
+  const fetchApiRef = useRef(fetchApi);
+
+  useEffect(() => {
+    fetchApiRef.current = fetchApi;
+  }, [fetchApi]);
+
   const [data, setData] = useState<T[]>([]);
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -56,7 +62,7 @@ export function useAdminTable<T>({ fetchApi, filters }: UseAdminTableConfig<T>) 
 
   const getData = useCallback(async () => {
     try {
-      const res = await fetchApi(currentPage, limit, searchQuery, filterValues);
+      const res = await fetchApiRef.current(currentPage, limit, searchQuery, filterValues);
 
       if (res?.data) {
         setData(res.data.data || []);
@@ -65,7 +71,7 @@ export function useAdminTable<T>({ fetchApi, filters }: UseAdminTableConfig<T>) 
     } catch (error) {
       console.error("Failed to fetch table data", error);
     }
-  }, [currentPage, limit, searchQuery, filterValues, fetchApi]);
+  }, [currentPage, limit, searchQuery, filterValues]);
 
 
   useEffect(() => {

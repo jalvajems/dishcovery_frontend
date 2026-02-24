@@ -78,6 +78,13 @@ export default function ChefDashboard() {
       console.error(error)
     }
   }
+  async function handleViewButtonBlog(id: string) {
+    try {
+      navigate(`/blog-detail/${id}`)
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   //blog=================
   const handlePageChange = (page: number) => {
@@ -275,7 +282,7 @@ export default function ChefDashboard() {
             className="bg-white rounded-xl shadow-md overflow-hidden group hover:shadow-2xl transition-all cursor-pointer"
           >
             <img
-              onClick={() => handleViewButtonRecipe(b._id)}
+              onClick={() => handleViewButtonBlog(b._id)}
               src={b.coverImage}
               alt={b.title}
               className="h-48 w-full object-cover group-hover:scale-105 transition-transform duration-500"

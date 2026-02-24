@@ -8,7 +8,7 @@ interface FilterOption {
 interface SearchFilterBarProps {
   searchInput: string;
   setSearchInput: (value: string) => void;
-  filters: Record<string, string>;
+  filters: Record<string, any>;
   updateFilter: (key: string, value: string) => void;
   filterOptions?: Record<string, FilterOption[]>;
 }

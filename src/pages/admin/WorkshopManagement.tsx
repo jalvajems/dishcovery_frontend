@@ -28,7 +28,12 @@ export default function WorkshopManagement() {
                 const response = await getAllWorkshopsAdminApi();
                 const allData = response.data.data;
 
-                let filtered = allData;
+                let filtered = [...allData].sort((a: IWorkshopPopulated, b: IWorkshopPopulated) => {
+                    const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                    const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                    return dateB - dateA;
+                });
+
                 if (search) {
                     filtered = filtered.filter((w: IWorkshopPopulated) =>
                         w.title.toLowerCase().includes(search.toLowerCase()) ||
