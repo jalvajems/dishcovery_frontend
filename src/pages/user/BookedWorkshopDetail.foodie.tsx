@@ -76,6 +76,9 @@ export default function BookedWorkshopDetailFoodie() {
                     <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 text-red-700 font-medium animate-pulse">
                         <X className="w-5 h-5" />
                         <span>This workshop has been cancelled by the Chef. Reason: {workshop.cancellationReason || "Unforseen circumstances"}</span>
+                        {workshop.myBooking?.status === 'REFUNDED' && (
+                            <span className="ml-2 font-bold px-2 py-1 bg-red-100 rounded-md text-red-800 text-[10px] uppercase tracking-widest">Payment Refunded</span>
+                        )}
                     </div>
                 </div>
             )}
@@ -83,7 +86,10 @@ export default function BookedWorkshopDetailFoodie() {
                 <div className="bg-orange-50 border-b border-orange-100 p-4 sticky top-[72px] z-40">
                     <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 text-orange-700 font-medium">
                         <Clock className="w-5 h-5" />
-                        <span>This workshop has expired as the chef did not start the session on time. Refunds have been initiated.</span>
+                        <span>This workshop has expired as the chef did not start the session on time.</span>
+                        {workshop.myBooking?.status === 'REFUNDED' && (
+                            <span className="ml-2 font-bold px-2 py-1 bg-orange-100 rounded-md text-orange-800 text-[10px] uppercase tracking-widest">Payment Refunded</span>
+                        )}
                     </div>
                 </div>
             )}
@@ -108,6 +114,25 @@ export default function BookedWorkshopDetailFoodie() {
                             <ShieldCheck size={12} />
                             Booking Confirmed
                         </span>
+
+                        {workshop.status === 'CANCELLED' && (
+                            <span className="px-4 py-1.5 bg-red-600 rounded-full text-[10px] font-black tracking-widest uppercase shadow-lg shadow-red-900/20 flex items-center gap-2">
+                                <X size={12} />
+                                Cancelled
+                            </span>
+                        )}
+                        {workshop.status === 'EXPIRED' && (
+                            <span className="px-4 py-1.5 bg-gray-600 rounded-full text-[10px] font-black tracking-widest uppercase shadow-lg shadow-gray-900/20 flex items-center gap-2">
+                                <Clock size={12} />
+                                Expired
+                            </span>
+                        )}
+                        {workshop.status === 'COMPLETED' && (
+                            <span className="px-4 py-1.5 bg-blue-600 rounded-full text-[10px] font-black tracking-widest uppercase shadow-lg shadow-blue-900/20 flex items-center gap-2">
+                                <ShieldCheck size={12} />
+                                Completed
+                            </span>
+                        )}
 
                         {workshop.status === 'LIVE' && (
                             <span className="px-4 py-1.5 bg-red-600 rounded-full text-[10px] font-black tracking-widest uppercase animate-pulse flex items-center gap-2">
@@ -150,7 +175,7 @@ export default function BookedWorkshopDetailFoodie() {
                     {/* Left Content */}
                     <div className="lg:col-span-8 space-y-12">
 
-                        {/* Online Session Join Card */}
+                        {/* Session State Cards */}
                         {workshop.mode === 'ONLINE' && workshop.status === 'LIVE' && (
                             <div className="bg-gray-900 rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl shadow-gray-200">
                                 <div className="absolute top-0 right-0 w-64 h-64 bg-green-500/20 rounded-full blur-3xl -mr-20 -mt-20"></div>
@@ -171,6 +196,38 @@ export default function BookedWorkshopDetailFoodie() {
                                         <Play fill="currentColor" size={20} />
                                         Join Now
                                     </button>
+                                </div>
+                            </div>
+                        )}
+                        {(workshop.status === 'APPROVED' || workshop.status === 'UPCOMING') && (
+                            <div className="bg-blue-50 border border-blue-100 rounded-[2.5rem] p-10 text-blue-900 relative overflow-hidden shadow-sm">
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-200/50 rounded-full blur-3xl -mr-20 -mt-20"></div>
+                                <div className="relative z-10">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600">
+                                            <Clock size={24} />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-2xl font-black">Session Will Start Soon</h3>
+                                            <p className="text-blue-700/80">Get ready! The host will start the session at the scheduled time.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        {workshop.status === 'COMPLETED' && (
+                            <div className="bg-green-50 border border-green-100 rounded-[2.5rem] p-10 text-green-900 relative overflow-hidden shadow-sm">
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-green-200/50 rounded-full blur-3xl -mr-20 -mt-20"></div>
+                                <div className="relative z-10">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center text-green-600">
+                                            <ShieldCheck size={24} />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-2xl font-black">Workshop Completed</h3>
+                                            <p className="text-green-700/80">Thank you for attending! We hope you enjoyed the culinary experience.</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -277,15 +334,17 @@ export default function BookedWorkshopDetailFoodie() {
                                     </div>
                                 </div>
 
-                                <div className="bg-green-50 rounded-2xl p-6 text-center border border-green-100 mb-6">
-                                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-green-600 mx-auto mb-3 shadow-sm">
-                                        <ShieldCheck size={24} />
+                                {['APPROVED', 'UPCOMING', 'LIVE'].includes(workshop.status) && (
+                                    <div className="bg-green-50 rounded-2xl p-6 text-center border border-green-100 mb-6">
+                                        <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-green-600 mx-auto mb-3 shadow-sm">
+                                            <ShieldCheck size={24} />
+                                        </div>
+                                        <p className="font-black text-green-800 text-lg mb-1">You're All Set!</p>
+                                        <p className="text-green-700/70 text-xs font-bold leading-relaxed px-4">
+                                            your spot is reserved. We'll send you a reminder before the session starts.
+                                        </p>
                                     </div>
-                                    <p className="font-black text-green-800 text-lg mb-1">You're All Set!</p>
-                                    <p className="text-green-700/70 text-xs font-bold leading-relaxed px-4">
-                                        your spot is reserved. We'll send you a reminder before the session starts.
-                                    </p>
-                                </div>
+                                )}
 
 
                             </div>

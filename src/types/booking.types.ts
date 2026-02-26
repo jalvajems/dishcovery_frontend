@@ -9,7 +9,7 @@ export interface IBooking {
     };
     bookingDate: Date | string;
     bookedAt: Date | string;
-    status: 'CONFIRMED' | 'CANCELLED' | 'PENDING';
+    status: 'CONFIRMED' | 'CANCELLED' | 'PENDING' | 'CANCELLED_BY_FOODIE' | 'CANCELLED_BY_CHEF' | 'REFUNDED' | 'COMPLETED';
     attendanceStatus: 'PRESENT' | 'ABSENT' | 'PENDING';
     bookingType: 'PAID' | 'FREE';
     amount: number;

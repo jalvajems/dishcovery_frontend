@@ -68,11 +68,18 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
 
         const handleMessageRead = (data: { conversationId: string, readBy: string }) => {
             if (data.conversationId === conversation._id) {
-                // Optimistically update messages to read
+                // Optimistically update messages to read only if they were read by the other person
                 useChatStore.setState((state) => ({
-                    messages: state.messages.map(msg =>
-                        msg.status !== 'read' ? { ...msg, status: 'read' } : msg
-                    )
+                    messages: state.messages.map(msg => {
+                        const senderId = typeof msg.senderId === 'string'
+                            ? msg.senderId
+                            : msg.senderId?._id;
+
+                        if (senderId !== data.readBy && msg.status !== 'read') {
+                            return { ...msg, status: 'read' };
+                        }
+                        return msg;
+                    })
                 }));
             }
         };

@@ -114,13 +114,28 @@ export default function WorkshopDetailFoodie() {
                 <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/20 to-transparent"></div>
 
                 <div className="absolute bottom-0 left-0 w-full p-8 md:p-12 text-white w-full mx-auto">
-                    <div className="flex items-center gap-3 mb-6">
+                    <div className="flex flex-wrap items-center gap-3 mb-6">
                         <span className={`px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase backdrop-blur-md border ${workshop.mode === 'ONLINE' ? 'bg-indigo-500/20 border-indigo-500/30' : 'bg-orange-500/20 border-orange-500/30'
                             }`}>
                             {workshop.mode} Session
                         </span>
                         {workshop.status === 'LIVE' && (
                             <span className="px-4 py-1.5 bg-red-600 rounded-full text-[10px] font-black tracking-widest uppercase animate-pulse">Live Now</span>
+                        )}
+                        {workshop.status === 'CANCELLED' && (
+                            <span className="px-4 py-1.5 bg-red-600 rounded-full text-[10px] font-black tracking-widest uppercase shadow-lg shadow-red-900/20">
+                                Cancelled
+                            </span>
+                        )}
+                        {workshop.status === 'EXPIRED' && (
+                            <span className="px-4 py-1.5 bg-gray-600 rounded-full text-[10px] font-black tracking-widest uppercase shadow-lg shadow-gray-900/20">
+                                Expired
+                            </span>
+                        )}
+                        {workshop.status === 'COMPLETED' && (
+                            <span className="px-4 py-1.5 bg-blue-600 rounded-full text-[10px] font-black tracking-widest uppercase shadow-lg shadow-blue-900/20">
+                                Completed
+                            </span>
                         )}
                     </div>
 
@@ -149,7 +164,7 @@ export default function WorkshopDetailFoodie() {
                             <p className="font-bold text-white text-xl">{workshop.isFree ? 'FREE' : `₹${workshop.price}`}</p>
                         </div>
 
-                        {workshop.status === 'LIVE' && (
+                        {workshop.status === 'LIVE' && workshop.isBooked && (
                             <button
                                 onClick={() => navigate(`/foodie/live-session/${id}`)}
                                 className="px-8 py-3 bg-red-600 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-red-700 hover:scale-105 transition-all shadow-xl shadow-red-900/20 animate-pulse"
