@@ -38,8 +38,8 @@ export default function Sidebar({ activePath, onMenuSelect }: SidebarProps) {
       await logoutApi()
       delUserStore()
       navigate("/admin-login");
-    } catch (error) {
-
+    } catch {
+      console.error('Logout failed');
     }
   };
 

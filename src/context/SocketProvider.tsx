@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuthStore } from '@/store/authStore';
@@ -8,7 +9,6 @@ interface SocketContextType {
     socket: Socket | null;
     isConnected: boolean;
 }
-
 const SocketContext = createContext<SocketContextType>({ socket: null, isConnected: false });
 
 export const useSocket = () => useContext(SocketContext);

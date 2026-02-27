@@ -13,7 +13,7 @@ interface ChefReviewProps {
 export default function ChefReviewSection({ reviewableId, reviewableType }: ChefReviewProps) {
   const [reviews, setReviews] = useState<IReview[]>([]);
   const [loading, setLoading] = useState(false);
-  const [sortBy, setSortBy] = useState("latest");
+  const [sortBy] = useState("latest");
 
   const getUserName = (user: IReview['userId']) => {
     if (!user) return "Anonymous";
@@ -33,7 +33,7 @@ export default function ChefReviewSection({ reviewableId, reviewableType }: Chef
     try {
       const res = await getReviewsApi(reviewableId, reviewableType);
 
-      let data = res.data.data;
+      const data = res.data.data;
 
       if (Array.isArray(data)) {
 

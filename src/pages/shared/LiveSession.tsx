@@ -291,13 +291,16 @@ const LiveSession = () => {
             try {
                 await endSessionApi(workshopId!);
                 socketRef.current?.emit('chef-control', { workshopId, action: 'end' });
-            } catch (error) {
+            } catch {
                 toast.error("Failed to mark workshop as completed");
                 socketRef.current?.emit('chef-control', { workshopId, action: 'end' });
             }
         } else {
-            { user?.role === 'chef' ? navigate('/chef/dashboard') : navigate('/foodie/dashboard') }
-
+            if (user?.role === 'chef') {
+                navigate('/chef/dashboard');
+            } else {
+                navigate('/foodie/dashboard');
+            }
         }
         setShowExitModal(false);
     };

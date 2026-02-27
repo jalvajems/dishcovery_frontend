@@ -306,7 +306,7 @@ export default function WorkshopDetailFoodie() {
                                         </div>
                                     </div>
                                 )}
-
+                                { }
                                 <div className="mb-10 text-center bg-gray-50 p-6 rounded-3xl border border-gray-100">
                                     <div className="flex items-center justify-center gap-2 mb-1">
                                         <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{workshop.mode} Session</span>
@@ -401,7 +401,7 @@ export default function WorkshopDetailFoodie() {
 }
 
 interface HighlightCardProps {
-    icon: any;
+    icon: React.ElementType;
     label: string;
     value: string | number;
 }

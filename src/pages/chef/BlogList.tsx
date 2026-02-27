@@ -8,7 +8,7 @@ import Pagination from "@/components/shared/Pagination";
 import SearchBar from "@/components/shared/SearchBar";
 import { useUserStore } from "@/store/userStore";
 
-import type { IBlog, IBlogListResponse } from "@/types/blog.types";
+import type { IBlog } from "@/types/blog.types";
 
 export default function BlogListChef() {
   const [searchQuery, setSearchQuery] = useState('')

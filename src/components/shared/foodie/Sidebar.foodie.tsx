@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { Home, BookOpen, FileText, MapPin, MessageCircle, Bot, LogOut, Pen, ToolCase, Store, Wallet, ChefHat, UserPlus } from 'lucide-react';
+import { Home, BookOpen, FileText, MapPin, MessageCircle, LogOut, Pen, ToolCase, Store, Wallet, ChefHat, UserPlus } from 'lucide-react';
 import { logoutApi } from "@/api/authApi";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";

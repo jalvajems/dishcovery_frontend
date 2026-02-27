@@ -42,7 +42,8 @@ export default function CheckoutForm({ clientSecret, amount, onSuccess, onCancel
                 toast.success("Payment successful! Your seat is reserved.");
                 onSuccess();
             }
-        } catch (err) {
+        } catch {
+            console.error('Payment failed');
             toast.error("An unexpected error occurred during payment.");
             setIsProcessing(false);
         }

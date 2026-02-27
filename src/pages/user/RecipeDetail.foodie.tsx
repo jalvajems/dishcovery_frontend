@@ -249,7 +249,7 @@ export default function RecipeDetailFoodie() {
 }
 
 interface StatBoxProps {
-  icon: any; // Lucide icon type
+  icon: React.ElementType; // Lucide icon type
   label: string;
   value: string | number;
   color?: string;

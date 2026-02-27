@@ -26,7 +26,7 @@ export default function ReviewSection({ reviewableId, reviewableType }: ReviewSe
         try {
             const res = await getReviewsApi(id, reviewableType);
 
-            let data = res.data.data;
+            const data = res.data.data;
 
 
             if (Array.isArray(data)) {

@@ -6,7 +6,6 @@ import {
   User,
   LogOut,
   Wallet,
-  Pen,
   ChefHat,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";

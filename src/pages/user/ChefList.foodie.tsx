@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { MapPin, Star, ArrowRight, ChefHat } from 'lucide-react';
+import { MapPin, ArrowRight, ChefHat } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getChefsApi } from '@/api/foodieApi';
 import { logError } from '@/utils/errorHandler';

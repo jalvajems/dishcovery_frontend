@@ -20,7 +20,7 @@ export interface IRecipe {
     };
     chefName?: string;
     likes?: string[] | number;
-    comments?: any[]; // refine if comment structure is known
+    comments?: Record<string, unknown>[]; // refine if comment structure is known
     createdAt?: string | Date;
     updatedAt?: string | Date;
     isPremium?: boolean;

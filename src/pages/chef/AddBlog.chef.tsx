@@ -50,7 +50,7 @@ const AddNewBlog: React.FC = () => {
   const [tags, setTags] = useState<string[]>([]);
   const [showTagDropdown, setShowTagDropdown] = useState(false);
 
-  const [isPublished, setIsPublished] = useState(false);
+  const [isPublished] = useState(false);
   const [coverImage, setCoverImage] = useState<string | null>(null);
 
   const [errors, setErrors] = useState<BlogErrors>({});

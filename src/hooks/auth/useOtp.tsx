@@ -38,7 +38,7 @@ export const useOtp = () => {
       return;
     }
 
-    let newOtp = [...otp];
+    const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
 
@@ -77,7 +77,6 @@ export const useOtp = () => {
 
         await verifyForgetOtpApi({ otp: OtptoSend, email });
         showSuccess("Forget password OTP verified successfully!!");
-        clearOtpData();
         navigate('/resetPassword');
       }
 

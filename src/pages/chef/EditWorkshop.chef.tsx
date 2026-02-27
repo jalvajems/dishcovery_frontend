@@ -64,7 +64,7 @@ export default function EditWorkshopChef() {
                 banner: w.banner || ''
             });
             if (w.banner) setUploadedBanner(w.banner);
-        } catch (error) {
+        } catch {
             toast.error("Failed to fetch workshop");
             navigate('/chef/workshop-listing');
         } finally {
@@ -153,7 +153,7 @@ export default function EditWorkshopChef() {
                 startTime: formData.startTime,
                 duration: formData.duration,
                 participantLimit: formData.participantLimit,
-                mode: formData.mode,
+                mode: formData.mode as 'ONLINE' | 'OFFLINE',
                 isFree: formData.isFree,
                 price: formData.isFree ? 0 : formData.price,
                 banner: formData.banner

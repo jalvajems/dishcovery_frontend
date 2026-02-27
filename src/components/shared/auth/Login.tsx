@@ -6,7 +6,6 @@ export default function Login() {
     formData,
     handleInputChange,
     handleForgotPassword,
-    handleGoogleLogin,
     handleLogin,
     handleBackSignup,
     errors
@@ -84,7 +83,7 @@ export default function Login() {
               Log in
             </button>
 
-        
+
             {/* Sign up Links */}
             <div className="text-center pt-2">
               <p className="text-sm text-green-600">

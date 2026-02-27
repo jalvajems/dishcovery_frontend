@@ -46,6 +46,11 @@ API.interceptors.response.use(
         }
         if (error.response?.status === 401 && !original._retry) {
 
+            // Prevent refresh attempts for login and refresh endpoints
+            if (original.url?.includes('/auth/login') || original.url?.includes('/auth/admin-login') || original.url?.includes('/auth/refresh')) {
+                return Promise.reject(error);
+            }
+
             original._retry = true;
 
             try {

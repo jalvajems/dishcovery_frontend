@@ -31,7 +31,7 @@ const Chatbot: React.FC = () => {
     const { user } = useAuthStore();
     const userRole = user?.role || 'foodie';
 
-    if (userRole === 'admin') return null;
+
 
     useEffect(() => {
         scrollToBottom();
@@ -86,6 +86,8 @@ const Chatbot: React.FC = () => {
             handleSend();
         }
     };
+
+    if (userRole === 'admin') return null;
 
     return (
         <div className="relative z-50">
