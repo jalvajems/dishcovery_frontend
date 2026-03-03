@@ -8,8 +8,12 @@ export const loginApi = (LoginData: { email: string; password: string }) => {
     return API.post(AUTH_ROUTES.LOGIN, LoginData)
 }
 
-export const adminLoginApi=(LoginData:{email:string; password:string})=>{
-    return API.post(AUTH_ROUTES.ADMIN_LOGIN,LoginData)
+export const googleAuthApi = (googleData: { credential: string; role?: string }) => {
+    return API.post(AUTH_ROUTES.GOOGLE_AUTH, googleData);
+}
+
+export const adminLoginApi = (LoginData: { email: string; password: string }) => {
+    return API.post(AUTH_ROUTES.ADMIN_LOGIN, LoginData)
 }
 export const forgetPassApi = (email: { email: string }) => {
     return API.post(AUTH_ROUTES.FORGOT_PASSWORD, email)

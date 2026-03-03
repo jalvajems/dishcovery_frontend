@@ -1,11 +1,12 @@
 import { useSignup } from "@/hooks/auth/useSignup";
-// import logo from "@/assets/logo.png";
+import { GoogleLogin } from '@react-oauth/google';
 
 export default function Signup() {
   const {
     agreedToTerms,
     formData,
     handleBackToLogin,
+    handleGoogleSuccess,
     handleInputChange,
     handleSignUp,
     setAgreedToTerms,
@@ -151,6 +152,24 @@ export default function Signup() {
               >
                 Back to Login
               </button>
+            </div>
+
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Or continue with</span>
+              </div>
+            </div>
+
+            <div className="flex justify-center flex-col items-center">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => console.log('Google Signup Failed')}
+                theme="outline"
+                shape="rectangular"
+              />
             </div>
           </div>
         </div>

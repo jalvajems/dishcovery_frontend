@@ -50,6 +50,7 @@ export default function WorkshopManagement() {
                 const startIndex = (page - 1) * limit;
                 const paginated = filtered.slice(startIndex, startIndex + limit);
 
+                console.log(allData)
                 return {
                     data: {
                         data: paginated,
@@ -68,13 +69,13 @@ export default function WorkshopManagement() {
                     }
                 };
             }
+
         },
         filters: [
             { key: "status", defaultValue: "all" },
             { key: "mode", defaultValue: "all" },
         ],
     });
-
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'APPROVED': return 'bg-green-100 text-green-700 border-green-200';

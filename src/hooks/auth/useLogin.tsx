@@ -1,4 +1,4 @@
-import { loginApi } from "@/api/authApi";
+import { loginApi, googleAuthApi } from "@/api/authApi";
 import { chefDashboardApi } from "@/api/chefApi";
 import { userDashboardApi } from "@/api/foodieApi";
 import { useAuthStore } from "@/store/authStore";
@@ -103,8 +103,55 @@ export const useLogin = () => {
   };
 
 
-  const handleGoogleLogin = () => {
-    alert('Google login initiated');
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    try {
+      if (!credentialResponse.credential) {
+        showError("Google login failed");
+        return;
+      }
+
+      const { data } = await googleAuthApi({ credential: credentialResponse.credential, role: 'user' }) as { data: AuthResponse };
+
+      if (data.user.isBlocked) {
+        showError('user is blocked!!')
+        return;
+      }
+      const mappedUser = {
+        id: data.user._id || data.user.id || '',
+        _id: data.user._id || data.user.id || '',
+        name: data.user.name,
+        email: data.user.email,
+        role: data.user.role as 'user' | 'chef' | 'admin'
+      };
+
+      login(data.accessToken, mappedUser);
+      if (data.user.role == "admin") {
+        showError("Access denied.");
+        return;
+      }
+      if (data.user.role === 'chef') {
+        try {
+          await chefDashboardApi();
+          showSuccess('Login Successfully!!')
+          navigate('/chef/dashboard');
+        } catch (err: unknown) {
+          const message = getErrorMessage(err, "Login failed. Please try again.");
+          showError(message);
+        }
+      } else if (data.user.role === 'user') {
+        try {
+          await userDashboardApi();
+          showSuccess('Login Successfully!!')
+          navigate('/foodie/dashboard');
+        } catch (err: unknown) {
+          const message = getErrorMessage(err, "Login failed. Please try again.");
+          showError(message);
+        }
+      }
+    } catch (error: unknown) {
+      const message = getErrorMessage(error, "Google Login failed. Please try again.");
+      showError(message);
+    }
   };
 
   const handleForgotPassword = () => {
@@ -117,7 +164,7 @@ export const useLogin = () => {
   return {
     formData,
     handleForgotPassword,
-    handleGoogleLogin,
+    handleGoogleSuccess,
     handleInputChange,
     handleLogin,
     handleBackSignup,

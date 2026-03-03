@@ -2,6 +2,7 @@ export const AUTH_ROUTES = {
   SIGNUP: "/auth/signup",
   LOGIN: "/auth/login",
   ADMIN_LOGIN: "/auth/admin-login",
+  GOOGLE_AUTH: "/auth/google-auth",
 
   FORGOT_PASSWORD: "/auth/forgetPassword",
   RESET_PASSWORD: "/auth/resetPassword",

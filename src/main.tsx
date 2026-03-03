@@ -6,10 +6,14 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { SocketProvider } from './context/SocketProvider.tsx';
 
 
+import { GoogleOAuthProvider } from '@react-oauth/google';
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <SocketProvider>
-      <App />
-    </SocketProvider>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ""}>
+      <SocketProvider>
+        <App />
+      </SocketProvider>
+    </GoogleOAuthProvider>
   </StrictMode>,
 )
