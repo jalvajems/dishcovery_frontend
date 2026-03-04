@@ -1,7 +1,11 @@
 import { useSignup } from "@/hooks/auth/useSignup";
 import { GoogleLogin } from '@react-oauth/google';
+import { useNavigate } from "react-router-dom";
+import logo from '../../../assets/logo.png'
+
 
 export default function Signup() {
+  const navigate=useNavigate()
   const {
     agreedToTerms,
     formData,
@@ -16,6 +20,16 @@ export default function Signup() {
   return (
     <div className="min-h-screen bg-white">
       <header className="flex justify-between items-center px-6 border-b border-gray-200">
+         <div
+          onClick={() => navigate('/foodie/dashboard')}
+          className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+        >
+          <img
+            src={logo}
+            alt="Dishcovery"
+            className="h-10 w-auto object-contain"
+          />
+        </div>
         <div className="flex items-center gap-2">
           <img alt="" className="h-14" />
         </div>

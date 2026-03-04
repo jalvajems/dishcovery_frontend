@@ -1,8 +1,12 @@
 import { useLogin } from '@/hooks/auth/useLogin';
 import { GoogleLogin } from '@react-oauth/google';
+import logo from "../../../assets/logo.png"
+import { useNavigate } from 'react-router-dom';
+
+
 
 export default function Login() {
-
+  const navigate=useNavigate()
   const {
     formData,
     handleInputChange,
@@ -17,6 +21,16 @@ export default function Login() {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="flex justify-between items-center px-6 border-b border-gray-200">
+         <div
+          onClick={() => navigate('/foodie/dashboard')}
+          className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+        >
+          <img
+            src={logo}
+            alt="Dishcovery"
+            className="h-10 w-auto object-contain"
+          />
+        </div>
         <div className="flex items-center gap-2">
           <img alt="" className=' h-14' />
         </div>
