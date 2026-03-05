@@ -27,6 +27,8 @@ export default function ChefWalletPage() {
       showError(getErrorMessage(error, "Failed to fetch wallet"));
     }
   }
+  console.log('---',wallet?.transactions[0]);
+  
 
   useEffect(() => {
     handleGetChefWallet(currentPage)

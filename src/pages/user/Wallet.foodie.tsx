@@ -6,6 +6,7 @@ import Pagination from "@/components/shared/Pagination";
 import { getFoodieWalletApi } from "@/api/foodieApi";
 import { logError } from "@/utils/errorHandler";
 import ReusableTable, { type ITableColumn } from "@/components/shared/DataTable";
+import FoodieNavbar from "@/components/shared/foodie/Navbar.foodie";
 
 // ---------------- TYPES ----------------
 interface FoodieWalletTransaction {
@@ -135,7 +136,7 @@ export default function FoodieWalletPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 ">
-      <ChefNavbar />
+      <FoodieNavbar />
       <div className="p-4 md:p-8">
         {/* Page Header */}
         <div className="mb-8">

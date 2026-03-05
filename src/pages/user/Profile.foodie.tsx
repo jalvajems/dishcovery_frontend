@@ -97,7 +97,7 @@ export default function ProfileFoodie() {
           {/* Action Buttons (Floating Top Right) */}
           <div className="absolute top-6 right-6 flex gap-3">
             <button
-              onClick={() => navigate("/foodie/profile-edit")}
+              onClick={() => navigate(`/foodie/profile-edit/${profile.userId}`)}
               className="p-3 bg-white/90 backdrop-blur-md text-gray-700 hover:text-emerald-600 rounded-2xl shadow-lg border border-gray-100 transition-all hover:scale-110 active:scale-95 group"
               title="Edit Profile"
             >
@@ -154,7 +154,7 @@ export default function ProfileFoodie() {
                     onClick={() => navigate("/foodie/followings")}
                     className="text-center md:text-left cursor-pointer group hover:opacity-80 transition-all"
                   >
-                    <span className="block text-2xl font-black text-gray-900 group-hover:text-emerald-600 transition-colors">{followedChefs.length}</span>
+                    <span className="block text-2xl font-black text-gray-900 group-hover:text-emerald-600 transition-colors">{followedChefs?.length}</span>
                     <span className="text-sm font-bold text-gray-400 uppercase tracking-widest group-hover:text-emerald-500 transition-colors">Following Chefs</span>
                   </div>
                   <div className="text-center md:text-left">
@@ -224,7 +224,7 @@ export default function ProfileFoodie() {
                 <Heart className="text-red-500 fill-red-500" size={24} /> Favorite Recipes
               </h2>
 
-              {!savedRecipe || savedRecipe.savedRecipes.length === 0 ? (
+              {!savedRecipe || savedRecipe.savedRecipes?.length === 0 ? (
                 <div className="bg-slate-50 p-12 rounded-[2rem] text-center border-2 border-dashed border-gray-200">
                   <Heart className="w-12 h-12 text-gray-200 mx-auto mb-4" />
                   <p className="text-gray-500 font-medium">You haven't saved any recipes yet.</p>
@@ -237,7 +237,7 @@ export default function ProfileFoodie() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {savedRecipe.savedRecipes.map((recipe: IRecipe) => (
+                  {savedRecipe.savedRecipes?.map((recipe: IRecipe) => (
                     <div
                       key={recipe._id}
                       className="group bg-white rounded-[2rem] shadow-sm hover:shadow-xl border border-gray-100 overflow-hidden transition-all duration-300"

@@ -22,8 +22,12 @@ export default function RecipeDetailFoodie() {
     async function fetchRecipe() {
       try {
         if (!id) return;
+        console.log('id-----',id);
+        
         const res = await getRecipeDetailFoodieApi(id);
         const data = res.data.data;
+        console.log("--------",data);
+        
         // Ensure legacy support if images is sometimes a string (though type says string[])
         if (typeof data.images === 'string') {
           data.images = [data.images];
