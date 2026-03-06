@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Clock, Users, Tag, ChefHat, Edit2, Trash2, ChevronRight } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { deleteRecipeApi, getRecipeDetailApi } from "@/api/chefApi";
-import { showError } from "@/utils/toast";
+import { showError, showSuccess } from "@/utils/toast";
 import { getErrorMessage, logError } from "@/utils/errorHandler";
 
 import ChefReviewSection from "@/components/shared/ChefReviewSection";
@@ -64,8 +64,14 @@ export default function RecipeDetailPage() {
     navigate(`/recipe-edit/${id}`, { state: { recipeId: id } })
   }
   const handleDelete = async (id: string) => {
-    await deleteRecipeApi(id)
-    navigate('/recipes-listing')
+    try {
+      await deleteRecipeApi(id);
+      showSuccess("Recipe deleted successfully");
+      navigate('/chef/recipes-listing');
+    } catch (error: unknown) {
+      logError(error);
+      showError(getErrorMessage(error, "Failed to delete recipe"));
+    }
   }
 
   return (
@@ -126,7 +132,7 @@ export default function RecipeDetailPage() {
           <div className="space-y-6">
             {recipe.steps?.map((step: string, i: number) => (
               <div key={i} className="flex gap-6">
-                <div className="w-12 h-12 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
+                <div className="w-12 h-12 flex-shrink-0 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
                   {i + 1}
                 </div>
                 <div>

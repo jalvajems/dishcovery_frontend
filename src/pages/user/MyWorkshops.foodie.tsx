@@ -39,6 +39,8 @@ export default function MyWorkshopsFoodie() {
             setLoading(false);
         }
     };
+    console.log('---',workshops);
+    
 
     const filterAndPaginate = () => {
         let filtered = [...allWorkshops];

@@ -39,10 +39,9 @@ export default function BlogDetailPage() {
 
   async function handleDelete() {
     try {
-
       await deleteBlogApi(blogId!);
       showSuccess("Blog deleted successfully");
-      // navigate("/chef/blog-listing");
+      navigate("/chef/blog-listing");
     } catch (error: unknown) {
       logError(error);
       showError(getErrorMessage(error, "Failed to delete blog"));

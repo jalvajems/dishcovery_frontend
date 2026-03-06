@@ -35,8 +35,10 @@ export default function WorkshopListChef() {
         try {
             setLoading(true);
             const res = await getChefWorkshopsApi(currentPage, limit, searchQuery, activeTab);
+            console.log('workshoppppppppppp11', res);
             setWorkshops(res.data.datas as IWorkshop[]);
             setTotalPages(res.data.totalPages || 1);
+            console.log('workshoppppppppppp', workshops);
         } catch (error: unknown) {
             logError(error);
             toast.error(getErrorMessage(error, "Failed to load workshops"));
@@ -44,7 +46,6 @@ export default function WorkshopListChef() {
             setLoading(false);
         }
     };
-    console.log('workshoppppppppppp', workshops);
 
 
     const handleSubmitForApproval = async (id: string) => {

@@ -60,6 +60,7 @@ export default function WorkshopDetailChef() {
 
     const fetchWorkshop = async () => {
         try {
+            console.log('iiiddd',id)
             const response = await getWorkshopByIdApi(id!);
             setWorkshop(response.data.data as IWorkshop);
         } catch (error: unknown) {

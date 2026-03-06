@@ -133,7 +133,7 @@ export default function BookedWorkshopDetailFoodie() {
                                 Completed
                             </span>
                         )}
-                        {workshop.myBooking?.attendanceStatus&& (
+                        {workshop.myBooking?.attendanceStatus && (
                             <span className="px-4 py-1.5 bg-blue-600 rounded-full text-[10px] font-black tracking-widest uppercase shadow-lg shadow-blue-900/20 flex items-center gap-2">
                                 <ShieldCheck size={12} />
                                 {workshop.myBooking?.attendanceStatus}
