@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { MapPin, Clock, Heart, Share2, Star, Navigation, UtensilsCrossed } from 'lucide-react';
 import Map, { Marker, NavigationControl } from 'react-map-gl/mapbox';
 import mapboxgl from 'mapbox-gl';
-import { getFoodSpotDetailApi } from '@/api/foodieApi';
+import { getFoodSpotDetailApi, toggleSaveFoodSpotApi } from '@/api/foodieApi';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import FoodieNavbar from '@/components/shared/foodie/Navbar.foodie';
 import ReviewSection from '@/components/shared/ReviewPage';
@@ -37,6 +37,7 @@ export const FoodSpotDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const [foodSpot, setFoodSpot] = useState<IFoodSpot | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -46,6 +47,7 @@ export const FoodSpotDetailPage: React.FC = () => {
         const res = await getFoodSpotDetailApi(id);
         if (res.data && res.data.success) {
           setFoodSpot(res.data.data);
+          setIsSaved(res.data.isSaved);
         } else if (res.data) {
           // Fallback if structure is different
           setFoodSpot(res.data);
@@ -59,6 +61,15 @@ export const FoodSpotDetailPage: React.FC = () => {
 
     fetchFoodSpot();
   }, [id]);
+
+  const handleToggleSave = async () => {
+    try {
+      const res = await toggleSaveFoodSpotApi(id!);
+      setIsSaved(res.data.isSaved);
+    } catch (err) {
+      logError(err);
+    }
+  };
 
   if (loading) {
     return (
@@ -150,8 +161,8 @@ export const FoodSpotDetailPage: React.FC = () => {
             </div>
 
             <div className="flex gap-4 animate-fade-in-up delay-100">
-              <button className="h-14 w-14 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white hover:text-green-600 transition-all duration-300 group">
-                <Heart className="w-6 h-6 group-hover:scale-110 transition-transform" />
+              <button onClick={handleToggleSave} className={`h-14 w-14 rounded-full backdrop-blur-md border flex items-center justify-center transition-all duration-300 group ${isSaved ? 'bg-white border-white text-emerald-600 shadow-lg shadow-emerald-500/20' : 'bg-white/10 border-white/20 text-white hover:bg-white hover:text-emerald-600'}`}>
+                <Heart className={`w-6 h-6 group-hover:scale-110 transition-transform ${isSaved ? "fill-emerald-600" : ""}`} />
               </button>
               <button className="h-14 w-14 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white hover:text-green-600 transition-all duration-300 group">
                 <Share2 className="w-6 h-6 group-hover:scale-110 transition-transform" />

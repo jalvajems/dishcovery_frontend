@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { LogOut, Pencil, Heart, Users, MapPin, Mail, Phone, Settings, ChevronRight, Home } from "lucide-react";
-import { getFoodieProfileApi, getSavedRecipeApi } from "@/api/foodieApi";
+import { getFoodieProfileApi, getSavedRecipeApi, getSavedBlogsApi, getSavedFoodSpotsApi } from "@/api/foodieApi";
 import { getFollowingApi } from "@/api/followApi";
 import { showError } from "@/utils/toast";
 import { useNavigate } from "react-router-dom";
@@ -8,16 +8,31 @@ import { useUserStore } from "@/store/userStore";
 import { useAuthStore } from "@/store/authStore";
 import { logoutApi } from "@/api/authApi";
 import FoodieNavbar from "@/components/shared/foodie/Navbar.foodie";
+import Pagination from "@/components/shared/Pagination";
 import { getErrorMessage } from "@/utils/errorHandler";
 import type { IFoodieProfile } from "@/types/profile.types";
 import type { IFollower } from "@/types/follower.types";
 import type { IRecipe } from "@/types/recipe.types";
+import type { IBlog } from "@/types/blog.types";
+import type { IFoodSpot } from "@/types/foodSpot.types";
 
 export default function ProfileFoodie() {
   const [profile, setProfile] = useState<IFoodieProfile | null>(null);
   const [followedChefs, setFollowedChefs] = useState<IFollower[]>([]);
 
-  const [savedRecipe, setSavedRecipe] = useState<{ savedRecipes: IRecipe[] } | null>(null);
+  const [savedRecipe, setSavedRecipe] = useState<IRecipe[] | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const [savedBlogs, setSavedBlogs] = useState<IBlog[] | null>(null);
+  const [blogPage, setBlogPage] = useState(1);
+  const [blogTotalPages, setBlogTotalPages] = useState(1);
+
+  const [savedFoodSpots, setSavedFoodSpots] = useState<IFoodSpot[] | null>(null);
+  const [spotPage, setSpotPage] = useState(1);
+  const [spotTotalPages, setSpotTotalPages] = useState(1);
+
+  const limit = 3;
   const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
@@ -29,14 +44,12 @@ export default function ProfileFoodie() {
   useEffect(() => {
     (async () => {
       try {
-        const [profileRes, recipeRes] = await Promise.all([
+        const [profileRes] = await Promise.all([
           getFoodieProfileApi(),
-          getSavedRecipeApi()
         ]);
 
         const profileData = profileRes.data.data.data;
         setProfile(profileData);
-        setSavedRecipe(recipeRes.data.data);
         const response = await getFollowingApi();
         setFollowedChefs(response.data.datas);
         // Stats fetching removed as state was unused
@@ -47,6 +60,45 @@ export default function ProfileFoodie() {
       }
     })();
   }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const recipeRes = await getSavedRecipeApi(page, limit);
+        setSavedRecipe(recipeRes.data.data);
+        setTotalPages(recipeRes.data.totalPages);
+      } catch (error: unknown) {
+        showError(getErrorMessage(error, "Failed to load saved recipes"));
+      }
+    })();
+  }, [page]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const blogRes = await getSavedBlogsApi(blogPage, limit);
+        setSavedBlogs(blogRes.data.data);
+        setBlogTotalPages(blogRes.data.totalPages);
+      } catch (error: unknown) {
+        showError(getErrorMessage(error, "Failed to load saved blogs"));
+      }
+    })();
+  }, [blogPage]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const spotRes = await getSavedFoodSpotsApi(spotPage, limit);
+        setSavedFoodSpots(spotRes.data.data);
+        setSpotTotalPages(spotRes.data.totalPages);
+      } catch (error: unknown) {
+        showError(getErrorMessage(error, "Failed to load saved food spots"));
+      }
+    })();
+  }, [spotPage]);
+
+  console.log('saved---', savedRecipe);
+
 
   useEffect(() => {
     setUserStore(profile?.userId?.name || '', profile?.userId?.email || '', profile?.image || '')
@@ -145,21 +197,29 @@ export default function ProfileFoodie() {
                 </p>
 
                 {/* Stats Row */}
-                <div className="flex flex-wrap justify-center md:justify-start gap-8 pt-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-6 pt-6">
                   <div className="text-center md:text-left">
-                    <span className="block text-2xl font-black text-gray-900">{savedRecipe?.savedRecipes?.length || 0}</span>
-                    <span className="text-sm font-bold text-gray-400 uppercase tracking-widest">Saved Recipes</span>
+                    <span className="block text-2xl font-black text-gray-900">{savedRecipe?.length || 0}</span>
+                    <span className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-widest">Saved Recipes</span>
+                  </div>
+                  <div className="text-center md:text-left">
+                    <span className="block text-2xl font-black text-gray-900">{savedBlogs?.length || 0}</span>
+                    <span className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-widest">Saved Blogs</span>
+                  </div>
+                  <div className="text-center md:text-left">
+                    <span className="block text-2xl font-black text-gray-900">{savedFoodSpots?.length || 0}</span>
+                    <span className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-widest">Saved Spots</span>
                   </div>
                   <div
                     onClick={() => navigate("/foodie/followings")}
                     className="text-center md:text-left cursor-pointer group hover:opacity-80 transition-all"
                   >
-                    <span className="block text-2xl font-black text-gray-900 group-hover:text-emerald-600 transition-colors">{followedChefs?.length}</span>
-                    <span className="text-sm font-bold text-gray-400 uppercase tracking-widest group-hover:text-emerald-500 transition-colors">Following Chefs</span>
+                    <span className="block text-2xl font-black text-gray-900 group-hover:text-emerald-600 transition-colors">{followedChefs?.length || 0}</span>
+                    <span className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-widest group-hover:text-emerald-500 transition-colors">Following Chefs</span>
                   </div>
                   <div className="text-center md:text-left">
                     <span className="block text-2xl font-black text-gray-900">{profile.preferences?.length || 0}</span>
-                    <span className="text-sm font-bold text-gray-400 uppercase tracking-widest">Preferences</span>
+                    <span className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-widest">Preferences</span>
                   </div>
                 </div>
               </div>
@@ -219,51 +279,187 @@ export default function ProfileFoodie() {
             </div>
 
             {/* Saved Recipes Section */}
-            <div>
+            <div className="mb-12">
               <h2 className="text-2xl font-black text-gray-900 mb-8 flex items-center gap-3">
                 <Heart className="text-red-500 fill-red-500" size={24} /> Favorite Recipes
               </h2>
 
-              {!savedRecipe || savedRecipe.savedRecipes?.length === 0 ? (
+              {!savedRecipe || savedRecipe?.length === 0 ? (
                 <div className="bg-slate-50 p-12 rounded-[2rem] text-center border-2 border-dashed border-gray-200">
                   <Heart className="w-12 h-12 text-gray-200 mx-auto mb-4" />
                   <p className="text-gray-500 font-medium">You haven't saved any recipes yet.</p>
                   <button
-                    onClick={() => navigate("/foodie/recipes")}
+                    onClick={() => navigate("/foodie/recipe-listing")}
                     className="mt-4 text-emerald-600 font-bold hover:underline"
                   >
                     Explore recipes
                   </button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {savedRecipe.savedRecipes?.map((recipe: IRecipe) => (
-                    <div
-                      key={recipe._id}
-                      className="group bg-white rounded-[2rem] shadow-sm hover:shadow-xl border border-gray-100 overflow-hidden transition-all duration-300"
-                    >
-                      <div className="h-48 overflow-hidden relative">
-                        <img
-                          src={recipe.images?.[0] || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c'}
-                          onClick={() => navigate(`/foodie/recipe-detail/${recipe._id}`)}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 cursor-pointer"
-                          alt={recipe.title}
-                        />
-                        <div className="absolute top-4 right-4 p-2 bg-white/90 backdrop-blur text-red-500 rounded-xl shadow-md">
-                          <Heart size={18} fill="currentColor" />
+                <div className="flex flex-col gap-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {savedRecipe?.map((recipe: IRecipe) => (
+                      <div
+                        key={recipe._id}
+                        className="group bg-white rounded-[2rem] shadow-sm hover:shadow-xl border border-gray-100 overflow-hidden transition-all duration-300"
+                      >
+                        <div className="h-48 overflow-hidden relative">
+                          <img
+                            src={recipe.images?.[0] || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c'}
+                            onClick={() => navigate(`/foodie/recipe-detail/${recipe._id}`)}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 cursor-pointer"
+                            alt={recipe.title}
+                          />
+                          <div className="absolute top-4 right-4 p-2 bg-white/90 backdrop-blur text-red-500 rounded-xl shadow-md">
+                            <Heart size={18} fill="currentColor" />
+                          </div>
+                        </div>
+                        <div className="p-6">
+                          <h3 className="font-bold text-lg text-gray-900 line-clamp-1 group-hover:text-emerald-600 transition-colors">
+                            {recipe.title}
+                          </h3>
+                          <div className="flex items-center gap-2 mt-2 text-sm text-gray-500 font-medium">
+                            <Users size={14} />
+                            <span>By Chef {recipe.chefId?.name || "Expert"}</span>
+                          </div>
                         </div>
                       </div>
-                      <div className="p-6">
-                        <h3 className="font-bold text-lg text-gray-900 line-clamp-1 group-hover:text-emerald-600 transition-colors">
-                          {recipe.title}
-                        </h3>
-                        <div className="flex items-center gap-2 mt-2 text-sm text-gray-500 font-medium">
-                          <Users size={14} />
-                          <span>By Chef {recipe.chefId?.name || "Expert"}</span>
-                        </div>
-                      </div>
+                    ))}
+                  </div>
+
+                  {totalPages > 1 && (
+                    <div className="mt-8 flex justify-center">
+                      <Pagination
+                        currentPage={page}
+                        totalPages={totalPages}
+                        onChange={setPage}
+                      />
                     </div>
-                  ))}
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Saved Blogs Section */}
+            <div className="mb-12">
+              <h2 className="text-2xl font-black text-gray-900 mb-8 flex items-center gap-3">
+                <Heart className="text-red-500 fill-red-500" size={24} /> Favorite Blogs
+              </h2>
+
+              {!savedBlogs || savedBlogs?.length === 0 ? (
+                <div className="bg-slate-50 p-12 rounded-[2rem] text-center border-2 border-dashed border-gray-200">
+                  <Heart className="w-12 h-12 text-gray-200 mx-auto mb-4" />
+                  <p className="text-gray-500 font-medium">You haven't saved any blogs yet.</p>
+                  <button
+                    onClick={() => navigate("/foodie/blog-listing")}
+                    className="mt-4 text-emerald-600 font-bold hover:underline"
+                  >
+                    Explore blogs
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {savedBlogs?.map((blog: IBlog) => (
+                      <div
+                        key={blog._id}
+                        className="group bg-white rounded-[2rem] shadow-sm hover:shadow-xl border border-gray-100 overflow-hidden transition-all duration-300"
+                      >
+                        <div className="h-48 overflow-hidden relative">
+                          <img
+                            src={blog.coverImage || 'https://images.unsplash.com/photo-1493770348161-369560ae357d'}
+                            onClick={() => navigate(`/foodie/blog-detail/${blog._id}`)}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 cursor-pointer"
+                            alt={blog.title}
+                          />
+                          <div className="absolute top-4 right-4 p-2 bg-white/90 backdrop-blur text-red-500 rounded-xl shadow-md">
+                            <Heart size={18} fill="currentColor" />
+                          </div>
+                        </div>
+                        <div className="p-6">
+                          <h3 className="font-bold text-lg text-gray-900 line-clamp-1 group-hover:text-emerald-600 transition-colors">
+                            {blog.title}
+                          </h3>
+                          <div className="flex items-center gap-2 mt-2 text-sm text-gray-500 font-medium">
+                            <Users size={14} />
+                            <span>By {typeof blog.chefId === 'object' ? blog.chefId?.name : 'Chef'}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {blogTotalPages > 1 && (
+                    <div className="mt-8 flex justify-center">
+                      <Pagination
+                        currentPage={blogPage}
+                        totalPages={blogTotalPages}
+                        onChange={setBlogPage}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Saved FoodSpots Section */}
+            <div>
+              <h2 className="text-2xl font-black text-gray-900 mb-8 flex items-center gap-3">
+                <Heart className="text-red-500 fill-red-500" size={24} /> Favorite Food Spots
+              </h2>
+
+              {!savedFoodSpots || savedFoodSpots?.length === 0 ? (
+                <div className="bg-slate-50 p-12 rounded-[2rem] text-center border-2 border-dashed border-gray-200">
+                  <Heart className="w-12 h-12 text-gray-200 mx-auto mb-4" />
+                  <p className="text-gray-500 font-medium">You haven't saved any food spots yet.</p>
+                  <button
+                    onClick={() => navigate("/foodie/foodspots")}
+                    className="mt-4 text-emerald-600 font-bold hover:underline"
+                  >
+                    Explore food spots
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {savedFoodSpots?.map((spot: IFoodSpot) => (
+                      <div
+                        key={spot._id}
+                        className="group bg-white rounded-[2rem] shadow-sm hover:shadow-xl border border-gray-100 overflow-hidden transition-all duration-300"
+                      >
+                        <div className="h-48 overflow-hidden relative">
+                          <img
+                            src={spot.coverImage || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4'}
+                            onClick={() => navigate(`/foodie/foodspot/${spot._id}`)}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 cursor-pointer"
+                            alt={spot.name}
+                          />
+                          <div className="absolute top-4 right-4 p-2 bg-white/90 backdrop-blur text-red-500 rounded-xl shadow-md">
+                            <Heart size={18} fill="currentColor" />
+                          </div>
+                        </div>
+                        <div className="p-6">
+                          <h3 className="font-bold text-lg text-gray-900 line-clamp-1 group-hover:text-emerald-600 transition-colors">
+                            {spot.name}
+                          </h3>
+                          <div className="flex items-center gap-2 mt-2 text-sm text-gray-500 font-medium">
+                            <MapPin size={14} />
+                            <span>{spot.address?.city}, {spot.address?.state}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {spotTotalPages > 1 && (
+                    <div className="mt-8 flex justify-center">
+                      <Pagination
+                        currentPage={spotPage}
+                        totalPages={spotTotalPages}
+                        onChange={setSpotPage}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
             </div>

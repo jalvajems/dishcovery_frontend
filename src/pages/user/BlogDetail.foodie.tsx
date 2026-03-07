@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Heart, Tag, Calendar, User, ArrowRight, Clock } from 'lucide-react';
 import { useParams, Link } from 'react-router-dom';
-import { getFoodieBlogDetailApi, getRelatedBlogsApi } from '@/api/foodieApi';
+import { getFoodieBlogDetailApi, getRelatedBlogsApi, toggleSaveBlogApi } from '@/api/foodieApi';
 import { showError } from '@/utils/toast';
 import { getErrorMessage, logError } from '@/utils/errorHandler';
 import ReviewSection from '@/components/shared/ReviewPage';
@@ -12,8 +12,7 @@ import type { IBlog } from "@/types/blog.types";
 const BlogDetailPage: React.FC = () => {
   const [blog, setBlog] = useState<IBlog | null>(null);
   const [relatedBlogs, setRelatedBlogs] = useState<IBlog[]>([]);
-  const [likes, setLikes] = useState(234); // Mock likes for now as logic wasn't fully connected in original
-  const [isLiked, setIsLiked] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const { blogId } = useParams();
 
   useEffect(() => {
@@ -22,6 +21,7 @@ const BlogDetailPage: React.FC = () => {
         if (!blogId) return;
         const res = await getFoodieBlogDetailApi(blogId);
         setBlog(res.data.data as IBlog);
+        setIsSaved(res.data.isSaved);
       } catch (error: unknown) {
         showError(getErrorMessage(error, "Failed to fetch blog details"));
       }
@@ -45,9 +45,13 @@ const BlogDetailPage: React.FC = () => {
   }, [blog]);
 
 
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    setLikes(isLiked ? likes - 1 : likes + 1);
+  const handleToggleSave = async () => {
+    try {
+      const res = await toggleSaveBlogApi(blogId!);
+      setIsSaved(res.data.isSaved);
+    } catch (err) {
+      logError(err);
+    }
   };
 
   if (!blog) {
@@ -132,11 +136,11 @@ const BlogDetailPage: React.FC = () => {
             <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 sticky top-24">
               <h3 className="text-xl font-bold mb-6">Engage</h3>
               <button
-                onClick={handleLike}
-                className={`w-full py-4 rounded-xl flex items-center justify-center gap-2 font-bold transition-all transform hover:scale-[1.02] ${isLiked ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'}`}
+                onClick={handleToggleSave}
+                className={`w-full py-4 rounded-xl flex items-center justify-center gap-2 font-bold transition-all transform hover:scale-[1.02] ${isSaved ? 'bg-emerald-100 text-emerald-700' : 'bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-lg hover:shadow-emerald-500/30'}`}
               >
-                <Heart size={24} className={isLiked ? "fill-red-600" : ""} />
-                {likes} Likes
+                <Heart size={20} className={isSaved ? "fill-emerald-700" : ""} />
+                {isSaved ? "Saved to Bookmarks" : "Save Blog"}
               </button>
 
               <div className='my-6 border-b border-gray-100'></div>

@@ -22,6 +22,7 @@ import { getErrorMessage } from "@/utils/errorHandler";
 import { useAwsS3Upload } from "@/components/shared/hooks/useAwsS3Upload";
 import FoodieNavbar from "@/components/shared/foodie/Navbar.foodie";
 import { useNavigate } from "react-router-dom";
+import MapLocationPicker from "@/utils/MapLocationPicker";
 
 interface FoodItem {
   name: string;

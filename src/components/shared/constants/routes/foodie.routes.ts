@@ -14,6 +14,8 @@ export const FOODIE_ROUTES = {
   BLOG_DETAIL: (id: string) => `/foodie/blog-detail/${id}`,
   RELATED_BLOGS: (tag: string) =>
     `/foodie/blog-relate-blogs/${tag}`,
+  SAVED_BLOGS: "/foodie/saved-blogs",
+  TOGGLE_SAVE_BLOG: "/foodie/toggle-save-blog",
 
   // Profile
   PROFILE_CREATE: "/foodie/profile",
@@ -26,6 +28,8 @@ export const FOODIE_ROUTES = {
   FOODSPOT_LIST: "/foodie/foodspots",
   MY_FOODSPOTS: "/foodie/myfoodspots",
   FOODSPOT_DETAIL: (id: string) => `/foodie/foodspot/${id}`,
+  SAVED_FOODSPOTS: "/foodie/saved-foodspots",
+  TOGGLE_SAVE_FOODSPOT: "/foodie/toggle-save-foodspot",
 
   // Wallet
   WALLET: "/foodie/wallet",

@@ -30,8 +30,10 @@ export const getRelatedRecipesApi = (cuisine: string) => {
     return API.get(FOODIE_ROUTES.RELATED_RECIPES(cuisine));
 };
 
-export const getSavedRecipeApi = () => {
-    return API.get(FOODIE_ROUTES.SAVED_RECIPES);
+export const getSavedRecipeApi = (page: number, limit: number) => {
+    return API.get(FOODIE_ROUTES.SAVED_RECIPES, {
+        params: { page, limit }
+    });
 };
 
 //==========
@@ -58,6 +60,16 @@ export const getFoodieBlogDetailApi = (blogId: string) => {
 
 export const getRelatedBlogsApi = (tag: string) => {
     return API.get(FOODIE_ROUTES.RELATED_BLOGS(tag));
+};
+
+export const getSavedBlogsApi = (page: number, limit: number) => {
+    return API.get(FOODIE_ROUTES.SAVED_BLOGS, {
+        params: { page, limit }
+    });
+};
+
+export const toggleSaveBlogApi = (blogId: string) => {
+    return API.post(FOODIE_ROUTES.TOGGLE_SAVE_BLOG, { blogId });
 };
 
 //==========
@@ -114,6 +126,16 @@ export const getAllMyFoodSpotApi = (
 
 export const getFoodSpotDetailApi = (spotId: string) => {
     return API.get(FOODIE_ROUTES.FOODSPOT_DETAIL(spotId));
+};
+
+export const getSavedFoodSpotsApi = (page: number, limit: number) => {
+    return API.get(FOODIE_ROUTES.SAVED_FOODSPOTS, {
+        params: { page, limit }
+    });
+};
+
+export const toggleSaveFoodSpotApi = (foodSpotId: string) => {
+    return API.post(FOODIE_ROUTES.TOGGLE_SAVE_FOODSPOT, { foodSpotId });
 };
 
 //==========
