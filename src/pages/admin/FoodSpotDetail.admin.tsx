@@ -15,6 +15,7 @@ import {
     CheckCircle,
     XCircle,
     AlertCircle,
+    UtensilsCrossed,
 } from "lucide-react";
 import { toast } from "react-toastify";
 import Map, { Marker, NavigationControl } from 'react-map-gl/mapbox';
@@ -110,7 +111,8 @@ export default function FoodSpotDetailAdmin() {
         isApproved,
         isBlocked,
         location,
-        rejectionReason: existingRejectionReason
+        rejectionReason: existingRejectionReason,
+        exploredFoods,
     } = foodSpot;
 
     const [lng, lat] = location?.coordinates || [0, 0];
@@ -199,17 +201,36 @@ export default function FoodSpotDetailAdmin() {
                         </section>
 
                         <section>
-                            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-3">Gallery</h3>
-                            {images && images.length > 0 ? (
-                                <div className="grid grid-cols-4 gap-2">
-                                    {images.map((img: string, idx: number) => (
-                                        <div key={idx} className="rounded-xl overflow-hidden h-24 shadow-sm border border-gray-100">
-                                            <img src={img} alt={`Gallery ${idx}`} className="w-full h-full object-cover" />
+                            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-3">Explored Foods</h3>
+                            {exploredFoods && exploredFoods.length > 0 ? (
+                                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                                    {exploredFoods.map((food: any, idx: number) => (
+                                        <div key={idx} className="bg-white border border-gray-100 rounded-xl p-3 shadow-sm flex gap-4 items-center">
+                                            <div className="w-16 h-16 bg-gray-100 rounded-lg flex-shrink-0 overflow-hidden relative">
+                                                {food.image ? (
+                                                    <img src={food.image} alt={food.name} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-gray-300">
+                                                        <UtensilsCrossed className="w-6 h-6" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="flex justify-between items-start mb-1 gap-2">
+                                                    <span className="font-semibold text-gray-900 text-sm">{food.name || "Food Item"}</span>
+                                                    {food.price != null && (
+                                                        <span className="font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-lg text-xs border border-green-100 whitespace-nowrap">
+                                                            ₹{food.price}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <p className="text-xs text-gray-500 line-clamp-2">{food.description || "No description provided."}</p>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
                             ) : (
-                                <p className="text-gray-500 italic">No images available</p>
+                                <p className="text-gray-500 italic">No explored foods listed</p>
                             )}
                         </section>
 

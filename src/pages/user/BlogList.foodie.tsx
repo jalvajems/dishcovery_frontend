@@ -111,10 +111,14 @@ export default function BlogListFoodie() {
                                 <h3 className="text-3xl font-bold text-gray-900 mb-3 group-hover:text-green-700 transition-colors">
                                     {blog.title}
                                 </h3>
-
+{/* 
                                 <p className="text-gray-600 mb-5 leading-relaxed text-lg">
                                     {blog.shortDescription}
-                                </p>
+                                </p> */}
+                                 <button
+                            className={`px-6 py-2 my-4 font-semibold rounded-xl transition-all shadow-lg bg-white/90 text-gray-700 border-gray-200 hover:bg-green-100 hover:text-green-700 hover:scale-105`}
+                        > {blog.tags?.[0]}
+                        </button>
 
                                 <button
                                     onClick={() => navigate(`/foodie/blog-detail/${blog._id}`)}

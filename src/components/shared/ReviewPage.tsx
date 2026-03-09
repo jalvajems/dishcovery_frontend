@@ -52,6 +52,7 @@ export default function ReviewSection({ reviewableId, reviewableType }: ReviewSe
             setLoading(false);
         }
     };
+console.log('----',reviews);
 
     useEffect(() => {
         if (reviewableId) loadReviews(reviewableId);
@@ -110,6 +111,7 @@ export default function ReviewSection({ reviewableId, reviewableType }: ReviewSe
             showError(message);
         }
     };
+    console.log('ssssssss',reviews[0]?.userId?.foodieProfile?.image)
 
     const handleDelete = async (reviewId: string) => {
         if (!window.confirm("Are you sure you want to delete this review?")) return;
@@ -219,7 +221,7 @@ export default function ReviewSection({ reviewableId, reviewableType }: ReviewSe
                             <>
                                 <div className="flex justify-between items-start mb-2">
                                     <div className="flex items-center gap-4">
-                                        <img src={typeof r.userId === 'object' && r.userId?.avatar ? r.userId.avatar : "/default-avatar.png"} alt={typeof r.userId === 'object' ? r.userId?.name : "User"} className="w-12 h-12 rounded-full object-cover" />
+                                        <img src={typeof r.userId === 'object' && r.userId?.foodieProfile?.image ? r.userId?.foodieProfile?.image : "/default-avatar.png"} alt={typeof r.userId === 'object' ? r.userId?.name : "User"} className="w-12 h-12 rounded-full object-cover" />
                                         <div>
                                             <div className="font-semibold">{typeof r.userId === 'object' ? r.userId?.name : "Anonymous"}</div>
                                             <div className="text-xs text-gray-500">{new Date(r.createdAt).toLocaleString()}</div>

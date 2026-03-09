@@ -236,7 +236,14 @@ export const MyFoodSpotDetailPage: React.FC = () => {
                         )}
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-bold text-lg text-gray-900 mb-1 group-hover:text-green-700 transition-colors">{food.name || "Food Item"}</h4>
+                        <div className="flex justify-between items-start mb-1 gap-2">
+                          <h4 className="font-bold text-lg text-gray-900 group-hover:text-green-700 transition-colors">{food.name || "Food Item"}</h4>
+                          {food.price != null && (
+                            <span className="font-bold text-green-600 bg-green-50 px-2.5 py-1 rounded-xl text-sm border border-green-100 whitespace-nowrap">
+                              ₹{food.price}
+                            </span>
+                          )}
+                        </div>
                         <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">{food.description || "A delicious culinary delight found at this spot."}</p>
                       </div>
                     </div>

@@ -164,9 +164,7 @@ export const FoodSpotDetailPage: React.FC = () => {
               <button onClick={handleToggleSave} className={`h-14 w-14 rounded-full backdrop-blur-md border flex items-center justify-center transition-all duration-300 group ${isSaved ? 'bg-white border-white text-emerald-600 shadow-lg shadow-emerald-500/20' : 'bg-white/10 border-white/20 text-white hover:bg-white hover:text-emerald-600'}`}>
                 <Heart className={`w-6 h-6 group-hover:scale-110 transition-transform ${isSaved ? "fill-emerald-600" : ""}`} />
               </button>
-              <button className="h-14 w-14 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white hover:text-green-600 transition-all duration-300 group">
-                <Share2 className="w-6 h-6 group-hover:scale-110 transition-transform" />
-              </button>
+
             </div>
           </div>
         </div>
@@ -237,7 +235,14 @@ export const FoodSpotDetailPage: React.FC = () => {
                         )}
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-bold text-lg text-gray-900 mb-1 group-hover:text-green-700 transition-colors">{food.name || "Food Item"}</h4>
+                        <div className="flex justify-between items-start mb-1 gap-2">
+                          <h4 className="font-bold text-lg text-gray-900 group-hover:text-green-700 transition-colors">{food.name || "Food Item"}</h4>
+                          {food.price != null && (
+                            <span className="font-bold text-green-600 bg-green-50 px-2.5 py-1 rounded-xl text-sm border border-green-100 whitespace-nowrap">
+                              ₹{food.price}
+                            </span>
+                          )}
+                        </div>
                         <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">{food.description || "A delicious culinary delight found at this spot."}</p>
                       </div>
                     </div>
