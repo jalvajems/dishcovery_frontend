@@ -1,0 +1,79 @@
+import { resetPassApi } from "@/api/authApi";
+import { useOtpStore } from "@/store/authStore";
+import { getErrorMessage } from "@/utils/errorHandler";
+import { showError, showSuccess } from "@/utils/toast";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+export const useResetPass = () => {
+  const { email, clearOtpData } = useOtpStore()
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [errors, setErrors] = useState({
+    newPassword: "",
+    confirmPassword: "",
+  });
+
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    setErrors(prev => ({ ...prev, [name]: "" }));
+
+  };
+  const validate = () => {
+    const tempErrors = {
+      newPassword: "",
+      confirmPassword: "",
+    };
+
+    if (!formData.newPassword.trim()) {
+      tempErrors.newPassword = "New password is required";
+    } else if (formData.newPassword.length < 6) {
+      tempErrors.newPassword = "Password must be at least 6 characters";
+    }
+
+    if (!formData.confirmPassword.trim()) {
+      tempErrors.confirmPassword = "Confirm password is required";
+    } else if (formData.confirmPassword !== formData.newPassword) {
+      tempErrors.confirmPassword = "Passwords do not match";
+    }
+
+    setErrors(tempErrors);
+
+    return !tempErrors.newPassword && !tempErrors.confirmPassword;
+  };
+
+
+  const handleSubmit = async () => {
+    try {
+      if (!validate()) return;
+
+      await resetPassApi({ email: email, newPass: formData.newPassword, confirmPass: formData.confirmPassword })
+      showSuccess("Password reset successfully");
+      clearOtpData();
+      navigate('/login')
+    } catch (error: unknown) {
+      showError(getErrorMessage(error, "Failed to reset password"));
+    }
+  };
+
+  const handleLogIn = () => {
+    navigate('/login')
+  };
+
+  return {
+    formData,
+    handleInputChange,
+    handleLogIn,
+    handleSubmit,
+    setFormData,
+    errors
+  }
+}
