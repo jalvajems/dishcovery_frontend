@@ -71,7 +71,7 @@ export const useLogin = () => {
         try {
           await chefDashboardApi();
           showSuccess('Login Successfully!!')
-          navigate('/chef-dashboard');
+          navigate('/chef/dashboard');
         } catch (err: any) {
           const message = err.response?.data?.message || "Login failed. Please try again.";
 
@@ -82,7 +82,7 @@ export const useLogin = () => {
         try {
           await userDashboardApi();
           showSuccess('Login Successfully!!')
-          navigate('/foodie-dashboard');
+          navigate('/foodie/dashboard');
         } catch (err: any) {
           const message =
             err.response?.data?.message || "Login failed. Please try again.";
