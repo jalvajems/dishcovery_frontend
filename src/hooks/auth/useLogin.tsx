@@ -1,10 +1,12 @@
-import { loginApi } from "@/api/authApi";
+import { loginApi, googleAuthApi } from "@/api/authApi";
 import { chefDashboardApi } from "@/api/chefApi";
 import { userDashboardApi } from "@/api/foodieApi";
 import { useAuthStore } from "@/store/authStore";
 import { showError, showSuccess } from "@/utils/toast";
+import { getErrorMessage } from "@/utils/errorHandler";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import type { AuthResponse } from "@/api/apiInstance";
 
 export const useLogin = () => {
 
@@ -55,15 +57,22 @@ export const useLogin = () => {
     const isValid = validateForm();
     if (!isValid) return;
     try {
-      const { data } = await loginApi({ email: formData.email, password: formData.password });
+      const { data } = await loginApi({ email: formData.email, password: formData.password }) as { data: AuthResponse };
 
       if (data.user.isBlocked) {
         showError('user is blocked!!')
         return;
       }
+      const mappedUser = {
+        id: data.user._id || data.user.id || '',
+        _id: data.user._id || data.user.id || '',
+        name: data.user.name,
+        email: data.user.email,
+        role: data.user.role as 'user' | 'chef' | 'admin'
+      };
 
-      login(data.accessToken, data.user);
-       if (data.user.role == "admin") {
+      login(data.accessToken, mappedUser);
+      if (data.user.role == "admin") {
         showError("Access denied.");
         return;
       }
@@ -72,40 +81,77 @@ export const useLogin = () => {
           await chefDashboardApi();
           showSuccess('Login Successfully!!')
           navigate('/chef/dashboard');
-        } catch (err: any) {
-          const message = err.response?.data?.message || "Login failed. Please try again.";
-
+        } catch (err: unknown) {
+          const message = getErrorMessage(err, "Login failed. Please try again.");
           showError(message);
-
         }
       } else if (data.user.role === 'user') {
         try {
           await userDashboardApi();
           showSuccess('Login Successfully!!')
           navigate('/foodie/dashboard');
-        } catch (err: any) {
-          const message =
-            err.response?.data?.message || "Login failed. Please try again.";
-
+        } catch (err: unknown) {
+          const message = getErrorMessage(err, "Login failed. Please try again.");
           showError(message);
-
         }
       }
-    } catch (error: any) {
-
-      const message =
-        error.response?.data?.message ||
-        "Login failed. Please try again.";
-
+    } catch (error: unknown) {
+      const message = getErrorMessage(error, "Login failed. Please try again.");
       showError(message);
     }
 
   };
 
 
-  const handleGoogleLogin = () => {
-    console.log('Continue with Google');
-    alert('Google login initiated');
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    try {
+      if (!credentialResponse.credential) {
+        showError("Google login failed");
+        return;
+      }
+
+      const { data } = await googleAuthApi({ credential: credentialResponse.credential, role: 'user' }) as { data: AuthResponse };
+
+      if (data.user.isBlocked) {
+        showError('user is blocked!!')
+        return;
+      }
+      const mappedUser = {
+        id: data.user._id || data.user.id || '',
+        _id: data.user._id || data.user.id || '',
+        name: data.user.name,
+        email: data.user.email,
+        role: data.user.role as 'user' | 'chef' | 'admin'
+      };
+
+      login(data.accessToken, mappedUser);
+      if (data.user.role == "admin") {
+        showError("Access denied.");
+        return;
+      }
+      if (data.user.role === 'chef') {
+        try {
+          await chefDashboardApi();
+          showSuccess('Login Successfully!!')
+          navigate('/chef/dashboard');
+        } catch (err: unknown) {
+          const message = getErrorMessage(err, "Login failed. Please try again.");
+          showError(message);
+        }
+      } else if (data.user.role === 'user') {
+        try {
+          await userDashboardApi();
+          showSuccess('Login Successfully!!')
+          navigate('/foodie/dashboard');
+        } catch (err: unknown) {
+          const message = getErrorMessage(err, "Login failed. Please try again.");
+          showError(message);
+        }
+      }
+    } catch (error: unknown) {
+      const message = getErrorMessage(error, "Google Login failed. Please try again.");
+      showError(message);
+    }
   };
 
   const handleForgotPassword = () => {
@@ -118,7 +164,7 @@ export const useLogin = () => {
   return {
     formData,
     handleForgotPassword,
-    handleGoogleLogin,
+    handleGoogleSuccess,
     handleInputChange,
     handleLogin,
     handleBackSignup,

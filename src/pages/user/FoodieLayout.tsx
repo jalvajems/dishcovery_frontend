@@ -7,13 +7,15 @@ export default function FoodieLayout() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-green-50">
       <FoodieHeader />
-      
-      <div className="flex max-w-7xl mx-auto">
-        <FoodieSidebar />
-        
-        <main className="flex-1 p-8">
+
+      <div className="flex w-full">
+        <div className="sticky top-20 h-[calc(100vh-5rem)] z-30">
+          <FoodieSidebar />
+        </div>
+
+        <main className="flex-1 p-6 md:p-8 min-w-0">
           <Outlet />   {/* Dynamic page content */}
-          < Footer/>
+          < Footer />
         </main>
       </div>
     </div>

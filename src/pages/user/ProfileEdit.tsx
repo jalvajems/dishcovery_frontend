@@ -27,13 +27,10 @@ export default function EditFoodieProfile() {
   };
 
   const handleSubmit = () => {
-    console.log('Form data:', formData);
-    console.log('Profile picture:', profilePicture);
     alert('Profile updated successfully!');
   };
 
   const handleBackToProfile = () => {
-    console.log('Navigate back to profile');
   };
 
   return (

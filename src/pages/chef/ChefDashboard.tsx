@@ -1,101 +1,194 @@
-import { useEffect } from "react";
-import { chefDashboardApi } from "@/api/chefApi";
-import { Utensils, Star, Users, BookOpen, Calendar } from "lucide-react";
+import { useEffect, useState } from "react";
+import { chefDashboardApi, getAllRecipeApi, getMyBlogsChefApi } from "@/api/chefApi";
+import { Utensils, Star, Users } from "lucide-react";
+import { useUserStore } from "@/store/userStore";
+import { useNavigate } from "react-router-dom";
+import Pagination from "@/components/shared/Pagination";
+import ConfirmModal from "@/components/shared/ConfirmModal";
+import { getErrorMessage, logError } from "@/utils/errorHandler";
+import { showError } from "@/utils/toast";
+
+interface Recipe {
+  _id: string;
+  title: string;
+  images: string;
+  cuisine: string;
+}
+
+interface Blog {
+  _id: string;
+  title: string;
+  coverImage: string;
+  tags: string[];
+}
 
 export default function ChefDashboard() {
-  useEffect(() => {
-    chefDashboardApi();
-  }, []);
-  
+  const { name } = useUserStore()
+  const navigate = useNavigate()
 
-  // Dummy data (replace with API data later)
+
+
+  const [recipes, setRecipes] = useState<Recipe[]>([])
+  const [currentPageRecipe, setCurrentPageRecipe] = useState(1);
+  const [totalPagesRecipe, setTotalPagesRecipe] = useState(1);
+  const limit = 5;
+  const [currentPageBlog, setCurrentPageBlog] = useState(1);
+  const [totalPagesBlog, setTotalPagesBlog] = useState(1);
+  const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
+  const { setIsVerifiedUser } = useUserStore()
+  const [dashboardStats, setDashboardStats] = useState({
+    totalRecipes: 0,
+    averageRating: 0,
+    totalFollowers: 0,
+    totalWorkshops: 0
+  });
+
+
+
+
+
+  //recipes===============
+  const handlePageChangeRecipe = (page: number) => {
+    setCurrentPageRecipe(page)
+  }
+  useEffect(() => {
+    fetchRecipes()
+  }, [currentPageRecipe, limit])
+
+  async function fetchRecipes() {
+    try {
+
+      const res = await getAllRecipeApi(currentPageRecipe, limit);
+      setRecipes(res.data.data)
+
+      setTotalPagesRecipe(res.data.totalPages)
+
+    } catch (error: unknown) {
+      logError(error);
+    }
+
+  }
+
+  async function handleViewButtonRecipe(id: string) {
+    try {
+      navigate(`/recipe-detail/${id}`)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+  async function handleViewButtonBlog(id: string) {
+    try {
+      navigate(`/blog-detail/${id}`)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  //blog=================
+  const handlePageChange = (page: number) => {
+    setCurrentPageBlog(page)
+  }
+
+  useEffect(() => {
+    fetchBlogs();
+  }, [currentPageBlog, limit]);
+
+  async function fetchBlogs() {
+
+    try {
+      const res = await getMyBlogsChefApi(currentPageBlog, limit);
+
+      setTotalPagesBlog(res.data.totalCount)
+      setBlogs(res.data.datas);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+
+
+
+
+
+  useEffect(() => {
+    checkChefProfile();
+  }, []);
+
+  async function checkChefProfile() {
+    try {
+      const res = await chefDashboardApi();
+      console.log('----------', res);
+
+      setIsVerifiedUser(res.data.isVerified)
+      setIsVerified(res.data.isVerified)
+
+      // Set dashboard stats from API response
+      if (res.data.stats) {
+        setDashboardStats(res.data.stats);
+      }
+
+      if (!res.data.hasProfile) {
+        setShowProfileModal(true);
+      }
+
+    } catch (error: unknown) {
+      logError(error);
+      showError(getErrorMessage(error, 'Something went wrong'));
+    }
+  }
+
+
   const stats = [
     {
       label: "Total Recipes",
-      value: 48,
+      value: dashboardStats.totalRecipes,
       icon: Utensils,
-      footer: "2 new this week",
+      footer: "Published recipes",
     },
     {
       label: "Average Rating",
-      value: "4.8",
+      value: dashboardStats.averageRating > 0 ? dashboardStats.averageRating.toFixed(1) : "N/A",
       icon: Star,
-      footer: "Based on 342 reviews",
+      footer: "From chef reviews",
     },
     {
       label: "Followers",
-      value: "3.4k",
+      value: dashboardStats.totalFollowers,
       icon: Users,
-      footer: "120 new this week",
+      footer: "Total followers",
     },
     {
-      label: "Workshops Hosted",
-      value: 18,
-      icon: BookOpen,
-      footer: "Next workshop tomorrow",
+      label: "Total Workshops",
+      value: dashboardStats.totalWorkshops,
+      icon: Utensils,
+      footer: "All workshops",
     },
   ];
 
-  const activities = [
-    {
-      title: "Uploaded a New Recipe",
-      desc: "Spicy Butter Garlic Shrimp",
-      time: "2 hours ago",
-    },
-    {
-      title: "Received a Review",
-      desc: "Your Italian Pasta has a new 5 star review",
-      time: "5 hours ago",
-    },
-    {
-      title: "New Workshop Registration",
-      desc: "10 people enrolled",
-      time: "1 day ago",
-    },
-  ];
 
-  const recipes = [
-    {
-      name: "Creamy Garlic Chicken",
-      image:
-        "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=400",
-    },
-    {
-      name: "Veg Loaded Pizza",
-      image:
-        "https://images.unsplash.com/photo-1548365328-8b2f93d1d93e?w=400",
-    },
-    {
-      name: "Thai Green Curry",
-      image:
-        "https://images.unsplash.com/photo-1604908177824-687d1f9ee866?w=400",
-    },
-    {
-      name: "Sushi Special",
-      image:
-        "https://images.unsplash.com/photo-1553621042-f6e147245754?w=400",
-    },
-  ];
 
-  const workshops = [
-    {
-      title: "Masterclass: Italian Special",
-      date: "Dec 20, 2025",
-      attendees: 42,
-      image:
-        "https://images.unsplash.com/photo-1520072959219-c595dc870360?w=400",
-    },
-    {
-      title: "Asian Fusion Cooking",
-      date: "Dec 26, 2025",
-      attendees: 38,
-      image:
-        "https://images.unsplash.com/photo-1514516870926-205ce66d922d?w=400",
-    },
-  ];
 
   return (
     <main className="flex-1 p-8">
+      <ConfirmModal
+        isOpen={showProfileModal}
+        title="Complete Your Chef Profile"
+        message="You need to create your chef profile before accessing the dashboard."
+        confirmText="Create Profile"
+        cancelText="Later"
+        confirmVariant="success"
+        onConfirm={() => navigate("/chef/profile-add")}
+        onCancel={() => setShowProfileModal(false)}
+      />
+      {!isVerified && (
+        <div className="bg-yellow-100 text-yellow-800 p-3 rounded mb-4 overflow-hidden">
+          <div className="animate-marquee whitespace-nowrap">
+            Your chef account is not verified yet. You cannot perform actions until admin approval.
+          </div>
+        </div>
+      )}
 
       {/* ------------------------------------------------------ */}
       {/* HERO SECTION */}
@@ -110,7 +203,7 @@ export default function ChefDashboard() {
 
         <div className="absolute inset-0 flex flex-col justify-end p-10">
           <h1 className="text-5xl font-bold text-white mb-4 drop-shadow-2xl">
-            Welcome back, Chef Jems!
+            Welcome back, Chef {name} !
           </h1>
           <p className="text-gray-200 text-lg">
             Here’s your performance overview and recent activity.
@@ -142,25 +235,7 @@ export default function ChefDashboard() {
         ))}
       </div>
 
-      {/* ------------------------------------------------------ */}
-      {/* ACTIVITIES */}
-      {/* ------------------------------------------------------ */}
-      <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-gray-900 to-green-700 bg-clip-text text-transparent">
-        My Activities
-      </h2>
 
-      <div className="grid grid-cols-3 gap-6 mb-12">
-        {activities.map((a, i) => (
-          <div
-            key={i}
-            className="bg-white p-6 rounded-2xl shadow-md border border-gray-100 hover:shadow-lg transition-all"
-          >
-            <h3 className="text-xl font-bold mb-2">{a.title}</h3>
-            <p className="text-gray-600">{a.desc}</p>
-            <p className="text-sm text-gray-400 mt-3">{a.time}</p>
-          </div>
-        ))}
-      </div>
 
       {/* ------------------------------------------------------ */}
       {/* RECENT RECIPES */}
@@ -169,55 +244,63 @@ export default function ChefDashboard() {
         Recent Recipes
       </h2>
 
-      <div className="grid grid-cols-4 gap-6 mb-12">
+      <div className="grid grid-cols-3 gap-6 mb-8">
         {recipes.map((r, i) => (
           <div
             key={i}
             className="bg-white rounded-xl shadow-md overflow-hidden group hover:shadow-2xl transition-all cursor-pointer"
           >
             <img
-              src={r.image}
-              alt={r.name}
-              className="h-40 w-full object-cover group-hover:scale-105 transition-transform duration-500"
+              onClick={() => handleViewButtonRecipe(r._id)}
+              src={r.images}
+              alt={r.title}
+              className="h-48 w-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
             <div className="p-4">
-              <h3 className="font-bold text-lg">{r.name}</h3>
+              <h3 className="font-bold text-lg truncate">{r.title}</h3>
+              <p className="text-sm text-gray-500 mt-1">{r.cuisine}</p>
             </div>
           </div>
         ))}
       </div>
-
+      <Pagination
+        currentPage={currentPageRecipe}
+        totalPages={totalPagesRecipe}
+        onChange={handlePageChangeRecipe}
+      />
       {/* ------------------------------------------------------ */}
-      {/* WORKSHOP OVERVIEW */}
+      {/* RECENT blog */}
       {/* ------------------------------------------------------ */}
       <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-gray-900 to-green-700 bg-clip-text text-transparent">
-        Workshop Overview
+        Recent Blogs
       </h2>
 
-      <div className="space-y-6 mb-12">
-        {workshops.map((w, i) => (
+      <div className="grid grid-cols-3 gap-6 mb-8">
+        {blogs.map((b, i) => (
           <div
             key={i}
-            className="bg-white p-5 rounded-2xl flex items-center gap-5 shadow-md hover:shadow-xl transition-all border border-gray-100 cursor-pointer"
+            className="bg-white rounded-xl shadow-md overflow-hidden group hover:shadow-2xl transition-all cursor-pointer"
           >
             <img
-              src={w.image}
-              alt={w.title}
-              className="w-32 h-24 rounded-lg object-cover"
+              onClick={() => handleViewButtonBlog(b._id)}
+              src={b.coverImage}
+              alt={b.title}
+              className="h-48 w-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
-
-            <div className="flex-1">
-              <h3 className="text-xl font-bold">{w.title}</h3>
-              <p className="text-gray-600">Attendees: {w.attendees}</p>
-            </div>
-
-            <div className="flex items-center gap-2 text-gray-700">
-              <Calendar className="w-5 h-5" />
-              <span>{w.date}</span>
+            <div className="p-4">
+              <h3 className="font-bold text-lg truncate">{b.title}</h3>
+              <p className="text-sm text-gray-500 mt-1">{b.tags?.[0] || 'Blog'}</p>
             </div>
           </div>
         ))}
       </div>
+      <Pagination
+        currentPage={currentPageBlog}
+        totalPages={totalPagesBlog}
+        onChange={handlePageChange}
+      />
+
+
     </main>
   );
 }

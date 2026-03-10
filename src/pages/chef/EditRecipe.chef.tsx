@@ -1,13 +1,17 @@
-import { useState } from 'react';
-import { Upload, ChevronDown, Plus, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Upload, ChevronDown, Plus, X, ChevronRight } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { editRecipePageApi } from '@/api/chefApi';
+import { editRecipePageApi, getRecipeDetailApi } from '@/api/chefApi';
 import { showError, showSuccess } from '@/utils/toast';
+import { getErrorMessage, logError } from '@/utils/errorHandler';
+import { useAwsS3Upload } from '@/components/shared/hooks/useAwsS3Upload';
+import ChefNavbar from '@/components/shared/chef/NavBar.chef';
+import { useUserStore } from '@/store/userStore';
 
 export default function EditRecipe() {
-    const navigate=useNavigate()
-  const location=useLocation()
-  const recipeId=location.state?.recipeId  
+  const navigate = useNavigate()
+  const location = useLocation()
+  const recipeId = location.state?.recipeId
 
   const [formData, setFormData] = useState({
     title: '',
@@ -15,11 +19,47 @@ export default function EditRecipe() {
     cookingTime: '',
     tags: '',
     dietType: '',
-    isDraft: true
+    isDraft: false
   });
   const [ingredients, setIngredients] = useState(['']);
   const [steps, setSteps] = useState(['']);
-  const [uploadedImages, setUploadedImages] = useState<File[]>([]);
+  const [uploadedImages, setUploadedImages] = useState<string | null>(null);
+  const { isVerifiedUser } = useUserStore()
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+
+
+
+  useEffect(() => {
+    async function fetchRecipe() {
+      if (!recipeId) return;
+
+      try {
+        const res = await getRecipeDetailApi(recipeId);
+        const recipe = res.data.data;
+
+        setFormData({
+          title: recipe.title || '',
+          cuisine: recipe.cuisine || '',
+          cookingTime: recipe.cookingTime?.toString() || '',
+          tags: recipe.tags?.[0] || '',
+          dietType: recipe.dietType?.[0] || '',
+          isDraft: recipe.isDraft ?? true,
+        });
+
+        setIngredients(recipe.ingredients?.length ? recipe.ingredients : ['']);
+        setSteps(recipe.steps?.length ? recipe.steps : ['']);
+        setUploadedImages(recipe.images?.[0] || null);
+
+      } catch (error: unknown) {
+        logError(error);
+        showError(getErrorMessage(error, 'Failed to load recipe'));
+      }
+    }
+
+    fetchRecipe();
+  }, [recipeId]);
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -29,9 +69,17 @@ export default function EditRecipe() {
     }));
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const { uploadToS3 } = useAwsS3Upload()
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setUploadedImages(Array.from(e.target.files));
+
+      const Image = e.target.files?.[0]
+      const url = await uploadToS3(Image)
+      console.log(url);
+
+      setUploadedImages(url)
+
     }
   };
 
@@ -63,27 +111,66 @@ export default function EditRecipe() {
     setSteps(newSteps);
   };
 
-  const handleSaveRecipe = async() => {
-   try {
-      const recipeData={
-        id:recipeId,
-      title: formData.title,
-      cuisine: formData.cuisine,
-      cookingTime: Number(formData.cookingTime) || 0,
-      tags: formData.tags ? [formData.tags] : [],
-      dietType: formData.dietType ? [formData.dietType] : [],
-      ingredients: ingredients.filter(i => i.trim() !== ''),
-      steps: steps.filter(s => s.trim() !== ''),
-      isDraft: formData.isDraft
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.title.trim()) {
+      newErrors.title = 'Recipe name is required';
+    } else if (formData.title.length < 3) {
+      newErrors.title = 'Recipe name must be at least 3 characters';
+    }
+
+    if (!formData.cuisine) {
+      newErrors.cuisine = 'Cuisine is required';
+    }
+
+    if (!formData.cookingTime) {
+      newErrors.cookingTime = 'Cooking time is required';
+    } else if (Number(formData.cookingTime) <= 0) {
+      newErrors.cookingTime = 'Cooking time must be greater than 0';
+    }
+
+    if (ingredients.filter(i => i.trim()).length === 0) {
+      newErrors.ingredients = 'At least one ingredient is required';
+    }
+
+    if (steps.filter(s => s.trim()).length === 0) {
+      newErrors.steps = 'At least one step is required';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+
+  const handleSaveRecipe = async () => {
+    if (!validateForm()) {
+      showError('Ivalid Credentials');
+      return;
+    }
+    try {
+      const recipeData = {
+        id: recipeId,
+        title: formData.title,
+        cuisine: formData.cuisine,
+        cookingTime: Number(formData.cookingTime) || 0,
+        tags: formData.tags ? [formData.tags] : [],
+        dietType: formData.dietType ? [formData.dietType] : [],
+        ingredients: ingredients.filter(i => i.trim() !== ''),
+        images: uploadedImages,
+        steps: steps.filter(s => s.trim() !== ''),
+        isDraft: formData.isDraft
       }
-      console.log('recipe data ',recipeData);
-      const result=await editRecipePageApi({recipeId:recipeId,recipeData:recipeData})
-      console.log('result ',result);
-      
+      console.log('recipe data ', recipeData);
+      const result = await editRecipePageApi({ recipeId: recipeId, recipeData: recipeData })
+      console.log('result ', result);
+
       navigate(`/recipe-detail/${recipeId}`)
       showSuccess(result.data.message)
-    } catch (error:any) {
-      showError(error.response?.data?.message)
+    } catch (error: unknown) {
+      logError(error);
+      showError(getErrorMessage(error));
     }
   };
 
@@ -94,40 +181,14 @@ export default function EditRecipe() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50">
       {/* Top Navigation */}
-      <nav className="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-50 border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" className="text-green-600">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2.5"/>
-              <path d="M8 12h8M12 8v8" stroke="currentColor" strokeWidth="2.5"/>
-            </svg>
-            <span className="text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-              Dishcovery
-            </span>
-          </div>
-
-          <div className="flex items-center gap-6 text-gray-700 font-medium">
-            <a href="#" className="hover:text-green-600 transition-colors">Home</a>
-            <a href="#" className="hover:text-green-600 transition-colors">My Recipes</a>
-            <a href="#" className="hover:text-green-600 transition-colors">My Blogs</a>
-            <a href="#" className="hover:text-green-600 transition-colors">My Workshops</a>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <input
-              type="text"
-              placeholder="Search"
-              className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-green-400 transition-all"
-            />
-            <div className="w-11 h-11 rounded-full bg-gradient-to-br from-green-400 to-blue-500 shadow-lg ring-2 ring-white">
-              <img src="https://images.unsplash.com/photo-1583394293214-28ded15ee548?w=100&h=100&fit=crop" alt="User" className="w-full h-full rounded-full object-cover" />
-            </div>
-          </div>
-        </div>
-      </nav>
-
+      <ChefNavbar />
       {/* Main Content */}
       <main className="max-w-3xl mx-auto px-8 py-12">
+        <div className="flex items-center gap-2 text-sm mb-8">
+          <a href="/chef/recipes-listing" className="text-green-600 font-semibold hover:underline">Recipe Detail</a>
+          <ChevronRight className="w-4 h-4 text-gray-400" />
+          <a href="/chef/" className="text-green-600 font-semibold hover:underline">Edit recipe</a>
+        </div>
         <h1 className="text-4xl font-bold mb-8 bg-gradient-to-r from-gray-900 via-green-700 to-emerald-700 bg-clip-text text-transparent">
           Edit Recipe
         </h1>
@@ -139,6 +200,10 @@ export default function EditRecipe() {
               <label htmlFor="recipeName" className="block text-sm font-bold text-gray-900 mb-2">
                 Recipe Name
               </label>
+              {errors.title && (
+                <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+              )}
+
               <input
                 type="text"
                 id="title"
@@ -155,6 +220,10 @@ export default function EditRecipe() {
               <label htmlFor="cuisine" className="block text-sm font-bold text-gray-900 mb-2">
                 Category / Cuisine
               </label>
+              {errors.cuisine && (
+                <p className="text-red-500 text-sm mt-1">{errors.cuisine}</p>
+              )}
+
               <div className="relative">
                 <select
                   id="cuisine"
@@ -179,6 +248,10 @@ export default function EditRecipe() {
               <label htmlFor="cookingTime" className="block text-sm font-bold text-gray-900 mb-2">
                 Cooking Time
               </label>
+              {errors.cookingTime && (
+                <p className="text-red-500 text-sm mt-1">{errors.cookingTime}</p>
+              )}
+
               <input
                 type="text"
                 id="cookingTime"
@@ -219,6 +292,10 @@ export default function EditRecipe() {
                 <label className="block text-sm font-bold text-gray-900">
                   Ingredients
                 </label>
+                {errors.ingredients && (
+                  <p className="text-red-500 text-sm mt-2">{errors.ingredients}</p>
+                )}
+
                 <button
                   onClick={addIngredient}
                   className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:shadow-lg hover:scale-105 transition-all font-semibold"
@@ -256,6 +333,10 @@ export default function EditRecipe() {
                 <label className="block text-sm font-bold text-gray-900">
                   Steps / Instructions
                 </label>
+                {errors.steps && (
+                  <p className="text-red-500 text-sm mt-2">{errors.steps}</p>
+                )}
+
                 <button
                   onClick={addStep}
                   className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:shadow-lg hover:scale-105 transition-all font-semibold"
@@ -311,11 +392,16 @@ export default function EditRecipe() {
                   <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4 group-hover:text-green-600 transition-colors" />
                   <p className="text-gray-700 font-semibold mb-1">Drag and drop images here</p>
                   <p className="text-gray-500 text-sm">Or click to browse</p>
-                  {uploadedImages.length > 0 && (
-                    <p className="text-green-600 font-semibold mt-4">
-                      {uploadedImages.length} file(s) selected
-                    </p>
+                  {uploadedImages && (
+                    <div className="mt-4 flex justify-center">
+                      <img
+                        src={uploadedImages}
+                        alt="Preview"
+                        className="w-40 h-40 object-cover rounded-xl shadow-md"
+                      />
+                    </div>
                   )}
+
                 </label>
               </div>
             </div>
@@ -344,7 +430,7 @@ export default function EditRecipe() {
             </div>
 
             {/* Publish Status */}
-            <div>
+            {/* <div>
               <label className="block text-sm font-bold text-gray-900 mb-3">
                 Publish Status
               </label>
@@ -360,7 +446,7 @@ export default function EditRecipe() {
                   <div className="w-14 h-7 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-green-500"></div>
                 </label>
               </div>
-            </div>
+            </div> */}
 
             {/* Action Buttons */}
             <div className="flex gap-4 pt-6">
@@ -371,7 +457,8 @@ export default function EditRecipe() {
                 Cancel
               </button>
               <button
-                onClick={()=>handleSaveRecipe()}
+                disabled={!isVerifiedUser}
+                onClick={() => handleSaveRecipe()}
                 className="flex-1 px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl hover:shadow-xl hover:scale-105 transition-all shadow-lg"
               >
                 Save Recipe
@@ -391,22 +478,22 @@ export default function EditRecipe() {
             <a href="#" className="text-green-600 hover:text-green-700 font-medium transition-colors">Terms & Conditions</a>
             <a href="#" className="text-green-600 hover:text-green-700 font-medium transition-colors">Privacy Policy</a>
           </div>
-          
+
           <div className="flex justify-center gap-4 mb-6">
             <a href="#" className="p-3 bg-green-100 text-green-600 rounded-full hover:bg-green-600 hover:text-white transition-all">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/>
+                <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z" />
               </svg>
             </a>
             <a href="#" className="p-3 bg-green-100 text-green-600 rounded-full hover:bg-green-600 hover:text-white transition-all">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-                <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" fill="white"/>
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" fill="white" />
               </svg>
             </a>
             <a href="#" className="p-3 bg-green-100 text-green-600 rounded-full hover:bg-green-600 hover:text-white transition-all">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/>
+                <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" />
               </svg>
             </a>
           </div>

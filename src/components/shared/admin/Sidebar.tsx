@@ -2,16 +2,15 @@ import {
   LayoutDashboard,
   Users,
   ChefHat,
-  Utensils,
   BookOpen,
   MapPin,
   Heart,
-  BarChart3,
   LogOut,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
 import { logoutApi } from "@/api/authApi";
+import { useUserStore } from "@/store/userStore";
 
 interface SidebarProps {
   activePath: string;
@@ -21,25 +20,26 @@ interface SidebarProps {
 export default function Sidebar({ activePath, onMenuSelect }: SidebarProps) {
   const navigate = useNavigate();
   const { logout } = useAuthStore();
+  const delUserStore = useUserStore().delUserStore
 
   const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/admin-dashboard" },
     { icon: Users, label: "User Management", path: "/admin-dashboard/foodie-management" },
     { icon: ChefHat, label: "Chef Management", path: "/admin-dashboard/chef-management" },
-    { icon: Utensils, label: "Workshop Management", path: "/admin-dashboard/workshops" },
-    { icon: BookOpen, label: "Blogs Management", path: "/admin-dashboard/blogs" },
-    { icon: MapPin, label: "Food Spot Management", path: "/admin-dashboard/foodspots" },
-    { icon: Heart, label: "Charity & Donations", path: "/admin-dashboard/charity" },
-    { icon: BarChart3, label: "Reports & Analytics", path: "/admin-dashboard/reports" },
+    { icon: Heart, label: "Recipe Managemnent", path: "/admin-dashboard/recipe-management" },
+    { icon: BookOpen, label: "Blogs Management", path: "/admin-dashboard/blog-management" },
+    { icon: MapPin, label: "Food Spot Management", path: "/admin-dashboard/foodspot-management" },
+    { icon: BookOpen, label: "Workshop Management", path: "/admin-dashboard/workshop-management" },
   ];
 
-  const handleLogout = async() => {
+  const handleLogout = async () => {
     try {
       logout();
       await logoutApi()
-      navigate("/login");
-    } catch (error) {
-      
+      delUserStore()
+      navigate("/admin-login");
+    } catch {
+      console.error('Logout failed');
     }
   };
 
@@ -52,11 +52,10 @@ export default function Sidebar({ activePath, onMenuSelect }: SidebarProps) {
             <button
               key={path}
               onClick={() => onMenuSelect(path)}
-              className={`w-full flex items-center gap-4 px-5 py-3.5 rounded-xl transition-all duration-300 ${
-                isActive
-                  ? "bg-gradient-to-r from-green-500 via-emerald-500 to-teal-600 text-white shadow-lg font-semibold"
-                  : "text-gray-700 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 hover:text-green-700"
-              }`}
+              className={`w-full flex items-center gap-4 px-5 py-3.5 rounded-xl transition-all duration-300 ${isActive
+                ? "bg-gradient-to-r from-green-500 via-emerald-500 to-teal-600 text-white shadow-lg font-semibold"
+                : "text-gray-700 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 hover:text-green-700"
+                }`}
             >
               <Icon className="w-5 h-5" />
               <span>{label}</span>

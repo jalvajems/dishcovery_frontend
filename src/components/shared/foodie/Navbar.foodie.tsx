@@ -1,28 +1,47 @@
+import logo from "../../../assets/logo.png"
+import { useNavigate } from "react-router-dom";
+import { useUserStore } from "@/store/userStore";
+import { NotificationBell } from "../NotificationBell";
+import Chatbot from "@/components/chat/Chatbot";
+
 export default function FoodieNavbar() {
+
+  const navigate = useNavigate()
+  const { image } = useUserStore()
+
   return (
-    <nav className="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="text-green-600">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-            <path d="M8 12h8M12 8v8" stroke="currentColor" strokeWidth="2" />
-          </svg>
-          <span className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-green-700 bg-clip-text text-transparent">
-            Dishcovery
-          </span>
+    <nav className="bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100/80 transition-all duration-300">
+      <div className="w-full px-4 md:px-8 h-20 flex items-center justify-between">
+        {/* Logo Section */}
+        <div
+          onClick={() => navigate('/foodie/dashboard')}
+          className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+        >
+          <img
+            src={logo}
+            alt="Dishcovery"
+            className="h-10 w-auto object-contain"
+          />
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search recipes, chefs, spots..."
-              className="pl-10 pr-4 py-2 w-80 bg-gray-50 border border-gray-200 rounded-full
-              focus:outline-none focus:ring-2 focus:ring-green-400 transition-all"
-            />
-          </div>
-          <div className="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center">
-            J
+        {/* Right Actions */}
+        <div className="flex items-center gap-6">
+          <Chatbot />
+          <NotificationBell />
+
+          <div className="h-8 w-[1px] bg-gray-200 hidden md:block"></div>
+
+          <div className="flex items-center gap-3">
+            <div
+              onClick={() => navigate("/foodie/profile")}
+              className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-gray-100 hover:ring-green-400 cursor-pointer transition-all duration-300 shadow-sm hover:shadow-md"
+            >
+              <img
+                src={image || "/default-avatar.png"}
+                alt="profile"
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
         </div>
       </div>

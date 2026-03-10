@@ -1,13 +1,17 @@
 import { useLogin } from '@/hooks/auth/useLogin';
-// import logo from "../../assets/logo.png";
+import { GoogleLogin } from '@react-oauth/google';
+import logo from "../../../assets/logo.png"
+import { useNavigate } from 'react-router-dom';
+
+
 
 export default function Login() {
-
+  const navigate=useNavigate()
   const {
     formData,
     handleInputChange,
     handleForgotPassword,
-    handleGoogleLogin,
+    handleGoogleSuccess,
     handleLogin,
     handleBackSignup,
     errors
@@ -17,6 +21,16 @@ export default function Login() {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="flex justify-between items-center px-6 border-b border-gray-200">
+         <div
+          onClick={() => navigate('/foodie/dashboard')}
+          className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+        >
+          <img
+            src={logo}
+            alt="Dishcovery"
+            className="h-10 w-auto object-contain"
+          />
+        </div>
         <div className="flex items-center gap-2">
           <img alt="" className=' h-14' />
         </div>
@@ -85,13 +99,24 @@ export default function Login() {
               Log in
             </button>
 
-            {/* Continue with Google Button */}
-            <button
-              onClick={handleGoogleLogin}
-              className="w-full px-6 py-3 bg-green-50 text-black font-medium rounded-lg hover:bg-green-100 transition-colors"
-            >
-              Continue with Google
-            </button>
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Or continue with</span>
+              </div>
+            </div>
+
+            <div className="flex justify-center flex-col items-center">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => console.log('Google Login Failed')}
+                theme="outline"
+                shape="rectangular"
+              />
+            </div>
+
 
             {/* Sign up Links */}
             <div className="text-center pt-2">

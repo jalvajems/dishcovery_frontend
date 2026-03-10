@@ -3,6 +3,7 @@ import AuthRoutes from "./routes/auth.routes";
 import UserRouter from "./routes/foodie.routes";
 import AdminRoutes from "./routes/admin.routes";
 import ChefRoutes from "./routes/chef.routes";
+import PublicRoutes from "./routes/public.routes";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 
@@ -10,6 +11,7 @@ import { ToastContainer } from "react-toastify";
 const App: React.FC = () => {
   return (
     <BrowserRouter>
+      <PublicRoutes />
       <AuthRoutes />
       <UserRouter />
       <ChefRoutes />
@@ -23,7 +25,8 @@ const App: React.FC = () => {
         pauseOnHover
         draggable
         theme="colored"
-      />    </BrowserRouter>
+      />
+    </BrowserRouter>
 
   )
 }

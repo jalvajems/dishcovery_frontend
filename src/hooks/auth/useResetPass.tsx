@@ -1,10 +1,12 @@
 import { resetPassApi } from "@/api/authApi";
 import { useOtpStore } from "@/store/authStore";
+import { getErrorMessage } from "@/utils/errorHandler";
+import { showError, showSuccess } from "@/utils/toast";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export const useResetPass = () => {
-  const { email } = useOtpStore()
+  const { email, clearOtpData } = useOtpStore()
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     newPassword: '',
@@ -26,7 +28,10 @@ export const useResetPass = () => {
 
   };
   const validate = () => {
-    let tempErrors: any = {};
+    const tempErrors = {
+      newPassword: "",
+      confirmPassword: "",
+    };
 
     if (!formData.newPassword.trim()) {
       tempErrors.newPassword = "New password is required";
@@ -42,7 +47,7 @@ export const useResetPass = () => {
 
     setErrors(tempErrors);
 
-    return Object.keys(tempErrors).length === 0;
+    return !tempErrors.newPassword && !tempErrors.confirmPassword;
   };
 
 
@@ -51,9 +56,11 @@ export const useResetPass = () => {
       if (!validate()) return;
 
       await resetPassApi({ email: email, newPass: formData.newPassword, confirmPass: formData.confirmPassword })
+      showSuccess("Password reset successfully");
+      clearOtpData();
       navigate('/login')
-    } catch (error) {
-
+    } catch (error: unknown) {
+      showError(getErrorMessage(error, "Failed to reset password"));
     }
   };
 

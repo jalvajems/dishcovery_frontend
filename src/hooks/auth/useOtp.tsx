@@ -1,7 +1,8 @@
 import { resendOtpApi, verifyForgetOtpApi, verifySignupOtpApi } from "@/api/authApi";
 import { useOtpStore } from "@/store/authStore";
 import { showError, showSuccess } from "@/utils/toast";
-import { useRef, useState } from "react";
+import { getErrorMessage, logError } from "@/utils/errorHandler";
+import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 export const useOtp = () => {
@@ -9,6 +10,17 @@ export const useOtp = () => {
   const navigate = useNavigate();
   const [otp, setOtp] = useState(['', '', '', '']);
   const [otpError, setOtpError] = useState(false);
+  const [timer, setTimer] = useState(60);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [timer]);
 
   const inputRefs = [
     useRef<HTMLInputElement>(null),
@@ -26,7 +38,7 @@ export const useOtp = () => {
       return;
     }
 
-    let newOtp = [...otp];
+    const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
 
@@ -61,28 +73,28 @@ export const useOtp = () => {
         navigate('/login');
 
       } else if (type === 'forgotPassword') {
+        console.log('ss1');
+
         await verifyForgetOtpApi({ otp: OtptoSend, email });
         showSuccess("Forget password OTP verified successfully!!");
-        clearOtpData();
         navigate('/resetPassword');
       }
 
-    } catch (error: any) {
-      console.log(error);
-
+    } catch (error: unknown) {
       setOtpError(true);
-
-      const msg = error?.response?.data?.message || "Invalid OTP";
+      const msg = getErrorMessage(error, "Invalid OTP");
       showError(msg);
     }
   };
 
   const handleResendOtp = async () => {
+    if (timer > 0) return;
     try {
       const { data } = await resendOtpApi({ email: email })
-      alert(data.message)
+      showSuccess(data.message)
+      setTimer(60);
     } catch (error) {
-      console.log(error);
+      logError(error, "Resend OTP failed");
     }
   }
 
@@ -100,7 +112,8 @@ export const useOtp = () => {
     setOtp,
     useOtp,
     otpError,
-    handleResendOtp
+    handleResendOtp,
+    timer
   }
-
 }
+

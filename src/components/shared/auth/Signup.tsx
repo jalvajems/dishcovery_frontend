@@ -1,11 +1,16 @@
 import { useSignup } from "@/hooks/auth/useSignup";
-// import logo from "@/assets/logo.png";
+import { GoogleLogin } from '@react-oauth/google';
+import { useNavigate } from "react-router-dom";
+import logo from '../../../assets/logo.png'
+
 
 export default function Signup() {
+  const navigate=useNavigate()
   const {
     agreedToTerms,
     formData,
     handleBackToLogin,
+    handleGoogleSuccess,
     handleInputChange,
     handleSignUp,
     setAgreedToTerms,
@@ -15,6 +20,16 @@ export default function Signup() {
   return (
     <div className="min-h-screen bg-white">
       <header className="flex justify-between items-center px-6 border-b border-gray-200">
+         <div
+          onClick={() => navigate('/foodie/dashboard')}
+          className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+        >
+          <img
+            src={logo}
+            alt="Dishcovery"
+            className="h-10 w-auto object-contain"
+          />
+        </div>
         <div className="flex items-center gap-2">
           <img alt="" className="h-14" />
         </div>
@@ -129,7 +144,7 @@ export default function Signup() {
                 type="checkbox"
                 id="terms"
                 checked={agreedToTerms}
-                onChange={(e) => setAgreedToTerms(e.target.checked)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAgreedToTerms(e.target.checked)}
                 className="w-4 h-4 text-green-500 border-gray-300 rounded focus:ring-green-500"
               />
               <label htmlFor="terms" className="text-sm text-gray-700">
@@ -151,6 +166,24 @@ export default function Signup() {
               >
                 Back to Login
               </button>
+            </div>
+
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Or continue with</span>
+              </div>
+            </div>
+
+            <div className="flex justify-center flex-col items-center">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => console.log('Google Signup Failed')}
+                theme="outline"
+                shape="rectangular"
+              />
             </div>
           </div>
         </div>

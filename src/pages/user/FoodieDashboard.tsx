@@ -1,147 +1,324 @@
-import { useEffect } from 'react';
-import { userDashboardApi } from '@/api/foodieApi';
+import { useEffect, useState } from 'react';
+import {
+  getRecentBlogsApi,
+  getRecentFoodSpotsApi,
+  getRecentRecipesApi,
+  userDashboardApi,
+} from '@/api/foodieApi';
+import { getRecentWorkshopsApi } from '@/api/workshopApi';
+import { useUserStore } from '@/store/userStore';
+import ConfirmModal from '@/components/shared/ConfirmModal';
+import { useNavigate } from 'react-router-dom';
+import { ArrowRight, Clock, MapPin, ChefHat, BookOpen, Calendar } from 'lucide-react';
+import { logError } from '@/utils/errorHandler';
+
+interface Recipe {
+  _id: string;
+  title: string;
+  images: string[];
+  chefId: {
+    firstName: string;
+    lastName: string;
+  };
+  difficulty: string;
+  cookingTime: number;
+  tags?: string[];
+}
+
+interface Blog {
+  _id: string;
+  heading: string;
+  coverImage: string;
+  description: string;
+  author: {
+    firstName: string;
+    lastName: string;
+  }
+}
+
+interface FoodSpot {
+  _id: string;
+  name: string;
+  coverImage: string;
+  location: {
+    coordinates: number[];
+  };
+  address: {
+    placeName: string;
+    city: string;
+  };
+  speciality: string[];
+  tags: string[];
+}
+
+interface Workshop {
+  _id: string;
+  title: string;
+  banner: string;
+  chefId: {
+    firstName: string;
+    lastName: string;
+    name?: string;
+  };
+  date: string;
+  startTime: string;
+  price: number;
+}
 
 export default function FoodieDashboard() {
 
+  const { name } = useUserStore();
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const navigate = useNavigate();
+
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [foodSpots, setFoodSpots] = useState<FoodSpot[]>([]);
+  const [workshops, setWorkshops] = useState<Workshop[]>([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    userDashboardApi();
+    checkFoodieProfile();
+    fetchDashboardData();
   }, []);
 
-  const featuredRecipes = [
-    { id: 1, title: 'Delicious Pasta Carbonara', chef: 'Chef Isabella Rossi', image: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400&h=400&fit=crop' },
-    { id: 2, title: 'Spicy Thai Green Curry', chef: 'Chef Ethan Lee', image: 'https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=400&h=400&fit=crop' },
-    { id: 3, title: 'Classic French Ratatouille', chef: 'Chef Olivia Dubois', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&h=400&fit=crop' }
-  ];
+  async function checkFoodieProfile() {
+    try {
+      const res = await userDashboardApi();
+      if (!res.data.hasProfile) {
+        setShowProfileModal(true);
+      }
+    } catch (error) {
+      logError(error);
+    }
+  }
 
-  const featuredBlogs = [
-    { id: 1, title: 'The Art of Sourdough Baking', desc: 'Learn the secrets to perfect sourdough.', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop' },
-    { id: 2, title: 'Exploring Global Street Food', desc: 'A culinary journey through street food.', image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=300&fit=crop' },
-    { id: 3, title: 'Sustainable Cooking Practices', desc: 'Tips for eco-friendly cooking.', image: 'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=400&h=300&fit=crop' }
-  ];
+  async function fetchDashboardData() {
+    try {
+      setLoading(true);
+      const [recipesRes, blogsRes, spotsRes, workshopsRes] = await Promise.all([
+        getRecentRecipesApi(3),
+        getRecentBlogsApi(3),
+        getRecentFoodSpotsApi(3),
+        getRecentWorkshopsApi(3)
+      ]);
 
-  const foodSpots = [
-    { id: 1, name: 'The Cozy Corner Cafe', desc: 'A charming cafe with a warm atmosphere.', image: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400&h=400&fit=crop' },
-    { id: 2, name: 'The Spice Route', desc: 'Authentic Indian cuisine with bold flavors.', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=400&fit=crop' },
-    { id: 3, name: 'The Green Table', desc: 'Fresh, locally sourced ingredients.', image: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=400&h=400&fit=crop' }
-  ];
+      setRecipes(recipesRes.data.datas || recipesRes.data.data || []);
+      setBlogs(blogsRes.data.datas || blogsRes.data.data || []);
+      setFoodSpots(spotsRes.data.data || spotsRes.data.datas || []);
+      setWorkshops(workshopsRes.data.data || workshopsRes.data.datas || []);
+    } catch (error) {
+      logError(error, "Error fetching dashboard data");
+    } finally {
+      setLoading(false);
+    }
+  }
+  console.log('recipes', recipes);
+  console.log('blogs', blogs);
+  console.log('foodSpots', foodSpots);
+  console.log('workshops', workshops);
+
+  const LoadingSkeleton = () => (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="h-64 bg-gray-200 rounded-2xl animate-pulse"></div>
+      ))}
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-green-50 p-8">
+    <div className="min-h-screen bg-slate-50 p-4 md:p-8 font-sans">
 
-      {/* Hero */}
-      <div className="relative mb-12 rounded-3xl overflow-hidden shadow-2xl group">
+      {/* Hero Section */}
+      <div className="relative mb-16 rounded-[2rem] overflow-hidden shadow-2xl group min-h-[500px]">
         <img
-          src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&h=400&fit=crop"
+          src="https://images.unsplash.com/photo-1543353071-873f17a7a088?w=1600&h=600&fit=crop"
           alt="Featured Food"
-          className="w-full h-96 object-cover group-hover:scale-105 transition-transform duration-700"
+          className="w-full h-full object-cover absolute inset-0 group-hover:scale-105 transition-transform duration-1000"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-        <div className="absolute inset-0 flex flex-col justify-end p-10">
-          <h1 className="text-5xl font-bold text-white mb-4 drop-shadow-lg">
-            Welcome back, Jalva!
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
+        <div className="absolute inset-0 flex flex-col justify-center p-8 md:p-16 max-w-2xl">
+          <span className="text-green-400 font-semibold tracking-wider mb-2 uppercase text-sm">Welcome Back</span>
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+            Hello, {name}! <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-300 to-emerald-500">
+              What are we cooking today?
+            </span>
           </h1>
-          <button className="px-8 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full font-semibold hover:shadow-xl hover:scale-105 transition-all w-fit shadow-lg">
-            Find your taste
-          </button>
-          <p className="text-white/90 mt-4 text-lg">
-            Explore new recipes, workshops, and food spots tailored just for you
+          <p className="text-gray-200 text-lg mb-8 leading-relaxed">
+            Discover new recipes, explore local food spots, and join exclusive workshops with top chefs.
           </p>
+          <div className="flex flex-wrap gap-4">
+            <button onClick={() => navigate('/foodie/recipe-listing')} className="px-8 py-3 bg-green-600 text-white rounded-full font-semibold hover:bg-green-700 hover:shadow-lg hover:shadow-green-500/30 transition-all flex items-center gap-2 group/btn">
+              Explore Recipes <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Featured Recipes */}
-      <section className="mb-12">
-        <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-gray-900 to-green-700 bg-clip-text text-transparent">Featured Recipes</h2>
-        <div className="grid grid-cols-3 gap-6">
-          {featuredRecipes.map(recipe => (
-            <div key={recipe.id} className="bg-white rounded-2xl overflow-hidden shadow-lg hover:-translate-y-2 transition-all duration-300 group">
-              <div className="relative h-56 overflow-hidden">
-                <img src={recipe.image} alt={recipe.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-              </div>
-              <div className="p-5">
-                <h3 className="font-bold text-lg text-gray-900">{recipe.title}</h3>
-                <p className="text-sm text-green-600 font-medium">{recipe.chef}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Featured Blogs */}
-      <section className="mb-12">
-        <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-gray-900 to-green-700 bg-clip-text text-transparent">Featured Blogs</h2>
-        <div className="grid grid-cols-3 gap-6">
-          {featuredBlogs.map(blog => (
-            <div key={blog.id} className="bg-white rounded-2xl overflow-hidden shadow-lg hover:-translate-y-2 transition-all duration-300 group">
-              <div className="h-48 overflow-hidden">
-                <img src={blog.image} alt={blog.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-              </div>
-              <div className="p-5">
-                <h3 className="font-bold text-lg mb-2 text-gray-900">{blog.title}</h3>
-                <p className="text-sm text-gray-600">{blog.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Workshop */}
-      <section className="mb-12">
-        <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-gray-900 to-green-700 bg-clip-text text-transparent">Upcoming Workshops</h2>
-        <div className="bg-white rounded-2xl p-8 shadow-lg">
-          <div className="flex justify-between items-start">
-            <div className="flex-1">
-              <span className="inline-block px-4 py-1 bg-green-100 text-green-700 rounded-full text-sm mb-4">Workshop</span>
-              <h3 className="text-2xl font-bold mb-3 text-gray-900">Sushi Making Masterclass</h3>
-              <p className="text-gray-600 mb-6 max-w-xl">Learn sushi-making with Chef Kenji Tanaka.</p>
-              <button className="px-8 py-3 bg-gray-900 text-white rounded-full font-semibold hover:scale-105 transition-all">
-                Book Now
-              </button>
-            </div>
-            <div className="w-64 h-48 rounded-2xl overflow-hidden shadow-xl">
-              <img src="https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop" alt="Sushi" className="w-full h-full object-cover" />
-            </div>
+      {/* Featured Recipes - Modern Card */}
+      <section className="mb-20">
+        <div className="flex justify-between items-end mb-8">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+              <ChefHat className="w-8 h-8 text-green-600" /> Recent Recipes
+            </h2>
+            <p className="text-gray-500">Fresh from the kitchen</p>
           </div>
+          <button onClick={() => navigate('/foodie/recipe-listing')} className="text-green-600 font-semibold hover:text-green-700 flex items-center gap-1 transition-colors">
+            View All <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
-      </section>
 
-      {/* Food Spots */}
-      <section className="mb-12">
-        <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-gray-900 to-green-700 bg-clip-text text-transparent">Food Spots</h2>
-        <div className="grid grid-cols-3 gap-6">
-          {foodSpots.map(spot => (
-            <div key={spot.id} className="bg-white rounded-2xl overflow-hidden shadow-lg hover:-translate-y-2 transition-all duration-300 group">
-              <div className="h-56 overflow-hidden">
-                <img src={spot.image} alt={spot.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+        {loading ? <LoadingSkeleton /> : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {recipes.length > 0 ? recipes.map(recipe => (
+              <div key={recipe._id} onClick={() => navigate(`/foodie/recipe-detail/${recipe._id}`)} className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer group flex flex-col h-full border border-gray-100 hover:border-green-100">
+                <div className="relative h-64 overflow-hidden">
+                  <img src={recipe.images?.[0]} alt={recipe.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                  <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-green-700 shadow-sm flex items-center gap-1">
+                    <Clock className="w-3 h-3" /> {recipe.cookingTime} min
+                  </div>
+                </div>
+                <div className="p-6 flex flex-col flex-1">
+                  <div className="mb-4">
+                    <span className="text-xs font-semibold tracking-wide text-green-600 bg-green-50 px-3 py-1 rounded-full uppercase">{recipe?.tags?.[0]}</span>
+                  </div>
+                  <h3 className="font-bold text-xl text-gray-900 mb-3 group-hover:text-green-700 transition-colors line-clamp-1">{recipe.title}</h3>
+                  <div className="mt-auto pt-4 border-t border-gray-100 flex items-center gap-2">
+                    <p className="text-sm text-gray-600 font-medium">By {recipe.chefId?.firstName} {recipe.chefId?.lastName}</p>
+                  </div>
+                </div>
               </div>
-              <div className="p-5">
-                <h3 className="font-bold text-lg text-gray-900">{spot.name}</h3>
-                <p className="text-sm text-gray-600">{spot.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Donation Events */}
-      <section className="mb-12">
-        <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-gray-900 to-green-700 bg-clip-text text-transparent">Donation Events</h2>
-        <div className="bg-white rounded-2xl p-8 shadow-lg">
-          <div className="flex justify-between items-start">
-            <div className="flex-1">
-              <span className="inline-block px-4 py-1 bg-orange-100 text-orange-700 rounded-full text-sm mb-4">Donation Event</span>
-              <h3 className="text-2xl font-bold mb-3 text-gray-900">Feed the Community</h3>
-              <p className="text-gray-600 mb-6 max-w-xl">Support meals for those in need.</p>
-              <button className="px-8 py-3 bg-orange-500 text-white rounded-full font-semibold hover:scale-105 transition-all">
-                Donate Now
-              </button>
-            </div>
-            <div className="w-64 h-48 rounded-2xl overflow-hidden shadow-xl">
-              <img src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=400&h=300&fit=crop" alt="Donation" className="w-full h-full object-cover" />
-            </div>
+            )) : (
+              <p className="col-span-3 text-center text-gray-500 py-12 bg-white rounded-2xl border border-dashed border-gray-300">No recipes found yet.</p>
+            )}
           </div>
-        </div>
+        )}
       </section>
+
+      {/* Featured Blogs - Magazine Layout */}
+      <section className="mb-20">
+        <div className="flex justify-between items-end mb-8">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+              <BookOpen className="w-8 h-8 text-blue-600" /> Culinary Stories
+            </h2>
+            <p className="text-gray-500">Read the latest from our community</p>
+          </div>
+          <button onClick={() => navigate('/foodie/blog-listing')} className="text-blue-600 font-semibold hover:text-blue-700 flex items-center gap-1 transition-colors">
+            Read More <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {loading ? <LoadingSkeleton /> : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {blogs.length > 0 ? blogs.map(blog => (
+              <div key={blog._id} onClick={() => navigate(`/foodie/blog-detail/${blog._id}`)} className="group cursor-pointer">
+                <div className="relative h-64 rounded-2xl overflow-hidden mb-4 shadow-lg">
+                  <img src={blog.coverImage || ''} alt={blog.heading} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
+                </div>
+                <div>
+                  <h3 className="font-bold text-xl text-gray-900 mb-2 group-hover:text-blue-600 transition-colors leading-snug">{blog.heading}</h3>
+                  <p className="text-gray-600 line-clamp-2 text-sm mb-3 opacity-80">{blog.description}</p>
+                  <p className="text-xs text-blue-500 font-semibold">Written by {blog.author?.firstName} {blog.author?.lastName}</p>
+                </div>
+              </div>
+            )) : (
+              <p className="col-span-3 text-center text-gray-500 py-12 bg-white rounded-2xl border border-dashed border-gray-300">No blogs posted yet.</p>
+            )}
+          </div>
+        )}
+      </section>
+
+      {/* Food Spots - Wide Cards */}
+      <section className="mb-20">
+        <div className="flex justify-between items-end mb-8">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+              <MapPin className="w-8 h-8 text-orange-500" /> Hidden Gems
+            </h2>
+            <p className="text-gray-500">Explore top-rated spots near you</p>
+          </div>
+          <button onClick={() => navigate('/foodie/spot-listing')} className="text-orange-500 font-semibold hover:text-orange-600 flex items-center gap-1 transition-colors">
+            Discover More <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {loading ? <LoadingSkeleton /> : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {foodSpots.length > 0 ? foodSpots.map(spot => (
+              <div key={spot._id} onClick={() => navigate(`/foodie/food-spots/${spot._id}`)} className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 cursor-pointer flex flex-col">
+                <div className="h-48 overflow-hidden relative">
+                  <img src={spot.coverImage || ''} alt={spot.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                  <div className="absolute top-3 left-3 bg-white/95 px-3 py-1 rounded-md text-xs font-bold text-gray-800 shadow-sm">
+                    {spot.speciality?.[0] || spot.tags?.[0] || 'Food Spot'}
+                  </div>
+                </div>
+                <div className="p-5 flex-1">
+                  <h3 className="font-bold text-lg text-gray-900 mb-1">{spot.name}</h3>
+                  <div className="flex items-center gap-2 text-gray-500 text-sm mb-4">
+                    <MapPin className="w-3 h-3" /> {spot.address?.placeName || spot.address?.city || 'Location unavailable'}
+                  </div>
+                </div>
+              </div>
+            )) : (
+              <p className="col-span-3 text-center text-gray-500 py-12 bg-white rounded-2xl border border-dashed border-gray-300">No food spots added yet.</p>
+            )}
+          </div>
+        )}
+      </section>
+
+      {/* Workshops - Event Cards */}
+      <section className="mb-12">
+        <div className="flex justify-between items-end mb-8">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+              <Calendar className="w-8 h-8 text-purple-600" /> Upcoming Workshops
+            </h2>
+            <p className="text-gray-500">Master culinary skills with the pros</p>
+          </div>
+          {/* <button className="text-purple-600 font-semibold hover:text-purple-700 flex items-center gap-1 transition-colors">
+            View Schedule <ArrowRight className="w-4 h-4" />
+          </button> */}
+        </div>
+
+        {loading ? <LoadingSkeleton /> : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {workshops.length > 0 ? workshops.map(workshop => (
+              <div key={workshop._id} onClick={() => navigate(`/foodie/workshop-detail/${workshop._id}`)} className="bg-gradient-to-br from-white to-purple-50 rounded-2xl p-4 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer border border-purple-100 flex gap-4 items-center">
+                <div className="w-24 h-24 md:w-28 md:h-28 rounded-xl overflow-hidden shrink-0 shadow-sm">
+                  <img src={workshop.banner || ''} alt={workshop.title} className="w-full h-full object-cover" />
+                </div>
+                <div className="flex-1 min-w-0 flex flex-col justify-center">
+                  <span className="text-xs font-bold text-purple-600 uppercase tracking-wider mb-1 block">Workshop</span>
+                  <h3 className="font-bold text-gray-900 mb-1 leading-tight truncate text-lg pr-2" title={workshop.title}>{workshop.title}</h3>
+                  <p className="text-sm text-gray-500 mb-1 truncate">with Chef {workshop.chefId?.name}</p>
+                  <p className="text-xs font-semibold text-gray-700 flex items-center gap-1">
+                    <Calendar className="w-3 h-3 text-purple-500" />
+                    {new Date(workshop.date).toLocaleDateString()} • {workshop.startTime}
+                  </p>
+                </div>
+              </div>
+            )) : (
+              <p className="col-span-3 text-center text-gray-500 py-12 bg-white rounded-2xl border border-dashed border-gray-300">No upcoming workshops.</p>
+            )}
+          </div>
+        )}
+      </section>
+
+
+      <ConfirmModal
+        isOpen={showProfileModal}
+        title="Complete Your Chef Profile"
+        message="You need to create your chef profile before accessing the dashboard."
+        confirmText="Create Profile"
+        cancelText="Later"
+        confirmVariant="success"
+        onConfirm={() => navigate("/foodie/profile-add")}
+        onCancel={() => setShowProfileModal(false)}
+      />
 
     </div>
   );

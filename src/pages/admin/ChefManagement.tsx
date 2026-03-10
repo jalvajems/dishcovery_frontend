@@ -13,6 +13,8 @@ import {
   adminVerifyChefApi,
   adminUnverifyChefApi,
 } from "@/api/adminApi";
+import { showError } from "@/utils/toast";
+import { getErrorMessage } from "@/utils/errorHandler";
 
 import { useState } from "react";
 
@@ -33,10 +35,11 @@ export default function ChefManagement() {
     setCurrentPage,
 
     searchInput,
-    setSearchInput,   
+    setSearchInput,
 
-    filters,         
-    updateFilter,     
+    filters,
+    updateFilter,
+    refetch
   } = useAdminTable<Chef>({
     fetchApi: async (page, limit, search, filters) => {
       return adminChefListingApi(
@@ -58,21 +61,29 @@ export default function ChefManagement() {
   const [actionType, setActionType] =
     useState<"BLOCK" | "UNBLOCK" | "VERIFY" | "UNVERIFY" | null>(null);
 
-  const openConfirm = (chef: Chef, type: any) => {
+  type ActionType = "BLOCK" | "UNBLOCK" | "VERIFY" | "UNVERIFY";
+
+  const openConfirm = (chef: Chef, type: ActionType) => {
     setSelectedChef(chef);
     setActionType(type);
     setModalOpen(true);
   };
 
+
   const handleConfirm = async () => {
     if (!selectedChef || !actionType) return;
 
-    if (actionType === "BLOCK") await AdminBlockApi(selectedChef._id);
-    if (actionType === "UNBLOCK") await AdminUnBlockApi(selectedChef._id);
-    if (actionType === "VERIFY") await adminVerifyChefApi(selectedChef._id);
-    if (actionType === "UNVERIFY") await adminUnverifyChefApi(selectedChef._id);
+    try {
+      if (actionType === "BLOCK") await AdminBlockApi(selectedChef._id);
+      if (actionType === "UNBLOCK") await AdminUnBlockApi(selectedChef._id);
+      if (actionType === "VERIFY") await adminVerifyChefApi(selectedChef._id);
+      if (actionType === "UNVERIFY") await adminUnverifyChefApi(selectedChef._id);
 
-    setModalOpen(false);
+      setModalOpen(false);
+      refetch();
+    } catch (error: unknown) {
+      showError(getErrorMessage(error, "Failed to update chef status"));
+    }
   };
 
   const columns: ITableColumn<Chef>[] = [
@@ -92,9 +103,8 @@ export default function ChefManagement() {
       label: "Status",
       render: (c) => (
         <button
-          className={`px-3 py-1 rounded ${
-            c.isBlocked ? "bg-red-200" : "bg-green-200"
-          }`}
+          className={`px-3 py-1 rounded ${c.isBlocked ? "bg-red-200" : "bg-green-200"
+            }`}
           onClick={() => openConfirm(c, c.isBlocked ? "UNBLOCK" : "BLOCK")}
         >
           {c.isBlocked ? "Unblock" : "Block"}
@@ -106,9 +116,8 @@ export default function ChefManagement() {
       label: "Verified",
       render: (c) => (
         <button
-          className={`px-3 py-1 rounded ${
-            c.isVerified ? "bg-blue-200" : "bg-yellow-200"
-          }`}
+          className={`px-3 py-1 rounded ${c.isVerified ? "bg-blue-200" : "bg-yellow-200"
+            }`}
           onClick={() => openConfirm(c, c.isVerified ? "UNVERIFY" : "VERIFY")}
         >
           {c.isVerified ? "Unverify" : "Verify"}

@@ -5,6 +5,8 @@ import {
   AdminBlockApi,
   AdminUnBlockApi,
 } from "@/api/adminApi";
+import { showError } from "@/utils/toast";
+import { getErrorMessage } from "@/utils/errorHandler";
 import ConfirmModal from "@/components/shared/ConfirmModal";
 import ReusableTable from "@/components/shared/DataTable";
 import Pagination from "@/components/shared/Pagination";
@@ -29,15 +31,16 @@ export default function FoodieManagement() {
 
     filters,
     updateFilter,
+    refetch
   } = useAdminTable<Foodie>({
-    
+
     fetchApi: async (page, limit, search, filters) => {
       return adminFoodieListingApi(page, limit, search, filters.status);
     },
     filters: [{ key: "status", defaultValue: "all" }],
   });
 
-  
+
   const [modalOpen, setModalOpen] = useState(false);
   const [selected, setSelected] = useState<Foodie | null>(null);
   const [actionType, setActionType] = useState<"BLOCK" | "UNBLOCK" | null>(null);
@@ -51,11 +54,15 @@ export default function FoodieManagement() {
   const handleConfirm = async () => {
     if (!selected || !actionType) return;
 
-    if (actionType === "BLOCK") await AdminBlockApi(selected._id);
-    else await AdminUnBlockApi(selected._id);
-  
+    try {
+      if (actionType === "BLOCK") await AdminBlockApi(selected._id);
+      else await AdminUnBlockApi(selected._id);
 
-    setModalOpen(false);
+      setModalOpen(false);
+      refetch();
+    } catch (error: unknown) {
+      showError(getErrorMessage(error, "Failed to update foodie status"));
+    }
   };
 
   const columns = [
@@ -74,9 +81,8 @@ export default function FoodieManagement() {
       label: "Status",
       render: (u: Foodie) => (
         <button
-          className={`px-4 py-1 rounded-lg font-semibold ${
-            u.isBlocked ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"
-          }`}
+          className={`px-4 py-1 rounded-lg font-semibold ${u.isBlocked ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"
+            }`}
           onClick={() => askConfirm(u, u.isBlocked ? "UNBLOCK" : "BLOCK")}
         >
           {u.isBlocked ? "Blocked" : "Active"}

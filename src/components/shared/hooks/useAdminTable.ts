@@ -1,36 +1,53 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
+
+type FilterValue = string | number | boolean;
 
 type FilterConfig = {
   key: string;
-  defaultValue: any;
+  defaultValue: FilterValue;
 };
+
+interface ApiResponse<T> {
+  data: {
+    data: T[];
+    totalPages: number;
+    currentPage?: number;
+    total?: number;
+  };
+}
 
 type UseAdminTableConfig<T> = {
   fetchApi: (
     page: number,
     limit: number,
     search: string,
-    filters: Record<string, any>
-  ) => Promise<any>;
+    filters: Record<string, FilterValue>
+  ) => Promise<{ data: ApiResponse<T>['data'] } | { data: { data: T[]; totalPages: number } }>; // Adjusting to match likely axios response structure or generic structure
   filters: FilterConfig[];
 };
 
 export function useAdminTable<T>({ fetchApi, filters }: UseAdminTableConfig<T>) {
+  const fetchApiRef = useRef(fetchApi);
+
+  useEffect(() => {
+    fetchApiRef.current = fetchApi;
+  }, [fetchApi]);
+
   const [data, setData] = useState<T[]>([]);
-  const [searchInput, setSearchInput] = useState(""); 
-  const [searchQuery, setSearchQuery] = useState(""); 
+  const [searchInput, setSearchInput] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const limit = 5;
+  const limit = 3;
 
-  const [filterValues, setFilterValues] = useState(() => {
-  const obj: Record<string, any> = {};
-  (filters || []).forEach((f) => (obj[f.key] = f.defaultValue));
-  return obj;
-});
+  const [filterValues, setFilterValues] = useState<Record<string, FilterValue>>(() => {
+    const obj: Record<string, FilterValue> = {};
+    (filters || []).forEach((f) => (obj[f.key] = f.defaultValue));
+    return obj;
+  });
 
 
-  const updateFilter = (key: string, value: any) => {
+  const updateFilter = (key: string, value: string) => {
     setFilterValues((prev) => ({ ...prev, [key]: value }));
     setCurrentPage(1);
   };
@@ -44,15 +61,22 @@ export function useAdminTable<T>({ fetchApi, filters }: UseAdminTableConfig<T>) 
   }, [searchInput]);
 
   const getData = useCallback(async () => {
-  const res = await fetchApi(currentPage, limit, searchQuery, filterValues);
-  setData(res.data.data);
-  setTotalPages(res.data.totalPages);
-}, [currentPage, limit, searchQuery, filterValues]);
+    try {
+      const res = await fetchApiRef.current(currentPage, limit, searchQuery, filterValues);
+
+      if (res?.data) {
+        setData(res.data.data || []);
+        setTotalPages(res.data.totalPages || 1);
+      }
+    } catch (error) {
+      console.error("Failed to fetch table data", error);
+    }
+  }, [currentPage, limit, searchQuery, filterValues]);
 
 
   useEffect(() => {
     getData();
-  }, [getData,currentPage, searchQuery, filterValues]);
+  }, [getData, currentPage, searchQuery, filterValues]);
 
   return {
     data,
@@ -64,5 +88,6 @@ export function useAdminTable<T>({ fetchApi, filters }: UseAdminTableConfig<T>) 
     searchQuery,
     filters: filterValues,
     updateFilter,
+    refetch: getData
   };
 }

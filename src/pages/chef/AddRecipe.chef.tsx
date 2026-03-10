@@ -3,6 +3,11 @@ import { Upload, ChevronDown, Plus, X } from 'lucide-react';
 import { addRecipePageApi } from '@/api/chefApi';
 import { useAuthStore } from '@/store/authStore';
 import { showError, showSuccess } from '@/utils/toast';
+import { getErrorMessage, logError } from '@/utils/errorHandler';
+import { useAwsS3Upload } from '@/components/shared/hooks/useAwsS3Upload';
+import ChefNavbar from '@/components/shared/chef/NavBar.chef';
+import { useNavigate } from 'react-router-dom';
+import { useUserStore } from '@/store/userStore';
 
 export default function AddRecipe() {
   const [formData, setFormData] = useState({
@@ -13,9 +18,24 @@ export default function AddRecipe() {
     dietType: '',
     isDraft: true
   });
+  type FormErrors = {
+    title?: string;
+    cuisine?: string;
+    cookingTime?: string;
+    ingredients?: string;
+    steps?: string;
+    image?: string;
+  };
+
+  const [errors, setErrors] = useState<FormErrors>({});
+
   const [ingredients, setIngredients] = useState(['']);
   const [steps, setSteps] = useState(['']);
-  const [uploadedImages, setUploadedImages] = useState<File[]>([]);
+  const [uploadedImages, setUploadedImages] = useState<string | null>(null);
+  const navigate = useNavigate()
+  const { isVerifiedUser } = useUserStore()
+
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -25,9 +45,16 @@ export default function AddRecipe() {
     }));
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const { uploadToS3 } = useAwsS3Upload()
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setUploadedImages(Array.from(e.target.files));
+
+      const Image = e.target.files?.[0]
+      const url = await uploadToS3(Image)
+
+      setUploadedImages(url)
+
     }
   };
 
@@ -58,66 +85,67 @@ export default function AddRecipe() {
     newSteps[index] = value;
     setSteps(newSteps);
   };
-  const handleSaveRecipe = async() => {
+
+  const validateForm = () => {
+    const newErrors: FormErrors = {};
+
+    if (!formData.title.trim()) {
+      newErrors.title = "Recipe name is required";
+    }
+
+    if (!formData.cuisine) {
+      newErrors.cuisine = "Please select a cuisine";
+    }
+
+    if (!formData.cookingTime || isNaN(Number(formData.cookingTime))) {
+      newErrors.cookingTime = "Enter a valid cooking time";
+    }
+
+    if (ingredients.filter(i => i.trim()).length === 0) {
+      newErrors.ingredients = "At least one ingredient is required";
+    }
+
+    if (steps.filter(s => s.trim()).length === 0) {
+      newErrors.steps = "At least one step is required";
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
+
+
+  const handleSaveRecipe = async () => {
+    if (!validateForm()) return;
     try {
-      const recipeData={
-        chefId: useAuthStore.getState().user?._id,
-      title: formData.title,
-      cuisine: formData.cuisine,
-      cookingTime: Number(formData.cookingTime) || 0,
-      tags: formData.tags ? [formData.tags] : [],
-      dietType: formData.dietType ? [formData.dietType] : [],
-      ingredients: ingredients.filter(i => i.trim() !== ''),
-      steps: steps.filter(s => s.trim() !== ''),
-      isDraft: formData.isDraft
+      const recipeData = {
+        chefId: (useAuthStore.getState().user as unknown as { _id: string })?._id,
+        title: formData.title,
+        cuisine: formData.cuisine,
+        cookingTime: Number(formData.cookingTime) || 0,
+        tags: formData.tags ? [formData.tags] : [],
+        dietType: formData.dietType ? [formData.dietType] : [],
+        ingredients: ingredients.filter(i => i.trim() !== ''),
+        images: uploadedImages,
+        steps: steps.filter(s => s.trim() !== ''),
+        isDraft: formData.isDraft
       }
-      const result=await addRecipePageApi(recipeData)
+      const result = await addRecipePageApi(recipeData)
       showSuccess(result.data.message)
-    } catch (error:any) {
-      showError(error.response?.data?.message)
+      navigate('/chef/recipes-listing')
+    } catch (error: unknown) {
+      logError(error);
+      showError(getErrorMessage(error, 'Failed to save recipe'))
     }
   };
 
   const handleCancel = () => {
-    console.log('Cancel clicked');
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50">
-      {/* Top Navigation */}
-      <nav className="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-50 border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" className="text-green-600">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2.5"/>
-              <path d="M8 12h8M12 8v8" stroke="currentColor" strokeWidth="2.5"/>
-            </svg>
-            <span className="text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-              Dishcovery
-            </span>
-          </div>
+      <ChefNavbar />
 
-          <div className="flex items-center gap-6 text-gray-700 font-medium">
-            <a href="#" className="hover:text-green-600 transition-colors">Home</a>
-            <a href="#" className="hover:text-green-600 transition-colors">My Recipes</a>
-            <a href="#" className="hover:text-green-600 transition-colors">My Blogs</a>
-            <a href="#" className="hover:text-green-600 transition-colors">My Workshops</a>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <input
-              type="text"
-              placeholder="Search"
-              className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-green-400 transition-all"
-            />
-            <div className="w-11 h-11 rounded-full bg-gradient-to-br from-green-400 to-blue-500 shadow-lg ring-2 ring-white">
-              <img src="https://images.unsplash.com/photo-1583394293214-28ded15ee548?w=100&h=100&fit=crop" alt="User" className="w-full h-full rounded-full object-cover" />
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Main Content */}
       <main className="max-w-3xl mx-auto px-8 py-12">
         <h1 className="text-4xl font-bold mb-8 bg-gradient-to-r from-gray-900 via-green-700 to-emerald-700 bg-clip-text text-transparent">
           Add Recipe
@@ -125,11 +153,15 @@ export default function AddRecipe() {
 
         <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl border border-gray-100 p-10">
           <div className="space-y-6">
-            {/* Recipe Name */}
             <div>
               <label htmlFor="recipeName" className="block text-sm font-bold text-gray-900 mb-2">
                 Recipe Name
               </label>
+              {errors.title && (
+                <p className="text-red-500 text-sm mb-1 font-medium">
+                  {errors.title}
+                </p>
+              )}
               <input
                 type="text"
                 id="title"
@@ -141,11 +173,15 @@ export default function AddRecipe() {
               />
             </div>
 
-            {/* Category / Cuisine */}
             <div>
               <label htmlFor="cuisine" className="block text-sm font-bold text-gray-900 mb-2">
                 Category / Cuisine
               </label>
+              {errors.cuisine && (
+                <p className="text-red-500 text-sm mb-1 font-medium">
+                  {errors.cuisine}
+                </p>
+              )}
               <div className="relative">
                 <select
                   id="cuisine"
@@ -156,6 +192,7 @@ export default function AddRecipe() {
                 >
                   <option value="">Select category</option>
                   <option value="italian">Italian</option>
+                  <option value="arabic">Arabic</option>
                   <option value="thai">Thai</option>
                   <option value="mexican">Mexican</option>
                   <option value="chinese">Chinese</option>
@@ -165,11 +202,16 @@ export default function AddRecipe() {
               </div>
             </div>
 
-            {/* Cooking Time */}
             <div>
+
               <label htmlFor="cookingTime" className="block text-sm font-bold text-gray-900 mb-2">
                 Cooking Time
               </label>
+              {errors.cookingTime && (
+                <p className="text-red-500 text-sm mb-1 font-medium">
+                  {errors.cookingTime}
+                </p>
+              )}
               <input
                 type="text"
                 id="cookingTime"
@@ -181,7 +223,6 @@ export default function AddRecipe() {
               />
             </div>
 
-            {/* Tags */}
             <div>
               <label htmlFor="tags" className="block text-sm font-bold text-gray-900 mb-2">
                 Tags
@@ -204,12 +245,17 @@ export default function AddRecipe() {
               </div>
             </div>
 
-            {/* Ingredients */}
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="block text-sm font-bold text-gray-900">
                   Ingredients
                 </label>
+                {errors.ingredients && (
+                  <p className="text-red-500 text-sm mb-2 font-medium">
+                    {errors.ingredients}
+                  </p>
+                )}
+
                 <button
                   onClick={addIngredient}
                   className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:shadow-lg hover:scale-105 transition-all font-semibold"
@@ -241,12 +287,16 @@ export default function AddRecipe() {
               </div>
             </div>
 
-            {/* Steps / Instructions */}
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="block text-sm font-bold text-gray-900">
-                  Steps / Instructions
+                  Steps
                 </label>
+                {errors.steps && (
+                  <p className="text-red-500 text-sm mb-2 font-medium">
+                    {errors.steps}
+                  </p>
+                )}
                 <button
                   onClick={addStep}
                   className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:shadow-lg hover:scale-105 transition-all font-semibold"
@@ -281,7 +331,6 @@ export default function AddRecipe() {
               </div>
             </div>
 
-            {/* Upload Images */}
             <div>
               <label className="block text-sm font-bold text-gray-900 mb-2">
                 Upload Images (Optional)
@@ -292,6 +341,7 @@ export default function AddRecipe() {
                   id="fileUpload"
                   accept="image/*"
                   multiple
+                  src=''
                   onChange={handleFileUpload}
                   className="hidden"
                 />
@@ -302,16 +352,20 @@ export default function AddRecipe() {
                   <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4 group-hover:text-green-600 transition-colors" />
                   <p className="text-gray-700 font-semibold mb-1">Drag and drop images here</p>
                   <p className="text-gray-500 text-sm">Or click to browse</p>
-                  {uploadedImages.length > 0 && (
-                    <p className="text-green-600 font-semibold mt-4">
-                      {uploadedImages.length} file(s) selected
-                    </p>
+                  {uploadedImages && (
+                    <div className="mt-4 flex justify-center">
+                      <img
+                        src={uploadedImages}
+                        alt="Preview"
+                        className="w-40 h-40 object-cover rounded-xl shadow-md"
+                      />
+                    </div>
                   )}
+
                 </label>
               </div>
             </div>
 
-            {/* Tags / Diet Type */}
             <div>
               <label htmlFor="dietType" className="block text-sm font-bold text-gray-900 mb-2">
                 Tags / Diet Type
@@ -334,7 +388,6 @@ export default function AddRecipe() {
               </div>
             </div>
 
-            {/* Publish Status */}
             <div>
               <label className="block text-sm font-bold text-gray-900 mb-3">
                 Publish Status
@@ -353,7 +406,6 @@ export default function AddRecipe() {
               </div>
             </div>
 
-            {/* Action Buttons */}
             <div className="flex gap-4 pt-6">
               <button
                 onClick={handleCancel}
@@ -362,6 +414,7 @@ export default function AddRecipe() {
                 Cancel
               </button>
               <button
+                disabled={!isVerifiedUser}
                 onClick={handleSaveRecipe}
                 className="flex-1 px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl hover:shadow-xl hover:scale-105 transition-all shadow-lg"
               >
@@ -372,7 +425,6 @@ export default function AddRecipe() {
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="bg-white/80 backdrop-blur-sm border-t border-gray-200 py-8 px-8 mt-16">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-wrap justify-center gap-8 mb-6">
@@ -382,22 +434,22 @@ export default function AddRecipe() {
             <a href="#" className="text-green-600 hover:text-green-700 font-medium transition-colors">Terms & Conditions</a>
             <a href="#" className="text-green-600 hover:text-green-700 font-medium transition-colors">Privacy Policy</a>
           </div>
-          
+
           <div className="flex justify-center gap-4 mb-6">
             <a href="#" className="p-3 bg-green-100 text-green-600 rounded-full hover:bg-green-600 hover:text-white transition-all">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/>
+                <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z" />
               </svg>
             </a>
             <a href="#" className="p-3 bg-green-100 text-green-600 rounded-full hover:bg-green-600 hover:text-white transition-all">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-                <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" fill="white"/>
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" fill="white" />
               </svg>
             </a>
             <a href="#" className="p-3 bg-green-100 text-green-600 rounded-full hover:bg-green-600 hover:text-white transition-all">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/>
+                <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" />
               </svg>
             </a>
           </div>

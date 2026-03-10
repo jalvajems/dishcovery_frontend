@@ -1,28 +1,79 @@
-import { Bell, Search } from "lucide-react";
+
+import { NotificationBell } from "../NotificationBell";
+import Chatbot from "@/components/chat/Chatbot";
+import logo from "../../../assets/logo.png"
+import { getChefProfileApi } from "@/api/chefApi";
+import { getErrorMessage } from "@/utils/errorHandler";
+import { showError } from "@/utils/toast";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+
+interface Chef {
+  firstName: string;
+  lastName: string;
+  image: string;
+}
 
 export default function ChefNavbar() {
-  return (
-    <header className="bg-white shadow-md px-6 py-4 flex justify-between items-center">
-      <h1 className="text-2xl font-bold text-green-600">Dishcovery - Chef Panel</h1>
+  const [chef, setChef] = useState<Chef | null>(null);
+  const navigate = useNavigate()
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const chefRes = await getChefProfileApi()
 
-      <div className="flex items-center gap-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-          <input
-            type="text"
-            placeholder="Search..."
-            className="pl-10 pr-4 py-2 bg-gray-100 rounded-full border border-gray-200"
+        setChef(chefRes.data.datas);
+
+      } catch (error: unknown) {
+        showError(getErrorMessage(error, "Something went wrong"));
+      }
+    }
+
+    fetchData();
+  }, []);
+
+
+  return (
+    <header className="bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100/80 transition-all duration-300">
+      <div className="w-full px-4 md:px-8 h-20 flex items-center justify-between">
+        {/* Left: Logo */}
+        <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => navigate('/chef/dashboard')}>
+          <img
+            src={logo}
+            alt="Dishcovery"
+            className="h-10 w-auto object-contain"
           />
         </div>
 
-        <button className="p-2 hover:bg-gray-100 rounded-full">
-          <Bell className="w-6 h-6 text-gray-600" />
-        </button>
+        {/* Right: Actions */}
+        <div className="flex items-center gap-6">
 
-        <img
-          src="https://images.unsplash.com/photo-1583394293214-28ded15ee548?w=80"
-          className="w-10 h-10 rounded-full border border-green-400"
-        />
+          {/* Notification */}
+          <Chatbot />
+          <NotificationBell />
+
+          <div className="h-8 w-[1px] bg-gray-200 hidden md:block"></div>
+
+          {/* Profile Image */}
+          <div
+            onClick={() => navigate("/chef/profile")}
+            className="flex items-center gap-3 cursor-pointer group"
+          >
+            <div className="text-right hidden md:block">
+              <p className="text-sm font-semibold text-gray-700 group-hover:text-green-600 transition-colors">{chef?.firstName} {chef?.lastName}</p>
+              <p className="text-xs text-gray-500">Chef</p>
+            </div>
+
+            <div className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-gray-100 group-hover:ring-green-400 transition-all duration-300 shadow-sm hover:shadow-md">
+              <img
+                src={chef?.image || "/default-avatar.png"}
+                className="w-full h-full object-cover"
+                alt="Chef Profile"
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </header>
   );
