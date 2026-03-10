@@ -258,6 +258,7 @@ const LiveSession = () => {
             socketRef.current?.disconnect();
             stream?.getTracks().forEach(track => track.stop());
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [workshopId]);
 
     // Auto-pin Chef when their stream arrives

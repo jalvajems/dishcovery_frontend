@@ -52,10 +52,11 @@ export default function ReviewSection({ reviewableId, reviewableType }: ReviewSe
             setLoading(false);
         }
     };
-console.log('----',reviews);
+    console.log('----', reviews);
 
     useEffect(() => {
         if (reviewableId) loadReviews(reviewableId);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [reviewableId]);
 
     const submitReview = async () => {
@@ -111,7 +112,7 @@ console.log('----',reviews);
             showError(message);
         }
     };
-    console.log('ssssssss',reviews[0]?.userId?.foodieProfile?.image)
+    console.log('ssssssss', (reviews[0]?.userId as Record<string, unknown>)?.foodieProfile)
 
     const handleDelete = async (reviewId: string) => {
         if (!window.confirm("Are you sure you want to delete this review?")) return;
@@ -221,7 +222,7 @@ console.log('----',reviews);
                             <>
                                 <div className="flex justify-between items-start mb-2">
                                     <div className="flex items-center gap-4">
-                                        <img src={typeof r.userId === 'object' && r.userId?.foodieProfile?.image ? r.userId?.foodieProfile?.image : "/default-avatar.png"} alt={typeof r.userId === 'object' ? r.userId?.name : "User"} className="w-12 h-12 rounded-full object-cover" />
+                                        <img src={typeof r.userId === 'object' && (r.userId as any)?.foodieProfile?.image ? (r.userId as any)?.foodieProfile?.image : "/default-avatar.png"} alt={typeof r.userId === 'object' ? r.userId?.name : "User"} className="w-12 h-12 rounded-full object-cover" />
                                         <div>
                                             <div className="font-semibold">{typeof r.userId === 'object' ? r.userId?.name : "Anonymous"}</div>
                                             <div className="text-xs text-gray-500">{new Date(r.createdAt).toLocaleString()}</div>

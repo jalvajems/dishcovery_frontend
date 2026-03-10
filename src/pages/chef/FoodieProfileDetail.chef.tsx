@@ -19,6 +19,7 @@ export default function FoodieProfileDetail() {
         if (id) {
             fetchProfile();
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
     const fetchProfile = async () => {

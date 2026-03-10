@@ -3,7 +3,7 @@ import { ChefHat, Globe, Users, Utensils, ArrowRight, ShieldCheck, Heart } from 
 import { Link, useNavigate } from 'react-router-dom';
 import logo from "../../assets/logo.png"
 
-const staggerContainer = {
+const staggerContainer: import("framer-motion").Variants = {
     hidden: { opacity: 0 },
     visible: {
         opacity: 1,
@@ -13,18 +13,18 @@ const staggerContainer = {
     },
 };
 
-const fadeInUp = {
+const fadeInUp: import("framer-motion").Variants = {
     hidden: { opacity: 0, y: 40 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
     exit: { opacity: 0, y: -40, transition: { duration: 0.4 } }
 };
 
-const fadeInLeft = {
+const fadeInLeft: import("framer-motion").Variants = {
     hidden: { opacity: 0, x: -50 },
     visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: "easeOut" } }
 };
 
-const fadeInRight = {
+const fadeInRight: import("framer-motion").Variants = {
     hidden: { opacity: 0, x: 50 },
     visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: "easeOut" } }
 };
@@ -33,7 +33,7 @@ const LandingPage = () => {
     const { scrollYProgress } = useScroll();
     const yBg = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
     const rotateBg = useTransform(scrollYProgress, [0, 1], [0, 45]);
-    const navigate=useNavigate()
+    const navigate = useNavigate()
 
     return (
         <div className="min-h-screen bg-neutral-50 text-neutral-900 font-sans selection:bg-emerald-500/30 overflow-hidden">
@@ -46,16 +46,16 @@ const LandingPage = () => {
                 className="fixed w-full z-50 top-0 bg-white/80 backdrop-blur-md border-b border-neutral-200"
             >
                 <div className="max-w-7xl mx-auto px-6 lg:px-8 py-4 flex justify-between items-center">
-                     <div
-          onClick={() => navigate('/foodie/dashboard')}
-          className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
-        >
-          <img
-            src={logo}
-            alt="Dishcovery"
-            className="h-10 w-auto object-contain"
-          />
-        </div>
+                    <div
+                        onClick={() => navigate('/foodie/dashboard')}
+                        className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+                    >
+                        <img
+                            src={logo}
+                            alt="Dishcovery"
+                            className="h-10 w-auto object-contain"
+                        />
+                    </div>
                     <div className="hidden md:flex gap-8 items-center font-medium text-neutral-600">
                         <a href="#features" className="hover:text-emerald-600 transition-colors">Features</a>
                         <a href="#about" className="hover:text-emerald-600 transition-colors">About</a>
@@ -300,8 +300,14 @@ const LandingPage = () => {
     );
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const FeatureCard = ({ icon, title, description, bgColor }: any) => {
+interface FeatureCardProps {
+    icon: React.ReactNode;
+    title: string;
+    description: string;
+    bgColor: string;
+}
+
+const FeatureCard = ({ icon, title, description, bgColor }: FeatureCardProps) => {
     return (
         <motion.div
             variants={fadeInUp}

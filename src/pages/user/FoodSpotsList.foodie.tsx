@@ -37,6 +37,7 @@ export default function FoodSpotListing() {
 
   useEffect(() => {
     fetchFoodSpots();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, limit, currentPage, filter]);
 
 

@@ -61,6 +61,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
         return () => {
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token, user]);
 
     return (

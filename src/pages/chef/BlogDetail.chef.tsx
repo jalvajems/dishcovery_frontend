@@ -22,6 +22,7 @@ export default function BlogDetailPage() {
   if (!blogId) throw Error('blog id is not defined');
   useEffect(() => {
     fetchBlog();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [blogId]);
 
   async function fetchBlog() {

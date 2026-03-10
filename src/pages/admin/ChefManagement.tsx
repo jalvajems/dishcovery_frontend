@@ -46,8 +46,8 @@ export default function ChefManagement() {
         page,
         limit,
         search,
-        filters.status,
-        filters.verified
+        filters.status as string,
+        filters.verified as string
       );
     },
     filters: [
@@ -133,7 +133,7 @@ export default function ChefManagement() {
       <SearchFilterBar
         searchInput={searchInput}
         setSearchInput={setSearchInput}
-        filters={filters}
+        filters={filters as Record<string, string>}
         updateFilter={updateFilter}
         filterOptions={{
           status: [

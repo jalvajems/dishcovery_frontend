@@ -103,7 +103,8 @@ export const useLogin = () => {
   };
 
 
-  const handleGoogleSuccess = async (credentialResponse: any) => {
+   
+  const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
     try {
       if (!credentialResponse.credential) {
         showError("Google login failed");

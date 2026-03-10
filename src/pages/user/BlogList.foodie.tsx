@@ -25,6 +25,7 @@ export default function BlogListFoodie() {
 
     useEffect(() => {
         fetchBlogs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentPage, searchQuery, limit, filter]);
 
     async function fetchBlogs() {
