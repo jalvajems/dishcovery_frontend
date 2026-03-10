@@ -81,7 +81,8 @@ const LiveSession = () => {
                 setStream(currentStream);
                 streamRef.current = currentStream;
 
-                socketRef.current = io('http://localhost:4000', {
+                const socketUrl = import.meta.env.PROD ? '/' : 'http://localhost:4000';
+                socketRef.current = io(socketUrl, {
                     auth: { token },
                     transports: ['websocket']
                 });

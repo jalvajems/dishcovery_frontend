@@ -30,7 +30,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }
 
         if (!socketRef.current) {
-            socketRef.current = io('http://localhost:4000', {
+            const socketUrl = import.meta.env.PROD ? '/' : 'http://localhost:4000';
+            socketRef.current = io(socketUrl, {
                 auth: { token },
                 transports: ['websocket'],
                 reconnection: true,
