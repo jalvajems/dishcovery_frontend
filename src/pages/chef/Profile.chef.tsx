@@ -55,6 +55,7 @@ export default function ChefProfilePage() {
     if (chef) {
       setUserStore(chef.chefId.name, chef.chefId.email, chef.image || '');
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chef])
 
   if (loading)

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Bell, Check } from 'lucide-react';
 import { useNotificationStore } from '@/store/notificationStore';
 import { useNavigate } from 'react-router-dom';
@@ -26,6 +26,7 @@ export const NotificationBell = () => {
         fetchUnreadCount();
         const interval = setInterval(fetchUnreadCount, 60000); // Poll every minute as backup
         return () => clearInterval(interval);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleToggle = () => {

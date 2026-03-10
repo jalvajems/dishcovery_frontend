@@ -55,6 +55,7 @@ export default function ChefReviewSection({ reviewableId, reviewableType }: Chef
 
   useEffect(() => {
     loadReviews();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reviewableId]);
 
   /** Sorting Logic */

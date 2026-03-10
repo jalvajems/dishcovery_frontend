@@ -42,7 +42,7 @@ export default function BlogManagement() {
     refetch
   } = useAdminTable<Blog>({
     fetchApi: async (page, limit, search, filters) => {
-      return adminBlogListingApi(page, limit, search, filters.status);
+      return adminBlogListingApi(page, limit, search, filters.status as string);
     },
     filters: [{ key: "status", defaultValue: "all" }],
   });
@@ -126,7 +126,7 @@ export default function BlogManagement() {
       <SearchFilterBar
         searchInput={searchInput}
         setSearchInput={setSearchInput}
-        filters={filters}
+        filters={filters as Record<string, string>}
         updateFilter={updateFilter}
         filterOptions={{
           status: [

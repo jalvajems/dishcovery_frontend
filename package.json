@@ -51,6 +51,7 @@
     "@types/node": "^24.9.1",
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.1.9",
+    "@types/react-map-gl": "^6.1.8",
     "@types/react-slick": "^0.23.13",
     "@types/simple-peer": "^9.11.9",
     "@vitejs/plugin-react": "^5.0.4",

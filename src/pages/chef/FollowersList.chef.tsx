@@ -19,6 +19,7 @@ export default function FollowersList() {
 
     useEffect(() => {
         fetchFollowers();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page]);
 
     const fetchFollowers = async () => {
@@ -121,7 +122,7 @@ export default function FollowersList() {
                                         </h3>
                                         <div className="flex items-center justify-center gap-1.5 text-gray-500 text-sm font-medium">
                                             <MapPin size={14} className="text-gray-400" />
-                                            {follow.followerId?.location || "Foodie"}
+                                            {(follow.followerId as any)?.location || "Foodie"}
                                         </div>
                                     </div>
 

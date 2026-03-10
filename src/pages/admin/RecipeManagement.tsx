@@ -45,7 +45,7 @@ export default function RecipeManagement() {
         page,
         limit,
         search,
-        filters.status
+        filters.status as string
       );
     },
 
@@ -124,7 +124,7 @@ export default function RecipeManagement() {
       <SearchFilterBar
         searchInput={searchInput}
         setSearchInput={setSearchInput}
-        filters={filters}
+        filters={filters as Record<string, string>}
         updateFilter={updateFilter}
         filterOptions={{
           status: [

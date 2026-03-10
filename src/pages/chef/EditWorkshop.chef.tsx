@@ -39,6 +39,7 @@ export default function EditWorkshopChef() {
 
     useEffect(() => {
         fetchWorkshop();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
     const fetchWorkshop = async () => {
@@ -134,7 +135,7 @@ export default function EditWorkshopChef() {
                 startTime: string;
                 duration: number;
                 participantLimit: number;
-                mode: string;
+                mode: 'ONLINE' | 'OFFLINE';
                 isFree: boolean;
                 price: number;
                 banner: string;

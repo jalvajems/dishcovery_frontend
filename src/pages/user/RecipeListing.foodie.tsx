@@ -25,6 +25,7 @@ export default function RecipeListing() {
 
   useEffect(() => {
     fetchRecipes()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, limit, searchQuery, filter])
   async function fetchRecipes() {
 

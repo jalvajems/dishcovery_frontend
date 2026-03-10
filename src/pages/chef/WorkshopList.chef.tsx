@@ -29,6 +29,7 @@ export default function WorkshopListChef() {
 
     useEffect(() => {
         fetchWorkshops();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentPage, searchQuery, activeTab]);
 
     const fetchWorkshops = async () => {

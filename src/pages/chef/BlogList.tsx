@@ -27,6 +27,7 @@ export default function BlogListChef() {
 
   useEffect(() => {
     fetchBlogs();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, currentPage, limit]);
 
   async function fetchBlogs() {

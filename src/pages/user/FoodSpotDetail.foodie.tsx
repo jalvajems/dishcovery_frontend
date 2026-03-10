@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MapPin, Clock, Heart, Share2, Star, Navigation, UtensilsCrossed } from 'lucide-react';
+ 
+import { MapPin, Clock, Heart, Star, Navigation, UtensilsCrossed } from 'lucide-react';
 import Map, { Marker, NavigationControl } from 'react-map-gl/mapbox';
 import mapboxgl from 'mapbox-gl';
 import { getFoodSpotDetailApi, toggleSaveFoodSpotApi } from '@/api/foodieApi';

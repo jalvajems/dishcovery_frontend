@@ -151,7 +151,7 @@ export default function WorkshopManagement() {
                     <SearchFilterBar
                         searchInput={searchInput}
                         setSearchInput={setSearchInput}
-                        filters={filters}
+                        filters={filters as Record<string, string>}
                         updateFilter={updateFilter}
                         filterOptions={{
                             status: [

@@ -56,6 +56,7 @@ export default function WorkshopDetailChef() {
             fetchWorkshop();
             fetchParticipants();
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
     const fetchWorkshop = async () => {
