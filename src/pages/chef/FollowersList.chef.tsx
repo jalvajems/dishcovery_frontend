@@ -122,7 +122,7 @@ export default function FollowersList() {
                                         </h3>
                                         <div className="flex items-center justify-center gap-1.5 text-gray-500 text-sm font-medium">
                                             <MapPin size={14} className="text-gray-400" />
-                                            {(follow.followerId as any)?.location || "Foodie"}
+                                            {String((follow.followerId as Record<string, unknown>)?.location || "Foodie")}
                                         </div>
                                     </div>
 

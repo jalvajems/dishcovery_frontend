@@ -13,8 +13,8 @@ import ConfirmModal from '@/components/shared/ConfirmModal';
 import { Buffer } from 'buffer';
 if (typeof window !== 'undefined') {
     window.Buffer = window.Buffer || Buffer;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    window.process = { env: {} } as any;
+
+    window.process = { env: {} } as unknown as NodeJS.Process;
 }
 
 import type { IWorkshopPopulated } from "@/types/workshop.types";
@@ -258,7 +258,7 @@ const LiveSession = () => {
             socketRef.current?.disconnect();
             stream?.getTracks().forEach(track => track.stop());
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [workshopId]);
 
     // Auto-pin Chef when their stream arrives
