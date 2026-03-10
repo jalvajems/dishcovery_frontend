@@ -222,7 +222,7 @@ export default function ReviewSection({ reviewableId, reviewableType }: ReviewSe
                             <>
                                 <div className="flex justify-between items-start mb-2">
                                     <div className="flex items-center gap-4">
-                                        <img src={typeof r.userId === 'object' && (r.userId as any)?.foodieProfile?.image ? (r.userId as any)?.foodieProfile?.image : "/default-avatar.png"} alt={typeof r.userId === 'object' ? r.userId?.name : "User"} className="w-12 h-12 rounded-full object-cover" />
+                                        <img src={typeof r.userId === 'object' && (r.userId as Record<string, unknown>)?.foodieProfile ? ((r.userId as Record<string, unknown>).foodieProfile as Record<string, unknown>)?.image as string : "/default-avatar.png"} alt={typeof r.userId === 'object' ? String((r.userId as Record<string, unknown>)?.name) : "User"} className="w-12 h-12 rounded-full object-cover" />
                                         <div>
                                             <div className="font-semibold">{typeof r.userId === 'object' ? r.userId?.name : "Anonymous"}</div>
                                             <div className="text-xs text-gray-500">{new Date(r.createdAt).toLocaleString()}</div>

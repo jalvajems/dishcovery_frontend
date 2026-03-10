@@ -121,7 +121,7 @@ export default function ChefList() {
                                 >
                                     <div className="relative h-72 overflow-hidden bg-gray-100">
                                         <img
-                                            src={(chef as any)?.image || 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=400&h=400&fit=crop'}
+                                            src={String((chef as unknown as Record<string, unknown>)?.image || 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=400&h=400&fit=crop')}
                                             alt={chef.chefId?.name}
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                                         />
