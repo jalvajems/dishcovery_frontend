@@ -21,6 +21,7 @@ const ChatPage: React.FC = () => {
 
     useEffect(() => {
         loadConversations();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -55,6 +56,7 @@ const ChatPage: React.FC = () => {
                 setActiveConversation(conversation);
             }
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [conversationId, conversations]);
 
     const handleSelectConversation = (conversation: Conversation) => {

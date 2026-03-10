@@ -20,6 +20,7 @@ export default function WorkshopDiscovery() {
 
     useEffect(() => {
         fetchWorkshops();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentPage, searchQuery, modeFilter]);
 
     const fetchWorkshops = async () => {

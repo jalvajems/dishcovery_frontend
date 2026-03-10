@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Wallet, Calendar, ArrowDownToLine, TrendingUp, DollarSign } from "lucide-react";
-import ChefNavbar from "@/components/shared/chef/NavBar.chef";
+ 
+
 import Footer from "@/components/shared/chef/Footer";
 import Pagination from "@/components/shared/Pagination";
 import { getFoodieWalletApi } from "@/api/foodieApi";

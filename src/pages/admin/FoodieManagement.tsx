@@ -35,7 +35,7 @@ export default function FoodieManagement() {
   } = useAdminTable<Foodie>({
 
     fetchApi: async (page, limit, search, filters) => {
-      return adminFoodieListingApi(page, limit, search, filters.status);
+      return adminFoodieListingApi(page, limit, search, filters.status as string);
     },
     filters: [{ key: "status", defaultValue: "all" }],
   });
@@ -98,7 +98,7 @@ export default function FoodieManagement() {
       <SearchFilterBar
         searchInput={searchInput}
         setSearchInput={setSearchInput}
-        filters={filters}
+        filters={filters as Record<string, string>}
         updateFilter={updateFilter}
         filterOptions={{
           status: [

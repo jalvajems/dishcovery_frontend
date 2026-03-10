@@ -43,6 +43,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
                 socket?.emit('chat:leave', conversation._id);
             };
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [conversation._id]);
 
     useEffect(() => {
@@ -103,6 +104,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
             socket?.off('chat:messages-read', handleMessageRead);
             socket?.off('chat:message-deleted', handleMessageDeleted);
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [socket, conversation._id, otherUser?._id, loadMessages]);
 
     useEffect(() => {

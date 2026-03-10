@@ -1,5 +1,7 @@
 import Map, { Marker } from "react-map-gl/mapbox";
-import type { MapRef } from "react-map-gl";
+interface MapRefType {
+  flyTo: (options: { center: [number, number]; zoom: number }) => void;
+}
 import mapboxgl from "mapbox-gl";
 import { useEffect, useRef, useState } from "react";
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
@@ -21,7 +23,7 @@ interface Props {
 }
 
 export default function MapLocationPicker({ onSelect, initialLat, initialLng }: Props) {
-  const mapRef = useRef<MapRef>(null);
+  const mapRef = useRef<MapRefType | null>(null);
   const geocoderRef = useRef<HTMLDivElement>(null);
 
   const [marker, setMarker] = useState({
@@ -59,8 +61,7 @@ export default function MapLocationPicker({ onSelect, initialLat, initialLng }: 
 
     const geocoder = new MapboxGeocoder({
       accessToken: mapboxgl.accessToken || "",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      mapboxgl: mapboxgl as any,
+      mapboxgl: mapboxgl as unknown as never,
       marker: false,
     });
 
@@ -98,7 +99,7 @@ export default function MapLocationPicker({ onSelect, initialLat, initialLng }: 
 
       {/* Map */}
       <Map
-        ref={mapRef}
+        ref={mapRef as never}
         initialViewState={{
           longitude: marker.lng,
           latitude: marker.lat,

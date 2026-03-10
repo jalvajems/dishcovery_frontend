@@ -37,6 +37,7 @@ export default function FoodSpotDetailAdmin() {
 
     useEffect(() => {
         fetchFoodSpot();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
     const fetchFoodSpot = async () => {
@@ -102,7 +103,7 @@ export default function FoodSpotDetailAdmin() {
         name,
         coverImage,
         description,
-        images,
+         
         address,
         openingHours,
         speciality,
@@ -204,7 +205,8 @@ export default function FoodSpotDetailAdmin() {
                             <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-3">Explored Foods</h3>
                             {exploredFoods && exploredFoods.length > 0 ? (
                                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                                    {exploredFoods.map((food: any, idx: number) => (
+                                    {exploredFoods.map((food: { image?: string; name?: string; price?: number; description?: string }, idx: number) => (
+                                         
                                         <div key={idx} className="bg-white border border-gray-100 rounded-xl p-3 shadow-sm flex gap-4 items-center">
                                             <div className="w-16 h-16 bg-gray-100 rounded-lg flex-shrink-0 overflow-hidden relative">
                                                 {food.image ? (

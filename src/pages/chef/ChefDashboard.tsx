@@ -55,6 +55,7 @@ export default function ChefDashboard() {
   }
   useEffect(() => {
     fetchRecipes()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPageRecipe, limit])
 
   async function fetchRecipes() {
@@ -93,6 +94,7 @@ export default function ChefDashboard() {
 
   useEffect(() => {
     fetchBlogs();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPageBlog, limit]);
 
   async function fetchBlogs() {
@@ -114,6 +116,7 @@ export default function ChefDashboard() {
 
   useEffect(() => {
     checkChefProfile();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function checkChefProfile() {

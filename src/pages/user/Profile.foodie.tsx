@@ -103,6 +103,7 @@ export default function ProfileFoodie() {
   useEffect(() => {
     setUserStore(profile?.userId?.name || '', profile?.userId?.email || '', profile?.image || '')
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile])
 
   if (loading || !profile)

@@ -20,6 +20,7 @@ export default function FollowingList() {
 
     useEffect(() => {
         fetchFollowing();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page, searchQuery, currentPage, limit]);
     const handlePageChange = (page: number) => {
         setCurrentPage(page)

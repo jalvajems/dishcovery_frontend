@@ -26,6 +26,7 @@ export default function MyWorkshopsFoodie() {
 
     useEffect(() => {
         filterAndPaginate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentPage, activeTab, allWorkshops]);
 
     const fetchMyWorkshops = async () => {

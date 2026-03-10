@@ -47,7 +47,7 @@ export default function FoodSpotManagement() {
         refetch,
     } = useAdminTable<FoodSpot>({
         fetchApi: async (page, limit, search, filters) => {
-            return adminFoodSpotListingApi(page, limit, search, filters.status, filters.approved);
+            return adminFoodSpotListingApi(page, limit, search, filters.status as string, filters.approved as string);
         },
         filters: [
             { key: "status", defaultValue: "all" },
@@ -157,7 +157,7 @@ export default function FoodSpotManagement() {
             <SearchFilterBar
                 searchInput={searchInput}
                 setSearchInput={setSearchInput}
-                filters={filters}
+                filters={filters as Record<string, string>}
                 updateFilter={updateFilter}
                 filterOptions={{
                     status: [

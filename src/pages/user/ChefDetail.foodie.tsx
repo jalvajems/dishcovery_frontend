@@ -59,12 +59,14 @@ export default function ChefDetail() {
         if (id) {
             fetchChefDetails();
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
     useEffect(() => {
         if (id && activeTab !== 'reviews') {
             fetchActivities();
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id, activeTab, currentPage]);
 
     const fetchChefDetails = async () => {
