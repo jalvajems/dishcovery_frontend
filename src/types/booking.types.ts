@@ -19,6 +19,7 @@ export interface IBooking {
 export interface IBookingPopulated extends Omit<IBooking, 'workshopId'> {
     workshopId: {
         _id: string;
+        id:string
         title: string;
         date: Date | string;
         startTime: string;
