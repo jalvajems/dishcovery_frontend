@@ -69,6 +69,8 @@ export default function WorkshopDetailFoodie() {
             setBookingLoading(false);
         }
     };
+    console.log('00=====',bookWorkshopApi);
+    
 
     if (loading) {
         return (
