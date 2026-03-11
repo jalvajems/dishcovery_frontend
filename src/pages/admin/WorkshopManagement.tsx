@@ -36,8 +36,8 @@ export default function WorkshopManagement() {
 
                 if (search) {
                     filtered = filtered.filter((w: IWorkshopPopulated) =>
-                        w.title.toLowerCase().includes(search.toLowerCase()) ||
-                        w.chefId?.name.toLowerCase().includes(search.toLowerCase())
+                        w.title?.toLowerCase().includes(search.toLowerCase()) ||
+                        w.chefId?.name?.toLowerCase().includes(search.toLowerCase())
                     );
                 }
                 if (filters.status && filters.status !== 'all') {
