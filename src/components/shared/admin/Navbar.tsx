@@ -1,4 +1,3 @@
-import { Bell, Settings } from "lucide-react";
 import logo from "../../../assets/logo.png"
 
 
