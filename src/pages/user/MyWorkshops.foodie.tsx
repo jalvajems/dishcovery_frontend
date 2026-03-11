@@ -86,7 +86,7 @@ export default function MyWorkshopsFoodie() {
             setSelectedBookingId(null);
         }
     };
-// console.log('----',bookings);
+    // console.log('----',bookings);
 
 
     return (
@@ -147,7 +147,7 @@ export default function MyWorkshopsFoodie() {
 
                             return (
                                 <div
-                                    key={booking._id}
+                                    key={booking.id || booking._id}
                                     className={`bg-white rounded-[2.5rem] border border-gray-100 shadow-xl shadow-gray-50 overflow-hidden hover:border-green-200 transition-all group ${isCancelled ? 'opacity-60 saturate-50' : ''}`}
                                 >
                                     <div className="flex flex-col md:flex-row items-stretch">
@@ -233,7 +233,7 @@ export default function MyWorkshopsFoodie() {
 
                                                 {booking.status === 'CONFIRMED' && isConfirmed && workshop.status !== 'LIVE' && workshop.status !== 'COMPLETED' && workshop.status !== 'EXPIRED' && (
                                                     <button
-                                                        onClick={() => handleCancelClick(booking._id||booking?.id)}
+                                                        onClick={() => handleCancelClick(booking.id || booking._id || "")}
                                                         className="flex-1 flex items-center justify-center gap-3 py-4 bg-red-50 text-red-600 rounded-2xl font-black hover:bg-red-100 transition-all border border-red-100"
                                                     >
                                                         Cancel Seat
