@@ -3,7 +3,7 @@ import { Upload, MapPin, Phone, BookOpen, UserCircle } from "lucide-react";
 import { createChefProfileApi } from "@/api/chefApi";
 import { showError, showSuccess } from "@/utils/toast";
 import { useNavigate } from "react-router-dom";
-import { useAwsS3Upload } from "@/components/shared/hooks/useAwsS3Upload";
+import { useAwsS3Upload } from "@/hooks/useAwsS3Upload";
 import { getErrorMessage, logError } from "@/utils/errorHandler";
 
 

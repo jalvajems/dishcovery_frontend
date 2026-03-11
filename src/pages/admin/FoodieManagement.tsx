@@ -1,5 +1,5 @@
 import SearchFilterBar from "@/components/shared/admin/SearchFilterBar";
-import { useAdminTable } from "@/components/shared/hooks/useAdminTable";
+import { useAdminTable } from "@/hooks/useAdminTable";
 import {
   adminFoodieListingApi,
   AdminBlockApi,

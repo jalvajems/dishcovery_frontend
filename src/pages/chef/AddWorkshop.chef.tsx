@@ -4,7 +4,7 @@ import { Calendar, Clock, Users, MapPin, Video, DollarSign, ChevronLeft, Save, U
 import { createWorkshopApi } from '@/api/workshopApi';
 import { toast } from 'react-toastify';
 import ChefNavbar from '@/components/shared/chef/NavBar.chef';
-import { useAwsS3Upload } from '@/components/shared/hooks/useAwsS3Upload';
+import { useAwsS3Upload } from '@/hooks/useAwsS3Upload';
 import MapLocationPicker from '@/utils/MapLocationPicker';
 import { getErrorMessage, logError } from '@/utils/errorHandler';
 import type { ICreateWorkshop, WorkshopMode } from '@/types/workshop.types';
