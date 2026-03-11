@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAdminTable } from "@/components/shared/hooks/useAdminTable";
+import { useAdminTable } from "@/hooks/useAdminTable";
 
 import SearchFilterBar from "@/components/shared/admin/SearchFilterBar";
 import ReusableTable, { type ITableColumn } from "@/components/shared/DataTable";

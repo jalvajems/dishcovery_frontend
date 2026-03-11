@@ -7,7 +7,7 @@ import { getChefProfileApi, updateChefProfileApi } from "@/api/chefApi";
 import { showError, showSuccess } from "@/utils/toast";
 import { getErrorMessage, logError } from "@/utils/errorHandler";
 import { useNavigate } from "react-router-dom";
-import { useAwsS3Upload } from "@/components/shared/hooks/useAwsS3Upload";
+import { useAwsS3Upload } from "@/hooks/useAwsS3Upload";
 
 export default function ChefProfileEdit() {
   const navigate = useNavigate()

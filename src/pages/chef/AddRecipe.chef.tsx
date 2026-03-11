@@ -4,7 +4,7 @@ import { addRecipePageApi } from '@/api/chefApi';
 import { useAuthStore } from '@/store/authStore';
 import { showError, showSuccess } from '@/utils/toast';
 import { getErrorMessage, logError } from '@/utils/errorHandler';
-import { useAwsS3Upload } from '@/components/shared/hooks/useAwsS3Upload';
+import { useAwsS3Upload } from '@/hooks/useAwsS3Upload';
 import ChefNavbar from '@/components/shared/chef/NavBar.chef';
 import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '@/store/userStore';

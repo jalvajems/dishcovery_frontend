@@ -56,12 +56,12 @@ export default function WorkshopDetailChef() {
             fetchWorkshop();
             fetchParticipants();
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
     const fetchWorkshop = async () => {
         try {
-            console.log('iiiddd',id)
+            console.log('iiiddd', id)
             const response = await getWorkshopByIdApi(id!);
             setWorkshop(response.data.data as IWorkshop);
         } catch (error: unknown) {
@@ -327,7 +327,7 @@ export default function WorkshopDetailChef() {
                             ) : (
                                 <div className="space-y-4">
                                     {participants.map((booking: IBooking) => (
-                                        <div key={booking._id} className="p-6 bg-white rounded-3xl border border-gray-100 shadow-sm flex items-center justify-between group hover:border-green-200 transition-all">
+                                        <div key={booking.id || booking._id} className="p-6 bg-white rounded-3xl border border-gray-100 shadow-sm flex items-center justify-between group hover:border-green-200 transition-all">
                                             <div className="flex items-center gap-4">
                                                 <div className="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center text-green-600 font-black">
                                                     {booking.foodieId?.name?.charAt(0) || 'F'}
@@ -354,13 +354,13 @@ export default function WorkshopDetailChef() {
                                                 {workshop.status === 'COMPLETED' && booking.status === 'CONFIRMED' && (
                                                     <div className="flex gap-2">
                                                         <button
-                                                            onClick={() => handleAttendance(booking._id, 'PRESENT')}
+                                                            onClick={() => handleAttendance(booking.id || booking._id || "", 'PRESENT')}
                                                             className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${booking.attendanceStatus === 'PRESENT' ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-400 border-gray-200 hover:border-green-300 hover:text-green-600'}`}
                                                         >
                                                             Present
                                                         </button>
                                                         <button
-                                                            onClick={() => handleAttendance(booking._id, 'ABSENT')}
+                                                            onClick={() => handleAttendance(booking.id || booking._id || "", 'ABSENT')}
                                                             className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${booking.attendanceStatus === 'ABSENT' ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-400 border-gray-200 hover:border-red-300 hover:text-red-600'}`}
                                                         >
                                                             Absent

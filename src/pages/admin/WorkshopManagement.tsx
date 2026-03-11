@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import ReusableTable, { type ITableColumn } from "@/components/shared/DataTable";
 import SearchFilterBar from "@/components/shared/admin/SearchFilterBar";
 import Pagination from "@/components/shared/Pagination";
-import { useAdminTable } from "@/components/shared/hooks/useAdminTable";
+import { useAdminTable } from "@/hooks/useAdminTable";
 import { getAllWorkshopsAdminApi } from "@/api/workshopApi";
 import { logError, getErrorMessage } from "@/utils/errorHandler";
 import { showError } from "@/utils/toast";

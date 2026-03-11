@@ -1,5 +1,6 @@
 export interface IBooking {
-    _id: string;
+    _id?: string;
+    id?: string;
     workshopId: string;
     foodieId: {
         _id: string;

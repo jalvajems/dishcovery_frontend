@@ -91,10 +91,15 @@ export const useNotificationStore = create<INotificationStore>((set, get) => ({
 
     clearAll: async () => {
         try {
-            set({ notifications: [], unreadCount: 0 });
-            await clearAllNotificationsApi();
+            const { filter } = get();
+            await clearAllNotificationsApi(filter);
+            // Re-fetch instead of just clearing the array so it syncs up exactly with the DB
+            get().fetchNotifications();
+            if (filter === 'all' || filter === 'unread') {
+                get().fetchUnreadCount();
+            }
         } catch (error) {
-            logError(error, "Failed to clear all notifications");
+            logError(error, "Failed to clear notifications");
         }
     },
 
