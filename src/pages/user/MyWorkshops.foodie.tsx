@@ -233,7 +233,7 @@ export default function MyWorkshopsFoodie() {
 
                                                 {booking.status === 'CONFIRMED' && isConfirmed && workshop.status !== 'LIVE' && workshop.status !== 'COMPLETED' && workshop.status !== 'EXPIRED' && (
                                                     <button
-                                                        onClick={() => handleCancelClick(booking._id||booking.id)}
+                                                        onClick={() => handleCancelClick(booking._id||booking?.id)}
                                                         className="flex-1 flex items-center justify-center gap-3 py-4 bg-red-50 text-red-600 rounded-2xl font-black hover:bg-red-100 transition-all border border-red-100"
                                                     >
                                                         Cancel Seat
