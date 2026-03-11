@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { editRecipePageApi, getRecipeDetailApi } from '@/api/chefApi';
 import { showError, showSuccess } from '@/utils/toast';
 import { getErrorMessage, logError } from '@/utils/errorHandler';
-import { useAwsS3Upload } from '@/components/shared/hooks/useAwsS3Upload';
+import { useAwsS3Upload } from '@/hooks/useAwsS3Upload';
 import ChefNavbar from '@/components/shared/chef/NavBar.chef';
 import { useUserStore } from '@/store/userStore';
 

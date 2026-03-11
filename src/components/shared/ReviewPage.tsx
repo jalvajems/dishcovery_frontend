@@ -112,7 +112,6 @@ export default function ReviewSection({ reviewableId, reviewableType }: ReviewSe
             showError(message);
         }
     };
-    console.log('ssssssss', (reviews[0]?.userId as Record<string, unknown>)?.foodieProfile)
 
     const handleDelete = async (reviewId: string) => {
         if (!window.confirm("Are you sure you want to delete this review?")) return;

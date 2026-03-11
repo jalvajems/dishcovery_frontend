@@ -16,6 +16,6 @@ export const getUnreadNotificationCountApi = () => {
     return API.get(`/notifications/unread-count`);
 };
 
-export const clearAllNotificationsApi = () => {
-    return API.delete(`/notifications`);
+export const clearAllNotificationsApi = (filter: string = 'all') => {
+    return API.delete(`/notifications?filter=${filter}`);
 };

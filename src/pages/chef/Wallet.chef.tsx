@@ -14,21 +14,21 @@ export default function ChefWalletPage() {
   const [wallet, setWallet] = useState<ChefWalletResponse | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const itemsPerPage = 8;
+  const itemsPerPage = 5;
 
   const handleGetChefWallet = async (page: number) => {
     try {
       const res = await getChefWalletApi(page, itemsPerPage)
       setWallet(res.data.data)
-      setTotalPages(res.data.totalPages || 1);
+      setTotalPages(res.data.data.totalPages || 1);
       setCurrentPage(page);
     } catch (error: unknown) {
       logError(error);
       showError(getErrorMessage(error, "Failed to fetch wallet"));
     }
   }
-  console.log('---',wallet?.transactions[0]);
-  
+  console.log('---', wallet?.transactions[0]);
+
 
   useEffect(() => {
     handleGetChefWallet(currentPage)

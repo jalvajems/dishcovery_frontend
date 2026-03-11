@@ -24,9 +24,6 @@ export const NotificationBell = () => {
     // Initial fetch
     useEffect(() => {
         fetchUnreadCount();
-        const interval = setInterval(fetchUnreadCount, 60000); // Poll every minute as backup
-        return () => clearInterval(interval);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleToggle = () => {
@@ -125,7 +122,7 @@ export const NotificationBell = () => {
                                     onClick={clearAll}
                                     className="text-xs text-red-600 hover:text-red-800 font-medium hover:underline ml-auto"
                                 >
-                                    Clear all
+                                    {filter === 'all' ? 'Clear all' : `Clear all ${filter}`}
                                 </button>
                             )}
                         </div>

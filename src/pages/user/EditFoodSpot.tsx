@@ -20,7 +20,7 @@ import {
 } from "@/api/foodieApi";
 import { showError, showSuccess } from "@/utils/toast";
 import { getErrorMessage } from "@/utils/errorHandler";
-import { useAwsS3Upload } from "@/components/shared/hooks/useAwsS3Upload";
+import { useAwsS3Upload } from "@/hooks/useAwsS3Upload";
 import FoodieNavbar from "@/components/shared/foodie/Navbar.foodie";
 
 import type { IFoodSpot } from "@/types/foodSpot.types";

@@ -4,7 +4,7 @@ import { Users, MapPin, Video, DollarSign, ChevronLeft, Save, Upload, X } from '
 import { getWorkshopByIdApi, updateWorkshopApi } from '@/api/workshopApi';
 import { toast } from 'react-toastify';
 import ChefNavbar from '@/components/shared/chef/NavBar.chef';
-import { useAwsS3Upload } from '@/components/shared/hooks/useAwsS3Upload';
+import { useAwsS3Upload } from '@/hooks/useAwsS3Upload';
 import MapLocationPicker from '@/utils/MapLocationPicker';
 import { getErrorMessage, logError } from '@/utils/errorHandler';
 

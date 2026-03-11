@@ -75,7 +75,7 @@ export default function BookedWorkshopDetailFoodie() {
                 <div className="bg-red-50 border-b border-red-100 p-4 sticky top-[72px] z-40">
                     <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 text-red-700 font-medium animate-pulse">
                         <X className="w-5 h-5" />
-                        <span>This workshop has been cancelled by the Chef. Reason: {workshop.cancellationReason || "Unforseen circumstances"}</span>
+                        <span>This workshop has been cancelled by the Chef. Reason: {workshop.rejectionReason || "Unforseen circumstances"}</span>
                         {workshop.myBooking?.status === 'REFUNDED' && (
                             <span className="ml-2 font-bold px-2 py-1 bg-red-100 rounded-md text-red-800 text-[10px] uppercase tracking-widest">Payment Refunded</span>
                         )}

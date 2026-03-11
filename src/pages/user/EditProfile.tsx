@@ -4,7 +4,7 @@ import { showError, showSuccess } from "@/utils/toast";
 import { getErrorMessage, logError } from "@/utils/errorHandler";
 import { User, Phone, MapPin, FileText, Image as ImageIcon, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAwsS3Upload } from "@/components/shared/hooks/useAwsS3Upload";
+import { useAwsS3Upload } from "@/hooks/useAwsS3Upload";
 
 export default function FoodieEditProfile() {
     const navigate = useNavigate()

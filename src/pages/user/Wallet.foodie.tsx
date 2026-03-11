@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Wallet, Calendar, ArrowDownToLine, TrendingUp, DollarSign } from "lucide-react";
- 
+
+
 
 import Footer from "@/components/shared/chef/Footer";
 import Pagination from "@/components/shared/Pagination";
@@ -41,13 +42,13 @@ export default function FoodieWalletPage() {
   const [wallet, setWallet] = useState<FoodieWalletResponse | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const itemsPerPage = 8;
+  const itemsPerPage = 5;
 
   const handleGetFoodieWallet = async (page: number) => {
     try {
       const res = await getFoodieWalletApi(page, itemsPerPage)
       setWallet(res.data.data)
-      setTotalPages(res.data.totalPages || 1);
+      setTotalPages(res.data.data.totalPages || 1);
       setCurrentPage(page);
     } catch (error) {
       logError(error, "Failed to fetch wallet");
