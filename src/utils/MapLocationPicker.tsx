@@ -3,7 +3,7 @@ interface MapRefType {
   flyTo: (options: { center: [number, number]; zoom: number }) => void;
 }
 import mapboxgl from "mapbox-gl";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
@@ -32,7 +32,7 @@ export default function MapLocationPicker({ onSelect, initialLat, initialLng }: 
   });
 
   // Reverse Geocode helper
-  const reverseGeocode = async (lng: number, lat: number) => {
+  const reverseGeocode = useCallback(async (lng: number, lat: number) => {
     const res = await fetch(
       `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxgl.accessToken}`
     );
@@ -53,7 +53,7 @@ export default function MapLocationPicker({ onSelect, initialLat, initialLng }: 
       country: get("country"),
       fullAddress: place.place_name,
     });
-  };
+  }, [onSelect]);
 
   // Init Geocoder
   useEffect(() => {
@@ -79,7 +79,7 @@ export default function MapLocationPicker({ onSelect, initialLat, initialLng }: 
 
       reverseGeocode(lng, lat);
     });
-  }, []);
+  }, [reverseGeocode]);
 
   // Sync state with props for edit mode
   useEffect(() => {

@@ -24,7 +24,7 @@ export default function Signup() {
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      handleSignUp(e as any);
+      handleSignUp(e as unknown as React.MouseEvent<HTMLButtonElement>);
     }
   };
 
