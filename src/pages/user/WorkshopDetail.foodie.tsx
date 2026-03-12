@@ -7,6 +7,7 @@ import { Minus, Plus } from 'lucide-react';
 import FoodieNavbar from '@/components/shared/foodie/Navbar.foodie';
 import { toast } from 'react-toastify';
 import { loadStripe } from '@stripe/stripe-js';
+import type { Stripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import CheckoutForm from '@/components/shared/CheckoutForm';
 import ReviewSection from '@/components/shared/ReviewPage';
@@ -17,7 +18,13 @@ import { getErrorMessage } from '@/utils/errorHandler';
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+let stripePromise: Promise<Stripe | null> | null = null;
+const getStripe = () => {
+    if (!stripePromise) {
+        stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+    }
+    return stripePromise;
+};
 
 import type { IWorkshopPopulated } from '@/types/workshop.types';
 
@@ -384,7 +391,7 @@ export default function WorkshopDetailFoodie() {
                             <p className="text-gray-500 font-medium">Complete your payment for <span className="text-gray-900 font-bold">{workshop.title}</span></p>
                         </div>
 
-                        <Elements stripe={stripePromise} options={{ clientSecret }}>
+                        <Elements stripe={getStripe()} options={{ clientSecret }}>
                             <CheckoutForm
                                 clientSecret={clientSecret}
                                 amount={workshop.price * ticketCount}
