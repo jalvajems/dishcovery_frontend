@@ -1,4 +1,5 @@
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import NotFound from "./pages/shared/NotFound";
 import AuthRoutes from "./routes/auth.routes";
 import UserRouter from "./routes/foodie.routes";
 import AdminRoutes from "./routes/admin.routes";
@@ -11,11 +12,14 @@ import { ToastContainer } from "react-toastify";
 const App: React.FC = () => {
   return (
     <BrowserRouter>
-      <PublicRoutes />
-      <AuthRoutes />
-      <UserRouter />
-      <ChefRoutes />
-      <AdminRoutes />
+      <Routes>
+        {PublicRoutes()}
+        {AuthRoutes()}
+        {UserRouter()}
+        {ChefRoutes()}
+        {AdminRoutes()}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
       <ToastContainer
         position="top-right"
         autoClose={3000}

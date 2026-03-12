@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Route } from "react-router-dom";
 import AdminLayout from "@/pages/admin/AdminLayout";
 import Dashboard from "@/pages/admin/Dashboard";
 import FoodieManagement from "@/pages/admin/FoodieManagement";
@@ -14,7 +14,7 @@ import AdminProtectedRoute from './AdminProtected.routes';
 
 export default function AdminRoutes() {
   return (
-    <Routes>
+    <>
       <Route element={<AdminProtectedRoute />}>
         <Route path="/admin-dashboard" element={<AdminLayout />}>
           <Route index element={<Dashboard />} />
@@ -28,6 +28,6 @@ export default function AdminRoutes() {
           <Route path="workshop-management/:id" element={<WorkshopDetailAdmin />} />
         </Route>
       </Route>
-    </Routes>
+    </>
   );
 }
