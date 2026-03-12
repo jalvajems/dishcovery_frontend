@@ -1,99 +1,152 @@
+import { useState } from 'react';
 import { useResetPass } from '@/hooks/auth/useResetPass';
+import { motion } from "framer-motion";
+import { Lock, Shield, Eye, EyeOff, ArrowRight, ArrowLeft } from "lucide-react";
 import logo from "../../assets/logo.png";
 
-
 export default function ResetPassword() {
-
-    const{
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    
+    const {
         formData,
         handleInputChange,
         handleLogIn,
         handleSubmit,
         errors
-    }=useResetPass()
+    } = useResetPass();
 
-  return (
-    <div className="min-h-screen bg-white">
-     {/* Header */}
-      <header className="flex justify-between items-center px-6 border-b border-gray-200">
-        <div className="flex items-center gap-2">
-         <img src={logo} alt="" className=' h-14'/>
-        </div>
-        <button
-        onClick={handleLogIn}
-        className="px-6 py-2 bg-green-100 text-green-800 rounded-md hover:bg-green-200 transition-colors">
-          Login
-        </button>
-      </header>
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        handleSubmit();
+      }
+    };
 
-      {/* Main Content */}
-      <main className="flex items-center justify-center px-4 py-20">
-        <div className="w-full max-w-lg">
-          <h1 className="text-4xl font-bold text-center mb-3">Reset Password</h1>
-          <p className="text-center text-gray-700 mb-8">enter the for digit number that send to your email</p>
-          
-          <div className="space-y-4">
-            {/* New Password Input */}
-            <div>
-              <label htmlFor="newPassword" className="block text-sm font-medium text-gray-900 mb-2">
-                New password
-              </label>
-               {errors.newPassword && (
-    <p className="text-red-600 text-sm mb-1">{errors.newPassword}</p>
-  )}
-              <input
-                type="password"
-                id="newPassword"
-                name="newPassword"
-                value={formData.newPassword}
-                onChange={handleInputChange}
-                placeholder="enter new password"
-                className="w-full px-4 py-4 bg-green-50 border border-green-100 rounded-xl text-gray-900 placeholder-green-600 focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-transparent"
-              />
-            </div>
+    return (
+        <div className="min-h-screen bg-neutral-50 flex flex-col items-center justify-center font-sans overflow-hidden relative py-12">
+            {/* Background abstract elements */}
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1 }}
+                className="fixed top-0 right-0 w-[600px] h-[600px] bg-emerald-100/40 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none"
+            />
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1 }}
+                className="fixed bottom-0 left-0 w-[500px] h-[500px] bg-teal-50/50 rounded-full blur-[80px] translate-y-1/3 -translate-x-1/3 pointer-events-none"
+            />
 
-            {/* Confirm Password Input */}
-            <div>
-
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-900 mb-2">
-                confirm password
-              </label>
-                {errors.confirmPassword && (
-    <p className="text-red-600 text-sm mb-1">{errors.confirmPassword}</p>
-  )}
-              <input
-                type="password"
-                id="confirmPassword"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                placeholder="Confirm password"
-                className="w-full px-4 py-4 bg-green-50 border border-green-100 rounded-xl text-gray-900 placeholder-green-600 focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-transparent"
-              />
-            </div>
-
-            {/* Submit Button */}
-            <div className="pt-4">
-              <button
-                onClick={handleSubmit}
-                className="w-full px-6 py-4 bg-green-500 text-black font-bold rounded-xl hover:bg-green-600 transition-colors"
-              >
-                Submit
-              </button>
-            </div>
-
-            {/* Log in Link */}
-            <div className="text-center pt-4">
-              <p className="text-green-600">
-                Remember your password?{' '}
-                <button onClick={handleLogIn} className="hover:underline font-medium">
-                  Log in
+            {/* Navbar Minimal */}
+            <div className="fixed top-0 w-full p-6 lg:px-8 flex justify-between items-center z-50">
+                <div onClick={handleLogIn} className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+                    <img src={logo} alt="Dishcovery" className="h-10 w-auto object-contain" />
+                </div>
+                <button
+                    onClick={handleLogIn}
+                    className="px-6 py-2 bg-white/80 backdrop-blur-sm border border-emerald-100 text-emerald-800 font-semibold rounded-full hover:bg-emerald-50 hover:shadow-md transition-all flex items-center gap-2">
+                    <ArrowLeft className="w-4 h-4" /> Back to Login
                 </button>
-              </p>
             </div>
-          </div>
+
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.5, type: "spring", stiffness: 100 }}
+                className="relative z-10 w-full max-w-md bg-white/80 backdrop-blur-xl shadow-2xl rounded-3xl p-8 sm:p-10 border border-white mt-8"
+            >
+                <div className="flex flex-col items-center mb-8">
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-center">
+                        <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Lock className="w-8 h-8 text-emerald-600" />
+                        </div>
+                        <h1 className="text-3xl font-extrabold text-neutral-900 tracking-tight">Setup New Password</h1>
+                        <p className="text-neutral-500 mt-2 text-sm max-w-xs mx-auto">
+                            Almost there! Please choose a new secure password for your account.
+                        </p>
+                    </motion.div>
+                </div>
+
+                <div className="space-y-6">
+                    {/* New Password */}
+                    <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.3 }}>
+                        <label className="block mb-2 text-sm font-semibold text-neutral-700">New Password</label>
+                        <div className="relative group">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <Lock className={`h-5 w-5 ${errors.newPassword ? 'text-red-400' : 'text-neutral-400 group-focus-within:text-emerald-500'} transition-colors duration-200`} />
+                            </div>
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                name="newPassword"
+                                value={formData.newPassword}
+                                onChange={handleInputChange}
+                                onKeyDown={handleKeyDown}
+                                placeholder="••••••••"
+                                className={`w-full pl-12 pr-12 py-3.5 bg-neutral-50 border ${errors.newPassword ? 'border-red-300 ring-red-100' : 'border-neutral-200 focus:border-emerald-500 focus:ring-emerald-100'} rounded-2xl outline-none focus:ring-4 transition-all duration-200 text-neutral-800 placeholder-neutral-400 font-medium tracking-wider`}
+                            />
+                            <button
+                                type="button"
+                                className="absolute inset-y-0 right-0 pr-4 flex items-center text-neutral-400 hover:text-emerald-500 transition-colors"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                            </button>
+                        </div>
+                        {errors.newPassword && (
+                            <motion.p initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-red-500 text-xs mt-2 ml-1 font-medium">{errors.newPassword}</motion.p>
+                        )}
+                    </motion.div>
+
+                    {/* Confirm Password */}
+                    <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.4 }}>
+                        <label className="block mb-2 text-sm font-semibold text-neutral-700">Confirm New Password</label>
+                        <div className="relative group">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <Shield className={`h-5 w-5 ${errors.confirmPassword ? 'text-red-400' : 'text-neutral-400 group-focus-within:text-emerald-500'} transition-colors duration-200`} />
+                            </div>
+                            <input
+                                type={showConfirmPassword ? "text" : "password"}
+                                name="confirmPassword"
+                                value={formData.confirmPassword}
+                                onChange={handleInputChange}
+                                onKeyDown={handleKeyDown}
+                                placeholder="••••••••"
+                                className={`w-full pl-12 pr-12 py-3.5 bg-neutral-50 border ${errors.confirmPassword ? 'border-red-300 ring-red-100' : 'border-neutral-200 focus:border-emerald-500 focus:ring-emerald-100'} rounded-2xl outline-none focus:ring-4 transition-all duration-200 text-neutral-800 placeholder-neutral-400 font-medium tracking-wider`}
+                            />
+                            <button
+                                type="button"
+                                className="absolute inset-y-0 right-0 pr-4 flex items-center text-neutral-400 hover:text-emerald-500 transition-colors"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            >
+                                {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                            </button>
+                        </div>
+                        {errors.confirmPassword && (
+                            <motion.p initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-red-500 text-xs mt-2 ml-1 font-medium">{errors.confirmPassword}</motion.p>
+                        )}
+                    </motion.div>
+
+                    <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.5 }} className="pt-4">
+                        <button
+                            onClick={handleSubmit}
+                            className="w-full relative group flex items-center justify-center gap-3 py-4 bg-gradient-to-r from-emerald-600 to-green-500 text-white font-bold text-lg rounded-2xl hover:scale-[1.02] transition-all duration-300 shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50"
+                        >
+                            <span>Save Password</span>
+                            <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                        </button>
+                    </motion.div>
+
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} className="text-center pt-2">
+                        <p className="text-sm font-medium text-neutral-600">
+                            Remembered your old password?{' '}
+                            <button onClick={handleLogIn} className="text-emerald-600 hover:text-emerald-700 hover:underline font-semibold transition-colors">
+                                Log in
+                            </button>
+                        </p>
+                    </motion.div>
+                </div>
+            </motion.div>
         </div>
-      </main>
-    </div>
-  );
+    );
 }

@@ -24,7 +24,7 @@ export const NotificationBell = () => {
     // Initial fetch
     useEffect(() => {
         fetchUnreadCount();
-    }, []);
+    }, [fetchUnreadCount]);
 
     const handleToggle = () => {
         if (!isOpen) {

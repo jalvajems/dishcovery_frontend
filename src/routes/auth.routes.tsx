@@ -5,13 +5,13 @@ import ResetPassword from '@/pages/auth/ResetPass'
 import Otp from '@/components/shared/auth/Otp'
 
 
-import { Route, Routes } from 'react-router-dom'
+import { Route } from 'react-router-dom'
 import AuthProtectedRoute from './auth-protected.routes'
 import AdminLogin from '@/components/shared/auth/AdminLogin'
 
 function AuthRoutes() {
   return (
-    <Routes>
+    <>
       <Route element={<AuthProtectedRoute />}>
         <Route path='/signup' element={<Signup />} />
         <Route path='/admin-login' element={<AdminLogin />} />
@@ -22,7 +22,7 @@ function AuthRoutes() {
         <Route path='/forget-otp-verify' element={<Otp />} />
         <Route path='/logout' />
       </Route>
-    </Routes>
+    </>
   )
 }
 
