@@ -3,7 +3,7 @@ import FoodieDashBoard from '@/pages/user/FoodieDashboard';
 import ChefList from '@/pages/user/ChefList.foodie';
 import ChefDetail from '@/pages/user/ChefDetail.foodie';
 import FoodieLayout from '@/pages/user/FoodieLayout';
-import { Route, Routes } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 import RecipeDetailFoodie from '@/pages/user/RecipeDetail.foodie';
 import ReviewPage from '@/components/shared/ReviewPage';
 import BlogDetailPage from '@/pages/user/BlogDetail.foodie';
@@ -31,7 +31,7 @@ import MyFoodSpotDetailPage from '@/pages/user/MyFoodSpotDetail.foodie';
 
 function UserRouter() {
     return (
-        <Routes>
+        <>
             <Route element={<ProtectedRoute />}>
                 <Route path="/foodie" element={<FoodieLayout />}>
                     <Route path="dashboard" element={<FoodieDashBoard />} />
@@ -68,7 +68,7 @@ function UserRouter() {
                 <Route path="/foodie/chat" element={<ChatPage />} />
                 <Route path="/foodie/chat/:conversationId" element={<ChatPage />} />
             </Route>
-        </Routes>
+        </>
     );
 }
 

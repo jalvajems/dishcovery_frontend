@@ -9,7 +9,7 @@ import CreateProfileChef from "@/pages/chef/AddProfile.chef";
 import EditRecipe from "@/pages/chef/EditRecipe.chef";
 import RecipeDetailPage from "@/pages/chef/RecipeDetails.chef";
 import RecipeListing from "@/pages/chef/RecipeListing.chef";
-import { Route, Routes } from "react-router-dom";
+import { Route } from "react-router-dom";
 import ChefProfileEdit from "@/pages/chef/EditProfile.chef";
 import ChefProfilePage from "@/pages/chef/Profile.chef";
 import WorkshopListChef from "@/pages/chef/WorkshopList.chef";
@@ -27,7 +27,7 @@ import ProtectedRoute from './Protected.routes';
 
 function ChefRoutes() {
     return (
-        <Routes>
+        <>
             <Route element={<ProtectedRoute />}>
                 <Route path="/chef" element={<ChefLayout />}>
                     <Route path="dashboard" element={<ChefDashboard />} />
@@ -59,7 +59,7 @@ function ChefRoutes() {
                 <Route path="/chef/chat" element={<ChatPage />} />
                 <Route path="/chef/chat/:conversationId" element={<ChatPage />} />
             </Route>
-        </Routes>
+        </>
     )
 }
 
