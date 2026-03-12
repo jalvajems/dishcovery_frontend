@@ -199,18 +199,7 @@ export default function ProfileFoodie() {
 
                 {/* Stats Row */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-6 pt-6">
-                  <div className="text-center md:text-left">
-                    <span className="block text-2xl font-black text-gray-900">{savedRecipe?.length || 0}</span>
-                    <span className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-widest">Saved Recipes</span>
-                  </div>
-                  <div className="text-center md:text-left">
-                    <span className="block text-2xl font-black text-gray-900">{savedBlogs?.length || 0}</span>
-                    <span className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-widest">Saved Blogs</span>
-                  </div>
-                  <div className="text-center md:text-left">
-                    <span className="block text-2xl font-black text-gray-900">{savedFoodSpots?.length || 0}</span>
-                    <span className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-widest">Saved Spots</span>
-                  </div>
+                  
                   <div
                     onClick={() => navigate("/foodie/followings")}
                     className="text-center md:text-left cursor-pointer group hover:opacity-80 transition-all"
