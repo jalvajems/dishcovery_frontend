@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { MapPin, Clock, Heart, Share2, Star, Navigation, Plus, UtensilsCrossed } from 'lucide-react';
+import { MapPin, Clock, Heart, Star, Navigation, Plus, UtensilsCrossed } from 'lucide-react';
 import Map, { Marker, NavigationControl } from 'react-map-gl/mapbox';
 import mapboxgl from 'mapbox-gl';
 import { getFoodSpotDetailApi } from '@/api/foodieApi';
@@ -151,9 +151,6 @@ export const MyFoodSpotDetailPage: React.FC = () => {
             <div className="flex gap-4 animate-fade-in-up delay-100">
               <button className="h-14 w-14 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white hover:text-green-600 transition-all duration-300 group">
                 <Heart className="w-6 h-6 group-hover:scale-110 transition-transform" />
-              </button>
-              <button className="h-14 w-14 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white hover:text-green-600 transition-all duration-300 group">
-                <Share2 className="w-6 h-6 group-hover:scale-110 transition-transform" />
               </button>
             </div>
           </div>
