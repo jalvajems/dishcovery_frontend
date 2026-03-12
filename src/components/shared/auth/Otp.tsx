@@ -75,13 +75,13 @@ export default function Otp() {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.3 + index * 0.1 }}
                           key={index}
-                          ref={inputRefs[index] as any}
+                          ref={inputRefs[index] as unknown as React.LegacyRef<HTMLInputElement>}
                           type="text"
                           inputMode="numeric"
                           maxLength={1}
                           value={digit}
                           onChange={(e) => handleChange(index, e.target.value)}
-                          onKeyDown={(e) => handleKeyDown(index, e as any)}
+                          onKeyDown={(e) => handleKeyDown(index, e as unknown as React.KeyboardEvent<HTMLInputElement>)}
                           className={`w-14 h-16 sm:w-16 sm:h-20 text-center text-3xl font-bold bg-neutral-50 border-2 rounded-2xl outline-none transition-all duration-200 shadow-sm
                           ${otpError ? 'border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-100 text-red-600' : 'border-neutral-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 text-neutral-800'}`}
                       />
@@ -90,7 +90,7 @@ export default function Otp() {
 
               <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.6 }} className="pt-2">
                   <button
-                      onClick={handleVerify as any}
+                      onClick={handleVerify as unknown as React.MouseEventHandler<HTMLButtonElement>}
                       className="w-full relative group flex items-center justify-center gap-3 py-4 bg-gradient-to-r from-emerald-600 to-green-500 text-white font-bold text-lg rounded-2xl hover:scale-[1.02] transition-all duration-300 shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50"
                   >
                       <span>Verify Code</span>
@@ -106,7 +106,7 @@ export default function Otp() {
                   ) : (
                       <p className="text-sm font-medium text-neutral-600">
                           Didn't receive the code?{' '}
-                          <button onClick={handleResendOtp as any} className="text-emerald-600 hover:text-emerald-700 hover:underline font-semibold transition-colors">
+                          <button onClick={handleResendOtp as unknown as React.MouseEventHandler<HTMLButtonElement>} className="text-emerald-600 hover:text-emerald-700 hover:underline font-semibold transition-colors">
                               Resend OTP
                           </button>
                       </p>
