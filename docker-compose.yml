@@ -1,0 +1,14 @@
+
+services:
+  frontend:
+    build:
+      context: .
+    ports:
+      - "8080:80"
+    networks:
+      - dishcovery-network
+
+networks:
+  dishcovery-network:
+    external: 
+      name: dishcovery-network

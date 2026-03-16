@@ -1,5 +1,3 @@
-// src/pages/admin/ChefManagement.tsx
-
 import { useAdminTable } from "@/hooks/useAdminTable";
 import SearchFilterBar from "@/components/shared/admin/SearchFilterBar";
 import ReusableTable, { type ITableColumn } from "@/components/shared/DataTable";

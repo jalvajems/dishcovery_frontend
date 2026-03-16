@@ -4,7 +4,7 @@ interface MapRefType {
 }
 import mapboxgl from "mapbox-gl";
 import { useEffect, useRef, useState, useCallback } from "react";
-import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
+// import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
@@ -55,31 +55,31 @@ export default function MapLocationPicker({ onSelect, initialLat, initialLng }: 
     });
   }, [onSelect]);
 
-  // Init Geocoder
-  useEffect(() => {
-    if (!geocoderRef.current || !mapRef.current) return;
+  // // Init Geocoder
+  // useEffect(() => {
+  //   if (!geocoderRef.current || !mapRef.current) return;
 
-    const geocoder = new MapboxGeocoder({
-      accessToken: mapboxgl.accessToken || "",
-      mapboxgl: mapboxgl as unknown as never,
-      marker: false,
-    });
+  //   const geocoder = new MapboxGeocoder({
+  //     accessToken: mapboxgl.accessToken || "",
+  //     mapboxgl: mapboxgl as unknown as never,
+  //     marker: false,
+  //   });
 
-    geocoder.addTo(geocoderRef.current);
+  //   geocoder.addTo(geocoderRef.current);
 
-    geocoder.on("result", (e) => {
-      const [lng, lat] = e.result.center;
+  //   geocoder.on("result", (e) => {
+  //     const [lng, lat] = e.result.center;
 
-      setMarker({ lng, lat });
+  //     setMarker({ lng, lat });
 
-      mapRef.current?.flyTo({
-        center: [lng, lat],
-        zoom: 15,
-      });
+  //     mapRef.current?.flyTo({
+  //       center: [lng, lat],
+  //       zoom: 15,
+  //     });
 
-      reverseGeocode(lng, lat);
-    });
-  }, [reverseGeocode]);
+  //     reverseGeocode(lng, lat);
+  //   });
+  // }, [reverseGeocode]);
 
   // Sync state with props for edit mode
   useEffect(() => {

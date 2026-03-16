@@ -20,7 +20,6 @@ export default function SearchBar({
     }, 400);
 
     return () => clearTimeout(delay);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
 
   return (
