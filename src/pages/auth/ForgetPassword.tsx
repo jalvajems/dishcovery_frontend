@@ -8,7 +8,9 @@ export default function ForgotPassword() {
         setEmail,
         email,
         handleLogIn,
-        handleSendOTP
+        handleSendOTP,
+        error,
+        setError
     } = useForgetPass();
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -71,14 +73,22 @@ export default function ForgotPassword() {
                                 <Mail className="h-5 w-5 text-neutral-400 group-focus-within:text-emerald-500 transition-colors duration-200" />
                             </div>
                             <input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                onKeyDown={handleKeyDown}
-                                placeholder="name@example.com"
-                                className="w-full pl-12 pr-4 py-3.5 bg-neutral-50 border border-neutral-200 focus:border-emerald-500 focus:ring-emerald-100 rounded-2xl outline-none focus:ring-4 transition-all duration-200 text-neutral-800 placeholder-neutral-400 font-medium"
+                                   type="email"
+                                   value={email}
+                                   onChange={(e) => {
+                                       setEmail(e.target.value);
+                                       if (error) setError('');
+                                   }}
+                                   onKeyDown={handleKeyDown}
+                                   placeholder="name@example.com"
+                                   className={`w-full pl-12 pr-4 py-3.5 bg-neutral-50 border ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-100' : 'border-neutral-200 focus:border-emerald-500 focus:ring-emerald-100'} rounded-2xl outline-none focus:ring-4 transition-all duration-200 text-neutral-800 placeholder-neutral-400 font-medium`}
                             />
                         </div>
+                        {error && (
+                            <p className="mt-2 text-sm text-red-500 font-medium animate-pulse">
+                                {error}
+                            </p>
+                        )}
                     </motion.div>
 
                     <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.4 }} className="pt-2">
