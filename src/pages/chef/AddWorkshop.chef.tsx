@@ -72,6 +72,7 @@ export default function AddWorkshopChef() {
         if (formData.description.length < 20) newErrors.description = "Description must be at least 20 chars";
         if (!formData.category) newErrors.category = "Category is required";
         if (!formData.date) newErrors.date = "Date is required";
+        if (!uploadedBanner) newErrors.uploadedBanner = "Banner is required";
 
         // Date & Time Validation
         if (formData.date) {
@@ -206,6 +207,8 @@ export default function AddWorkshopChef() {
 
                                 <div>
                                     <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Category</label>
+                                    {errors.category && <p className="text-red-500 text-xs mt-1 font-bold">{errors.category}</p>}
+
                                     <select
                                         name="category"
                                         value={formData.category}
@@ -230,6 +233,8 @@ export default function AddWorkshopChef() {
                                 <div className="w-2 h-8 bg-green-500 rounded-full"></div>
                                 Workshop Banner
                             </h2>
+                            {errors.uploadedBanner && <p className="text-red-500 text-xs mt-1 font-bold">{errors.uploadedBanner}</p>}
+
                             <div className="bg-gray-50 border border-dashed border-gray-300 rounded-3xl p-8 text-center relative hover:bg-gray-100 transition-colors group">
                                 {uploadedBanner ? (
                                     <div className="relative w-full h-64 rounded-2xl overflow-hidden shadow-lg">
@@ -310,6 +315,7 @@ export default function AddWorkshopChef() {
                                         min="15"
                                     />
                                 </div>
+                                    {errors.duration && <p className="text-red-500 text-xs mt-1 font-bold">{errors.duration}</p>}
                             </div>
                         </section>
 
@@ -350,6 +356,8 @@ export default function AddWorkshopChef() {
                                             className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-green-500 outline-none transition-all font-bold"
                                             placeholder="e.g., Green Garden Studio"
                                         />
+                                        {errors.venueName && <p className="text-red-500 text-xs mt-1 font-bold">{errors.venueName}</p>}
+
                                     </div>
                                     <div className="md:col-span-2">
                                         <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Location on Map</label>
@@ -375,6 +383,8 @@ export default function AddWorkshopChef() {
                                             readOnly
                                             className="w-full p-4 bg-gray-100 border border-gray-100 rounded-2xl outline-none text-gray-600 font-medium cursor-not-allowed"
                                         />
+                                        {errors.address && <p className="text-red-500 text-xs mt-1 font-bold">{errors.address}</p>}
+
                                     </div>
                                     <div>
                                         <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">City</label>
@@ -383,7 +393,9 @@ export default function AddWorkshopChef() {
                                             value={formData.city}
                                             readOnly
                                             className="w-full p-4 bg-gray-100 border border-gray-100 rounded-2xl outline-none text-gray-600 font-medium cursor-not-allowed"
-                                        />
+                                            />
+                                            {errors.city && <p className="text-red-500 text-xs mt-1 font-bold">{errors.city}</p>}
+
                                     </div>
                                 </div>
                             )}
@@ -408,6 +420,7 @@ export default function AddWorkshopChef() {
                                             className="w-24 p-4 bg-white border border-gray-100 rounded-2xl focus:ring-2 focus:ring-green-500 outline-none transition-all font-black text-2xl text-center"
                                             min="1"
                                         />
+
                                     </div>
                                 </div>
 
