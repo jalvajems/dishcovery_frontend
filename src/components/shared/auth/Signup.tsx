@@ -12,13 +12,11 @@ export default function Signup() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
-    agreedToTerms,
     formData,
     handleBackToLogin,
     handleGoogleSuccess,
     handleInputChange,
     handleSignUp,
-    setAgreedToTerms,
     errors,
   } = useSignup();
 
@@ -235,18 +233,8 @@ export default function Signup() {
             transition={{ delay: 0.55 }}
             className="flex items-start gap-2 pt-2"
           >
-            <div className="flex items-center h-5">
-              <input
-                type="checkbox"
-                id="terms"
-                checked={agreedToTerms}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAgreedToTerms(e.target.checked)}
-                className="w-4 h-4 text-emerald-500 bg-neutral-100 border-neutral-300 rounded focus:ring-emerald-500 cursor-pointer"
-              />
-            </div>
-            <label htmlFor="terms" className="text-sm text-neutral-600 leading-tight">
-              I agree to the <span className="text-emerald-600 hover:underline cursor-pointer">Terms of Service</span> and <span className="text-emerald-600 hover:underline cursor-pointer">Privacy Policy</span>
-            </label>
+            
+
           </motion.div>
           {errors.terms && (
               <motion.p initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-red-500 text-xs ml-6 font-medium">{errors.terms}</motion.p>
