@@ -131,6 +131,7 @@ export default function ChefDashboard() {
       if (res.data.stats) {
         setDashboardStats(res.data.stats);
       }
+console.log('----->>>>>>>>',res.data);
 
       if (!res.data.hasProfile) {
         setShowProfileModal(true);
@@ -138,7 +139,7 @@ export default function ChefDashboard() {
 
     } catch (error: unknown) {
       logError(error);
-      showError(getErrorMessage(error, 'Something went wrong'));
+      // showError(getErrorMessage(error, 'Something went wrong'));
     }
   }
 

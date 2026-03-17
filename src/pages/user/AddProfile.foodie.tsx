@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createFoodieProfileApi } from "@/api/foodieApi";
 import { showError, showSuccess } from "@/utils/toast";
 import { getErrorMessage } from "@/utils/errorHandler";
-import { MapPin, Phone, User, FileText, Image as ImageIcon, Heart } from "lucide-react";
+import { MapPin, Phone, User, FileText, Image as ImageIcon, Heart, Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAwsS3Upload } from "@/hooks/useAwsS3Upload";
 
@@ -29,6 +29,9 @@ export default function FoodieAddProfile() {
 
     }
   };
+   const removeCoverImage = () => {
+        setImage(null);
+    };
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
@@ -56,6 +59,9 @@ export default function FoodieAddProfile() {
       newErrors.bio = "Bio is required";
     } else if (bio.length < 10) {
       newErrors.bio = "Bio must be at least 10 characters";
+    }
+    if (!image?.trim()) {
+      newErrors.image = "Image  is required";
     }
 
     setErrors(newErrors);
@@ -174,24 +180,48 @@ export default function FoodieAddProfile() {
 
           {/* Image Upload */}
           <div>
-            <label className="text-sm font-medium flex items-center gap-1">
-              <ImageIcon size={16} /> Profile Image
-            </label>
-            <input
-              type="file"
-              className="w-full bg-gray-50 p-3 rounded-lg"
-              onChange={handleImageChange}
-            />
-            {image && (
-              <div className="mt-4 flex justify-center">
-                <img
-                  src={image}
-                  alt="Preview"
-                  className="w-40 h-40 object-cover rounded-xl shadow-md"
-                />
-              </div>
+                       <label className="text-sm font-medium flex items-center gap-1">
+                            <ImageIcon size={16} />
+                            Update Profile Image
+                        </label>
+                       {errors.preferences && (
+              <p className="text-red-500 text-sm mt-1">{errors.image}</p>
             )}
-          </div>
+                        {!image ? (
+                                <label className="flex flex-col items-center justify-center h-72 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-emerald-500 hover:bg-emerald-50/30 transition-all group">
+                                    <Upload className="w-14 h-14 text-gray-400 mb-4 group-hover:text-emerald-600 transition-colors group-hover:scale-110 transform" />
+                                    <span className="text-base font-medium text-gray-700 group-hover:text-emerald-700 mb-1">
+                                        Click to upload cover image
+                                    </span>
+                                    <span className="text-sm text-gray-500">
+                                        PNG, JPG, WEBP up to 10MB
+                                    </span>
+                                    <input
+                                        type="file"
+                                        className="hidden"
+                                        accept="image/*"
+                                        onChange={handleImageChange}
+                                    />
+                                </label>
+                            ) : (
+                                <div className="relative rounded-xl overflow-hidden group shadow-lg">
+                                    <img
+                                        src={image}
+                                        alt="Cover preview"
+                                        className="w-full h-96 object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <button
+                                            type="button"
+                                            onClick={removeCoverImage}
+                                            className="bg-red-500 hover:bg-red-600 text-white p-3 rounded-full shadow-2xl transform hover:scale-110 transition-all"
+                                        >
+                                            <h1>X</h1>
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                    </div>
 
           {/* Submit */}
           <button
