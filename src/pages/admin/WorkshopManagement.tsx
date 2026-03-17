@@ -161,6 +161,7 @@ export default function WorkshopManagement() {
                                 { label: "Rejected", value: "REJECTED" },
                                 { label: "Live", value: "LIVE" },
                                 { label: "Completed", value: "COMPLETED" },
+                                { label: "Expired", value: "EXPIRED" },
                             ],
                             mode: [
                                 { label: "All Modes", value: "all" },
