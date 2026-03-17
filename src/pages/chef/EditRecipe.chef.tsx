@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Upload, ChevronDown, Plus, X, ChevronRight } from 'lucide-react';
+import { Upload, ChevronDown, Plus, X, ChevronRight, ImageIcon } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { editRecipePageApi, getRecipeDetailApi } from '@/api/chefApi';
 import { showError, showSuccess } from '@/utils/toast';
@@ -82,7 +82,9 @@ export default function EditRecipe() {
 
     }
   };
-
+ const removeCoverImage = () => {
+        setUploadedImages(null);
+    };
   const addIngredient = () => {
     setIngredients([...ingredients, '']);
   };
@@ -123,6 +125,15 @@ export default function EditRecipe() {
 
     if (!formData.cuisine) {
       newErrors.cuisine = 'Cuisine is required';
+    }
+    if (!formData.tags) {
+      newErrors.tags = 'Tag is required';
+    }
+    if (!formData.dietType) {
+      newErrors.dietType = 'Diet type is required';
+    }
+    if (!uploadedImages) {
+      newErrors.image = 'Image is required';
     }
 
     if (!formData.cookingTime) {
@@ -268,6 +279,9 @@ export default function EditRecipe() {
               <label htmlFor="tags" className="block text-sm font-bold text-gray-900 mb-2">
                 Tags
               </label>
+               {errors.tags && (
+                            <p className="text-red-500 text-sm mt-1">{errors.tags}</p>
+                        )}
               <div className="relative">
                 <select
                   id="tags"
@@ -372,45 +386,58 @@ export default function EditRecipe() {
             </div>
 
             {/* Upload Images */}
-            <div>
-              <label className="block text-sm font-bold text-gray-900 mb-2">
-                Upload Images (Optional)
-              </label>
-              <div className="relative">
-                <input
-                  type="file"
-                  id="fileUpload"
-                  accept="image/*"
-                  multiple
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
-                <label
-                  htmlFor="fileUpload"
-                  className="block w-full px-6 py-16 bg-white border-2 border-dashed border-gray-300 rounded-2xl text-center cursor-pointer hover:border-green-400 hover:bg-green-50/50 transition-all group"
-                >
-                  <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4 group-hover:text-green-600 transition-colors" />
-                  <p className="text-gray-700 font-semibold mb-1">Drag and drop images here</p>
-                  <p className="text-gray-500 text-sm">Or click to browse</p>
-                  {uploadedImages && (
-                    <div className="mt-4 flex justify-center">
-                      <img
-                        src={uploadedImages}
-                        alt="Preview"
-                        className="w-40 h-40 object-cover rounded-xl shadow-md"
-                      />
+           <div>
+                       <label className="text-sm font-medium flex items-center gap-1">
+                            <ImageIcon size={16} />
+                            Update Profile Image
+                        </label>
+                       {errors.image && (
+                            <p className="text-red-500 text-sm mt-1">{errors.image}</p>
+                        )}
+                        {!uploadedImages ? (
+                                <label className="flex flex-col items-center justify-center h-72 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-emerald-500 hover:bg-emerald-50/30 transition-all group">
+                                    <Upload className="w-14 h-14 text-gray-400 mb-4 group-hover:text-emerald-600 transition-colors group-hover:scale-110 transform" />
+                                    <span className="text-base font-medium text-gray-700 group-hover:text-emerald-700 mb-1">
+                                        Click to upload cover image
+                                    </span>
+                                    <span className="text-sm text-gray-500">
+                                        PNG, JPG, WEBP up to 10MB
+                                    </span>
+                                    <input
+                                        type="file"
+                                        className="hidden"
+                                        accept="image/*"
+                                        onChange={handleFileUpload}
+                                    />
+                                </label>
+                            ) : (
+                                <div className="relative rounded-xl overflow-hidden group shadow-lg">
+                                    <img
+                                        src={uploadedImages}
+                                        alt="Cover preview"
+                                        className="w-full h-96 object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <button
+                                            type="button"
+                                            onClick={removeCoverImage}
+                                            className="bg-red-500 hover:bg-red-600 text-white p-3 rounded-full shadow-2xl transform hover:scale-110 transition-all"
+                                        >
+                                            <h1>X</h1>
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                     </div>
-                  )}
-
-                </label>
-              </div>
-            </div>
 
             {/* Tags / Diet Type */}
             <div>
               <label htmlFor="dietType" className="block text-sm font-bold text-gray-900 mb-2">
                 Tags / Diet Type
               </label>
+               {errors.dietType && (
+                            <p className="text-red-500 text-sm mt-1">{errors.dietType}</p>
+                        )}
               <div className="relative">
                 <select
                   id="dietType"
