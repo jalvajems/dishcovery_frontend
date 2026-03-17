@@ -22,7 +22,6 @@ export const useSignup = () => {
     confirmPassword: "",
   });
 
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [errors, setErrors] = useState({
     name: "",
     email: "",
@@ -72,9 +71,7 @@ export const useSignup = () => {
       newErrors.confirmPassword = "Passwords do not match";
     if (!formData.role) newErrors.role = "Role is required!"
 
-    if (!agreedToTerms)
-      newErrors.terms = "You must agree to the Terms & Conditions";
-
+   
     setErrors(newErrors);
 
 
@@ -166,9 +163,7 @@ export const useSignup = () => {
     handleSignUp,
     handleGoogleSuccess,
     handleInputChange,
-    setAgreedToTerms,
     formData,
-    agreedToTerms,
     errors,
   };
 };

@@ -9,8 +9,20 @@ export const useForgetPass = () => {
   const navigate = useNavigate()
   const { setOtpData } = useOtpStore()
   const [email, setEmail] = useState('');
+  const [error, setError] = useState('');
 
   const handleSendOTP = async () => {
+    setError('');
+    if (!email.trim()) {
+      setError("Email is required");
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Invalid email format");
+      return;
+    }
+
     try {
       setOtpData(email, 'forgotPassword')
       await forgetPassApi({ email })
@@ -30,6 +42,8 @@ export const useForgetPass = () => {
     email,
     handleLogIn,
     handleSendOTP,
+    error,
+    setError
   }
 }
 

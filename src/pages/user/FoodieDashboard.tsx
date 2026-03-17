@@ -311,8 +311,8 @@ export default function FoodieDashboard() {
 
       <ConfirmModal
         isOpen={showProfileModal}
-        title="Complete Your Chef Profile"
-        message="You need to create your chef profile before accessing the dashboard."
+        title="Complete Your Foodie Profile"
+        message="You need to create your foodie profile before accessing the dashboard."
         confirmText="Create Profile"
         cancelText="Later"
         confirmVariant="success"
