@@ -82,6 +82,7 @@ export default function BookedWorkshopDetailFoodie() {
                     </div>
                 </div>
             )}
+       
             {workshop.status === 'EXPIRED' && (
                 <div className="bg-orange-50 border-b border-orange-100 p-4 sticky top-[72px] z-40">
                     <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 text-orange-700 font-medium">
@@ -109,7 +110,7 @@ export default function BookedWorkshopDetailFoodie() {
                             }`}>
                             {workshop.mode} Session
                         </span>
-
+                            
                         <span className="px-4 py-1.5 bg-green-600 rounded-full text-[10px] font-black tracking-widest uppercase shadow-lg shadow-green-900/20 flex items-center gap-2">
                             <ShieldCheck size={12} />
                             Booking Confirmed
