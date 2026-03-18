@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Home, Search } from 'lucide-react';
 import logo from "../../assets/logo.png";
+import { STATUS_CODE } from '@/constants/StatusCode';
 
 const NotFound: React.FC = () => {
     const navigate = useNavigate();
@@ -23,7 +24,6 @@ const NotFound: React.FC = () => {
                 className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-teal-50/50 rounded-full blur-[80px] translate-y-1/3 -translate-x-1/3 pointer-events-none"
             />
 
-            {/* Navbar (simple version for 404) */}
             <div className="absolute top-0 w-full p-6 lg:px-8 flex justify-between items-center z-50">
                 <Link to="/" className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
                     <img src={logo} alt="Dishcovery" className="h-10 w-auto object-contain" />
@@ -38,7 +38,7 @@ const NotFound: React.FC = () => {
                     className="relative mb-8"
                 >
                     <h1 className="text-[150px] md:text-[200px] font-extrabold leading-none tracking-tighter bg-gradient-to-br from-emerald-600 via-green-500 to-teal-400 bg-clip-text text-transparent opacity-20 select-none">
-                        404
+                        {STATUS_CODE.NOT_FOUND}
                     </h1>
                     <div className="absolute inset-0 flex items-center justify-center">
                         <Search size={100} className="text-emerald-500 drop-shadow-xl" strokeWidth={1.5} />
