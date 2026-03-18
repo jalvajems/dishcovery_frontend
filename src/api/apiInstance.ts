@@ -1,3 +1,4 @@
+import { STATUS_CODE } from '@/constants/StatusCode';
 import { useAuthStore } from '@/store/authStore';
 import axios from 'axios'
 import type { InternalAxiosRequestConfig } from "axios";
@@ -38,13 +39,13 @@ API.interceptors.response.use(
     res => res,
     async (error) => {
         const original = error.config;
-        if (error.response?.status === 403) {
+        if (error.response?.status === STATUS_CODE.FORBIDDEN) {
             useAuthStore.getState().logout();
             setTimeout(() => {
                 window.location.href = "/login"
             }, 1000)
         }
-        if (error.response?.status === 401 && !original._retry) {
+        if (error.response?.status === STATUS_CODE.UNAUTHORIZED && !original._retry) {
 
             // Prevent refresh attempts for login and refresh endpoints
             if (original.url?.includes('/auth/login') || original.url?.includes('/auth/admin-login') || original.url?.includes('/auth/refresh') || original.url?.includes('/auth/google-auth')) {
