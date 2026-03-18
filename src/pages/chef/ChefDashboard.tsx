@@ -5,8 +5,7 @@ import { useUserStore } from "@/store/userStore";
 import { useNavigate } from "react-router-dom";
 import Pagination from "@/components/shared/Pagination";
 import ConfirmModal from "@/components/shared/ConfirmModal";
-import { getErrorMessage, logError } from "@/utils/errorHandler";
-import { showError } from "@/utils/toast";
+import {  logError } from "@/utils/errorHandler";
 
 interface Recipe {
   _id: string;

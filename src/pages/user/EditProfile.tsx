@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getFoodieProfileApi, updateFoodieProfileApi } from "@/api/foodieApi";
 import { showError, showSuccess } from "@/utils/toast";
 import { getErrorMessage, logError } from "@/utils/errorHandler";
-import { User, Phone, MapPin, FileText, Image as ImageIcon, Heart, Upload, X } from "lucide-react";
+import { User, Phone, MapPin, FileText, Image as ImageIcon, Heart, Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAwsS3Upload } from "@/hooks/useAwsS3Upload";
 
