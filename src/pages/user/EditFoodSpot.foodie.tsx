@@ -18,7 +18,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import MapLocationPicker from "@/utils/MapLocationPicker";
 import { editFoodSpotApi, getFoodSpotDetailApi } from "@/api/foodieApi";
-import { showError, showSuccess } from "@/utils/toast";
+import { showSuccess } from "@/utils/toast";
 import { getErrorMessage, logError } from "@/utils/errorHandler";
 import { useAwsS3Upload } from "@/hooks/useAwsS3Upload";
 import FoodieNavbar from "@/components/shared/foodie/Navbar.foodie";
@@ -41,6 +41,26 @@ interface LocationData {
     fullAddress: string;
 }
 
+interface FormErrors {
+    name?: string;
+    description?: string;
+    speciality?: string;
+    tag?: string;
+    coverImage?: string;
+    location?: string;
+    openingOpen?: string;
+    openingClose?: string;
+    foods?: { name?: string; price?: string; image?: string }[];
+}
+
+// Reusable inline error component
+const FieldError = ({ msg }: { msg?: string }) =>
+    msg ? (
+        <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+            <span>⚠</span> {msg}
+        </p>
+    ) : null;
+
 export default function EditFoodSpot() {
     const navigate = useNavigate();
     const { id } = useParams();
@@ -62,6 +82,7 @@ export default function EditFoodSpot() {
     const [location, setLocation] = useState<LocationData | null>(null);
     const [loading, setLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [errors, setErrors] = useState<FormErrors>({});
 
     const { uploadToS3, loading: uploadLoading } = useAwsS3Upload();
 
@@ -72,7 +93,7 @@ export default function EditFoodSpot() {
     const fetchFoodSpot = async (spotId: string) => {
         try {
             const { data } = await getFoodSpotDetailApi(spotId);
-            const spot: IFoodSpot = data.data; // Adjust based on API response structure
+            const spot: IFoodSpot = data.data;
 
             setForm({
                 name: spot.name,
@@ -105,7 +126,6 @@ export default function EditFoodSpot() {
                 });
             }
         } catch (err: unknown) {
-            showError("Failed to fetch food spot details");
             logError(err);
         } finally {
             setLoading(false);
@@ -118,7 +138,10 @@ export default function EditFoodSpot() {
     ) => {
         if (!e.target.files?.[0]) return;
         const url = await uploadToS3(e.target.files[0]);
-        if (url) cb(url);
+        if (url) {
+            cb(url);
+            setErrors((prev) => ({ ...prev, coverImage: undefined }));
+        }
     };
 
     const handleFoodImageUpload = async (
@@ -132,6 +155,15 @@ export default function EditFoodSpot() {
         const updated = [...foods];
         updated[index].image = url;
         setFoods(updated);
+
+        // Clear image error for this item
+        setErrors((prev) => {
+            const foodErrors = [...(prev.foods || [])];
+            if (foodErrors[index]) {
+                foodErrors[index] = { ...foodErrors[index], image: undefined };
+            }
+            return { ...prev, foods: foodErrors };
+        });
     };
 
     const addFood = () =>
@@ -148,14 +180,60 @@ export default function EditFoodSpot() {
         const updated = [...foods];
         updated[index][key] = value;
         setFoods(updated);
+
+        // Clear the relevant error for this food item on change
+        setErrors((prev) => {
+            const foodErrors = [...(prev.foods || [])];
+            if (foodErrors[index]) {
+                foodErrors[index] = { ...foodErrors[index], [key]: undefined };
+            }
+            return { ...prev, foods: foodErrors };
+        });
+    };
+
+    const validate = (): boolean => {
+        const newErrors: FormErrors = {};
+
+        if (!form.name.trim()) newErrors.name = "Spot name is required.";
+        if (!form.description.trim()) newErrors.description = "Please add a description.";
+        if (!form.speciality.trim()) newErrors.speciality = "Please add a speciality.";
+        if (!form.tags.trim()) newErrors.tag = "Please add at least one tag.";
+        if (!coverImage) newErrors.coverImage = "Cover image is required.";
+        if (!location) newErrors.location = "Please select a location on the map.";
+
+        if (form.openingOpen && form.openingClose && form.openingOpen >= form.openingClose) {
+            newErrors.openingClose = "Closing time must be after opening time.";
+        }
+
+        const foodErrors: { name?: string; price?: string; image?: string }[] = foods.map((f) => {
+            const err: { name?: string; price?: string; image?: string } = {};
+            if (!f.name.trim()) err.name = "Food item name is required.";
+            if (!f.image.trim()) err.image = "Food item image is required.";
+            if (f.price && isNaN(Number(f.price))) err.price = "Price must be a valid number.";
+            if (f.price && Number(f.price) < 0) err.price = "Price cannot be negative.";
+            return err;
+        });
+
+        const hasFoodErrors = foodErrors.some((e) => e.name || e.price || e.image);
+        if (hasFoodErrors) newErrors.foods = foodErrors;
+
+        setErrors(newErrors);
+        return (
+            !newErrors.name &&
+            !newErrors.description &&
+            !newErrors.speciality &&
+            !newErrors.tag &&
+            !newErrors.coverImage &&
+            !newErrors.location &&
+            !newErrors.openingClose &&
+            !hasFoodErrors
+        );
     };
 
     const handleSave = async () => {
-        try {
-            if (!form.name.trim()) return showError("Food spot name is required");
-            if (!coverImage) return showError("Cover image is required");
-            if (!location) return showError("Location is required");
+        if (!validate()) return;
 
+        try {
             setIsSubmitting(true);
 
             const payload = {
@@ -164,14 +242,14 @@ export default function EditFoodSpot() {
                 coverImage,
                 location: {
                     type: "Point",
-                    coordinates: [location.lng, location.lat],
+                    coordinates: [location!.lng, location!.lat],
                 },
                 address: {
-                    placeName: location.placeName,
-                    city: location.city,
-                    state: location.state,
-                    country: location.country,
-                    fullAddress: location.fullAddress,
+                    placeName: location!.placeName,
+                    city: location!.city,
+                    state: location!.state,
+                    country: location!.country,
+                    fullAddress: location!.fullAddress,
                 },
                 exploredFoods: foods.map((f) => ({
                     name: f.name,
@@ -191,10 +269,10 @@ export default function EditFoodSpot() {
             if (id) {
                 await editFoodSpotApi(id, payload);
                 showSuccess("Food spot updated successfully!");
-                navigate(`/foodie/spot-listing`); // Or back to detail page
+                navigate(`/foodie/spot-listing`);
             }
         } catch (err: unknown) {
-            showError(getErrorMessage(err));
+            setErrors((prev) => ({ ...prev, name: getErrorMessage(err) }));
         } finally {
             setIsSubmitting(false);
         }
@@ -256,48 +334,93 @@ export default function EditFoodSpot() {
                             </div>
 
                             <div className="space-y-4">
+                                {/* Spot Name */}
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Spot Name</label>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                                        Spot Name <span className="text-red-500">*</span>
+                                    </label>
                                     <input
                                         placeholder="e.g. The Burger Joint"
-                                        className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none"
+                                        className={`w-full px-4 py-3 bg-gray-50 rounded-xl border focus:bg-white focus:ring-2 transition-all outline-none ${
+                                            errors.name
+                                                ? "border-red-400 focus:border-red-500 focus:ring-red-200"
+                                                : "border-transparent focus:border-emerald-500 focus:ring-emerald-200"
+                                        }`}
                                         value={form.name}
-                                        onChange={(e) => setForm({ ...form, name: e.target.value })}
+                                        onChange={(e) => {
+                                            setForm({ ...form, name: e.target.value });
+                                            if (e.target.value.trim()) setErrors((prev) => ({ ...prev, name: undefined }));
+                                        }}
                                     />
+                                    <FieldError msg={errors.name} />
                                 </div>
 
+                                {/* Description */}
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Description</label>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                                        Description <span className="text-red-500">*</span>
+                                    </label>
                                     <textarea
                                         placeholder="Tell us what makes this place special..."
-                                        className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none resize-none"
+                                        className={`w-full px-4 py-3 bg-gray-50 rounded-xl border focus:bg-white focus:ring-2 transition-all outline-none resize-none ${
+                                            errors.description
+                                                ? "border-red-400 focus:border-red-500 focus:ring-red-200"
+                                                : "border-transparent focus:border-emerald-500 focus:ring-emerald-200"
+                                        }`}
                                         rows={4}
                                         value={form.description}
-                                        onChange={(e) => setForm({ ...form, description: e.target.value })}
+                                        onChange={(e) => {
+                                            setForm({ ...form, description: e.target.value });
+                                            if (e.target.value.trim()) setErrors((prev) => ({ ...prev, description: undefined }));
+                                        }}
                                     />
+                                    <FieldError msg={errors.description} />
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {/* Speciality */}
                                     <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">Speciality</label>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                                            Speciality <span className="text-red-500">*</span>
+                                        </label>
                                         <input
                                             placeholder="e.g. Wood-fired pizza"
-                                            className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none"
+                                            className={`w-full px-4 py-3 bg-gray-50 rounded-xl border focus:bg-white focus:ring-2 transition-all outline-none ${
+                                                errors.speciality
+                                                    ? "border-red-400 focus:border-red-500 focus:ring-red-200"
+                                                    : "border-transparent focus:border-emerald-500 focus:ring-emerald-200"
+                                            }`}
                                             value={form.speciality}
-                                            onChange={(e) => setForm({ ...form, speciality: e.target.value })}
+                                            onChange={(e) => {
+                                                setForm({ ...form, speciality: e.target.value });
+                                                if (e.target.value.trim()) setErrors((prev) => ({ ...prev, speciality: undefined }));
+                                            }}
                                         />
+                                        <FieldError msg={errors.speciality} />
                                     </div>
+
+                                    {/* Tags */}
                                     <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">Tags</label>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                                            Tags <span className="text-red-500">*</span>
+                                        </label>
                                         <div className="relative">
                                             <Tag className="absolute left-4 top-3.5 text-gray-400" size={16} />
                                             <input
                                                 placeholder="Italian, Casual, etc."
-                                                className="w-full pl-10 pr-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all outline-none"
+                                                className={`w-full pl-10 pr-4 py-3 bg-gray-50 rounded-xl border focus:bg-white focus:ring-2 transition-all outline-none ${
+                                                    errors.tag
+                                                        ? "border-red-400 focus:border-red-500 focus:ring-red-200"
+                                                        : "border-transparent focus:border-emerald-500 focus:ring-emerald-200"
+                                                }`}
                                                 value={form.tags}
-                                                onChange={(e) => setForm({ ...form, tags: e.target.value })}
+                                                onChange={(e) => {
+                                                    setForm({ ...form, tags: e.target.value });
+                                                    if (e.target.value.trim()) setErrors((prev) => ({ ...prev, tag: undefined }));
+                                                }}
                                             />
                                         </div>
+                                        <FieldError msg={errors.tag} />
                                     </div>
                                 </div>
                             </div>
@@ -335,13 +458,19 @@ export default function EditFoodSpot() {
                                             exit={{ opacity: 0, height: 0 }}
                                             className="group flex gap-4 items-start bg-gray-50 p-4 rounded-xl relative border border-transparent hover:border-gray-200 transition-all"
                                         >
+                                            {/* Food Image */}
                                             <div className="flex-shrink-0">
-                                                <label className="block cursor-pointer relative w-20 h-20 rounded-lg overflow-hidden bg-white border border-dashed border-gray-300 hover:border-emerald-400 transition-colors">
+                                                <label className={`block cursor-pointer relative w-20 h-20 rounded-lg overflow-hidden bg-white border border-dashed transition-colors ${
+                                                    errors.foods?.[i]?.image
+                                                        ? "border-red-400 hover:border-red-500"
+                                                        : "border-gray-300 hover:border-emerald-400"
+                                                }`}>
                                                     {food.image ? (
                                                         <img src={food.image} className="w-full h-full object-cover" alt="Food" />
                                                     ) : (
-                                                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                                            <ImageIcon size={20} />
+                                                        <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 gap-1">
+                                                            <ImageIcon size={18} />
+                                                            <span className="text-[10px]">Upload</span>
                                                         </div>
                                                     )}
                                                     <input
@@ -351,24 +480,40 @@ export default function EditFoodSpot() {
                                                         onChange={(e) => handleFoodImageUpload(i, e)}
                                                     />
                                                 </label>
+                                                <FieldError msg={errors.foods?.[i]?.image} />
                                             </div>
 
+                                            {/* Name & Price */}
                                             <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                <input
-                                                    placeholder="Item Name"
-                                                    className="w-full px-3 py-2 bg-white rounded-lg border border-gray-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-200 outline-none text-sm"
-                                                    value={food.name}
-                                                    onChange={(e) => updateFood(i, "name", e.target.value)}
-                                                />
-                                                <div className="relative">
-                                                    <DollarSign className="absolute left-3 top-2.5 text-gray-400" size={14} />
+                                                <div>
                                                     <input
-                                                        placeholder="Price"
-                                                        type="number"
-                                                        className="w-full pl-8 pr-3 py-2 bg-white rounded-lg border border-gray-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-200 outline-none text-sm"
-                                                        value={food.price}
-                                                        onChange={(e) => updateFood(i, "price", e.target.value)}
+                                                        placeholder="Item Name *"
+                                                        className={`w-full px-3 py-2 bg-white rounded-lg border focus:ring-1 outline-none text-sm transition-all ${
+                                                            errors.foods?.[i]?.name
+                                                                ? "border-red-400 focus:border-red-500 focus:ring-red-200"
+                                                                : "border-gray-200 focus:border-emerald-500 focus:ring-emerald-200"
+                                                        }`}
+                                                        value={food.name}
+                                                        onChange={(e) => updateFood(i, "name", e.target.value)}
                                                     />
+                                                    <FieldError msg={errors.foods?.[i]?.name} />
+                                                </div>
+                                                <div>
+                                                    <div className="relative">
+                                                        <DollarSign className="absolute left-3 top-2.5 text-gray-400" size={14} />
+                                                        <input
+                                                            placeholder="Price"
+                                                            type="number"
+                                                            className={`w-full pl-8 pr-3 py-2 bg-white rounded-lg border focus:ring-1 outline-none text-sm transition-all ${
+                                                                errors.foods?.[i]?.price
+                                                                    ? "border-red-400 focus:border-red-500 focus:ring-red-200"
+                                                                    : "border-gray-200 focus:border-emerald-500 focus:ring-emerald-200"
+                                                            }`}
+                                                            value={food.price}
+                                                            onChange={(e) => updateFood(i, "price", e.target.value)}
+                                                        />
+                                                    </div>
+                                                    <FieldError msg={errors.foods?.[i]?.price} />
                                                 </div>
                                             </div>
 
@@ -393,21 +538,28 @@ export default function EditFoodSpot() {
                             transition={{ delay: 0.2 }}
                             className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100"
                         >
-                            <div className="flex items-center gap-3 mb-6">
+                            <div className="flex items-center gap-3 mb-4">
                                 <div className="p-2 bg-blue-50 rounded-lg">
                                     <MapPin className="text-blue-600" size={20} />
                                 </div>
-                                <h2 className="text-lg font-bold text-gray-800">Location</h2>
+                                <h2 className="text-lg font-bold text-gray-800">
+                                    Location <span className="text-red-500">*</span>
+                                </h2>
                             </div>
 
-                            <div className="rounded-xl overflow-hidden border border-gray-200">
-                                {/* Pass initialLat/Lng if available to center the map on existing location */}
+                            <div className={`rounded-xl overflow-hidden border transition-all ${
+                                errors.location ? "border-red-400" : "border-gray-200"
+                            }`}>
                                 <MapLocationPicker
-                                    onSelect={(data: LocationData) => setLocation(data)}
+                                    onSelect={(data: LocationData) => {
+                                        setLocation(data);
+                                        setErrors((prev) => ({ ...prev, location: undefined }));
+                                    }}
                                     initialLat={location?.lat}
                                     initialLng={location?.lng}
                                 />
                             </div>
+                            <FieldError msg={errors.location} />
 
                             {location && (
                                 <div className="mt-4 p-4 bg-gray-50 rounded-xl flex items-start gap-3 text-sm text-gray-600">
@@ -429,7 +581,7 @@ export default function EditFoodSpot() {
                             className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100"
                         >
                             <h2 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                                <Camera size={18} /> Cover Image
+                                <Camera size={18} /> Cover Image <span className="text-red-500">*</span>
                             </h2>
 
                             {coverImage ? (
@@ -437,7 +589,10 @@ export default function EditFoodSpot() {
                                     <img src={coverImage} alt="Cover" className="w-full h-full object-cover" />
                                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
                                         <button
-                                            onClick={() => setCoverImage("")}
+                                            onClick={() => {
+                                                setCoverImage("");
+                                                setErrors((prev) => ({ ...prev, coverImage: "Cover image is required." }));
+                                            }}
                                             className="p-2 bg-white text-red-500 rounded-full hover:bg-red-50 transition-all shadow-lg"
                                         >
                                             <X size={20} />
@@ -446,9 +601,16 @@ export default function EditFoodSpot() {
                                 </div>
                             ) : (
                                 <label className="block cursor-pointer group">
-                                    <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center hover:border-emerald-400 hover:bg-emerald-50/50 transition-all h-48 flex flex-col items-center justify-center gap-3">
+                                    <div className={`border-2 border-dashed rounded-xl p-8 text-center transition-all h-48 flex flex-col items-center justify-center gap-3 ${
+                                        errors.coverImage
+                                            ? "border-red-400 bg-red-50/30 hover:border-red-500"
+                                            : "border-gray-200 hover:border-emerald-400 hover:bg-emerald-50/50"
+                                    }`}>
                                         <div className="p-3 bg-gray-50 rounded-full group-hover:bg-white transition-colors">
-                                            <Upload className="text-gray-400 group-hover:text-emerald-500" size={24} />
+                                            <Upload
+                                                className={errors.coverImage ? "text-red-400" : "text-gray-400 group-hover:text-emerald-500"}
+                                                size={24}
+                                            />
                                         </div>
                                         <div>
                                             <p className="text-sm font-semibold text-gray-700">Click to upload</p>
@@ -463,6 +625,7 @@ export default function EditFoodSpot() {
                                     />
                                 </label>
                             )}
+                            <FieldError msg={errors.coverImage} />
                         </motion.div>
 
                         {/* Opening Hours Card */}
@@ -481,19 +644,35 @@ export default function EditFoodSpot() {
                                     <label className="block text-xs font-semibold text-gray-500 mb-1">OPENS AT</label>
                                     <input
                                         type="time"
-                                        className="w-full px-4 py-2 bg-gray-50 rounded-lg border-transparent focus:bg-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-200 transition-all outline-none"
+                                        className={`w-full px-4 py-2 bg-gray-50 rounded-lg border focus:bg-white focus:ring-1 transition-all outline-none ${
+                                            errors.openingOpen
+                                                ? "border-red-400 focus:border-red-500 focus:ring-red-200"
+                                                : "border-transparent focus:border-emerald-500 focus:ring-emerald-200"
+                                        }`}
                                         value={form.openingOpen}
-                                        onChange={(e) => setForm({ ...form, openingOpen: e.target.value })}
+                                        onChange={(e) => {
+                                            setForm({ ...form, openingOpen: e.target.value });
+                                            setErrors((prev) => ({ ...prev, openingOpen: undefined, openingClose: undefined }));
+                                        }}
                                     />
+                                    <FieldError msg={errors.openingOpen} />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-semibold text-gray-500 mb-1">CLOSES AT</label>
                                     <input
                                         type="time"
-                                        className="w-full px-4 py-2 bg-gray-50 rounded-lg border-transparent focus:bg-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-200 transition-all outline-none"
+                                        className={`w-full px-4 py-2 bg-gray-50 rounded-lg border focus:bg-white focus:ring-1 transition-all outline-none ${
+                                            errors.openingClose
+                                                ? "border-red-400 focus:border-red-500 focus:ring-red-200"
+                                                : "border-transparent focus:border-emerald-500 focus:ring-emerald-200"
+                                        }`}
                                         value={form.openingClose}
-                                        onChange={(e) => setForm({ ...form, openingClose: e.target.value })}
+                                        onChange={(e) => {
+                                            setForm({ ...form, openingClose: e.target.value });
+                                            setErrors((prev) => ({ ...prev, openingClose: undefined }));
+                                        }}
                                     />
+                                    <FieldError msg={errors.openingClose} />
                                 </div>
                             </div>
                         </motion.div>

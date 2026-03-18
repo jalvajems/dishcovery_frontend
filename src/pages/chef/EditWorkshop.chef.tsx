@@ -222,6 +222,8 @@ export default function EditWorkshopChef() {
                                         onChange={handleInputChange}
                                         className={`w-full p-4 bg-gray-50 border ${errors.title ? 'border-red-300' : 'border-gray-100'} rounded-2xl focus:ring-2 focus:ring-green-500 outline-none transition-all font-bold`}
                                     />
+                                                                        {errors.title && <p className="text-red-500 text-xs mt-1 font-bold">{errors.title}</p>}
+
                                 </div>
 
                                 <div>
@@ -232,10 +234,14 @@ export default function EditWorkshopChef() {
                                         onChange={handleInputChange}
                                         className={`w-full p-4 bg-gray-50 border ${errors.description ? 'border-red-300' : 'border-gray-100'} rounded-2xl h-32 focus:ring-2 focus:ring-green-500 outline-none transition-all font-medium resize-none`}
                                     ></textarea>
+                                                                        {errors.description && <p className="text-red-500 text-xs mt-1 font-bold">{errors.description}</p>}
+
                                 </div>
 
                                 <div>
                                     <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Category</label>
+                                                                        {errors.category && <p className="text-red-500 text-xs mt-1 font-bold">{errors.category}</p>}
+
                                     <select
                                         name="category"
                                         value={formData.category}
@@ -258,6 +264,8 @@ export default function EditWorkshopChef() {
                                 <div className="w-2 h-8 bg-green-500 rounded-full"></div>
                                 Workshop Banner
                             </h2>
+                                                                {errors.uploadedBanner && <p className="text-red-500 text-xs mt-1 font-bold">{errors.uploadedBanner}</p>}
+
                             <div className="bg-gray-50 border border-dashed border-gray-300 rounded-3xl p-8 text-center relative hover:bg-gray-100 transition-colors group">
                                 {uploadedBanner ? (
                                     <div className="relative w-full h-64 rounded-2xl overflow-hidden shadow-lg">
@@ -297,6 +305,8 @@ export default function EditWorkshopChef() {
                                 <div className="w-2 h-8 bg-green-500 rounded-full"></div>
                                 Date & Time
                             </h2>
+                                                                {errors.date && <p className="text-red-500 text-xs mt-1 font-bold">{errors.date}</p>}
+
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div>
                                     <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Date</label>
@@ -310,6 +320,8 @@ export default function EditWorkshopChef() {
                                 </div>
                                 <div>
                                     <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Start Time</label>
+                                                                        {errors.startTime && <p className="text-red-500 text-xs mt-1 font-bold">{errors.startTime}</p>}
+
                                     <input
                                         type="time"
                                         name="startTime"
@@ -320,6 +332,8 @@ export default function EditWorkshopChef() {
                                 </div>
                                 <div>
                                     <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Duration (mins)</label>
+                                                                        {errors.duration && <p className="text-red-500 text-xs mt-1 font-bold">{errors.duration}</p>}
+
                                     <input
                                         type="number"
                                         name="duration"
@@ -367,6 +381,8 @@ export default function EditWorkshopChef() {
                                             onChange={handleInputChange}
                                             className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-green-500 outline-none transition-all font-bold"
                                         />
+                                                                            {errors.venueName && <p className="text-red-500 text-xs mt-1 font-bold">{errors.venueName}</p>}
+
                                     </div>
                                     <div className="md:col-span-2">
                                         <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Location on Map</label>
@@ -394,6 +410,8 @@ export default function EditWorkshopChef() {
                                             readOnly
                                             className="w-full p-4 bg-gray-100 border border-gray-100 rounded-2xl outline-none text-gray-600 font-medium cursor-not-allowed"
                                         />
+                                                                            {errors.address && <p className="text-red-500 text-xs mt-1 font-bold">{errors.address}</p>}
+
                                     </div>
                                     <div>
                                         <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">City</label>
@@ -403,6 +421,8 @@ export default function EditWorkshopChef() {
                                             readOnly
                                             className="w-full p-4 bg-gray-100 border border-gray-100 rounded-2xl outline-none text-gray-600 font-medium cursor-not-allowed"
                                         />
+                                                                            {errors.city && <p className="text-red-500 text-xs mt-1 font-bold">{errors.city}</p>}
+
                                     </div>
                                 </div>
                             )}

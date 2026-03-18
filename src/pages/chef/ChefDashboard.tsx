@@ -5,8 +5,7 @@ import { useUserStore } from "@/store/userStore";
 import { useNavigate } from "react-router-dom";
 import Pagination from "@/components/shared/Pagination";
 import ConfirmModal from "@/components/shared/ConfirmModal";
-import { getErrorMessage, logError } from "@/utils/errorHandler";
-import { showError } from "@/utils/toast";
+import {  logError } from "@/utils/errorHandler";
 
 interface Recipe {
   _id: string;
@@ -131,6 +130,7 @@ export default function ChefDashboard() {
       if (res.data.stats) {
         setDashboardStats(res.data.stats);
       }
+console.log('----->>>>>>>>',res.data);
 
       if (!res.data.hasProfile) {
         setShowProfileModal(true);
@@ -138,7 +138,7 @@ export default function ChefDashboard() {
 
     } catch (error: unknown) {
       logError(error);
-      showError(getErrorMessage(error, 'Something went wrong'));
+      // showError(getErrorMessage(error, 'Something went wrong'));
     }
   }
 

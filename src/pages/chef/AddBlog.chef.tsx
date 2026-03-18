@@ -12,6 +12,7 @@ type BlogErrors = {
   shortDescription?: string;
   content?: string;
   coverImage?: string;
+  tags?:string;
 };
 
 const SUGGESTED_TAGS = [
@@ -68,6 +69,7 @@ const AddNewBlog: React.FC = () => {
     if (content.length < 20) newErrors.content = "At least 20 characters needed";
     if (!content.trim()) newErrors.content = "Content is required";
     if (!coverImage) newErrors.coverImage = "Cover image is required";
+    if (!tags.length) newErrors.tags = "Tag is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -287,7 +289,7 @@ const AddNewBlog: React.FC = () => {
                 }}
                 placeholder="Write your full blog content here. Share your recipes, cooking techniques, tips, and culinary stories..."
                 className="w-full px-4 py-3.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all resize-none hover:border-emerald-300"
-              />
+                />
             </div>
 
             {/* Tags with Dropdown */}
@@ -297,8 +299,14 @@ const AddNewBlog: React.FC = () => {
                 <label className="block text-base font-semibold text-gray-800">
                   Tags
                 </label>
+                
               </div>
-
+{errors.tags && (
+                <p className="text-red-500 text-sm mb-2 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                  {errors.tags}
+                </p>
+              )}
               <div className="relative">
                 <div className="flex gap-3">
                   <div className="flex-1 relative">
