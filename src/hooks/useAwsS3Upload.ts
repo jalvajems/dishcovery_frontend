@@ -1,4 +1,4 @@
-import axios from 'axios'
+import API from '../api/apiInstance';
 
 import { useState } from "react";
 
@@ -18,7 +18,7 @@ export const useAwsS3Upload=():UploadResult=>{
             setLoading(true);
             setError(null);
 
-            const {data}=await axios.post('/api/file/file-upload',{
+            const {data}=await API.post('/file/file-upload',{
                     fileName: file.name,
                     fileType: file.type,
                 });
