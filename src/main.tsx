@@ -8,9 +8,14 @@ import { SocketProvider } from './context/SocketProvider.tsx';
 
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+if (!googleClientId) {
+  console.error("VITE_GOOGLE_CLIENT_ID is missing from environment variables. Google Authentication will not work.");
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ""}>
+    <GoogleOAuthProvider clientId={googleClientId || ""}>
       <SocketProvider>
         <App />
       </SocketProvider>
