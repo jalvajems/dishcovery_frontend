@@ -2,7 +2,11 @@
 FROM node:18-alpine AS builder
 
 WORKDIR /usr/src/app
-
+ 
+# Add build arguments for Vite environment variables
+ARG VITE_GOOGLE_CLIENT_ID
+ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
+ 
 # Copy package.json and package-lock.json (if available)
 COPY package*.json ./
 
