@@ -150,7 +150,7 @@ const LiveSession = () => {
                     peer.on('close', () => console.log('PEER CLOSED (Initiator) with:', userToSignal));
 
                     // Add ICE logging for production debugging
-                    // @ts-ignore - access internal RTC connection
+                    // @ts-expect-error - access internal RTC connection
                     const conn = peer._pc as RTCPeerConnection;
                     if (conn) {
                         conn.oniceconnectionstatechange = () => console.log(`ICE State (${userToSignal}):`, conn.iceConnectionState);
@@ -196,7 +196,7 @@ const LiveSession = () => {
                     peer.on('close', () => console.log('PEER CLOSED (Answerer) with:', callerId));
 
                     // Add ICE logging for production debugging
-                    // @ts-ignore
+                    // @ts-expect-error
                     const conn = peer._pc as RTCPeerConnection;
                     if (conn) {
                         conn.oniceconnectionstatechange = () => console.log(`ICE State (${callerId}):`, conn.iceConnectionState);
