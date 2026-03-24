@@ -77,7 +77,7 @@ const ChatPage: React.FC = () => {
                 `}>
                     <ChatList 
                         conversations={conversations}
-                        activeConversationId={activeConversation?._id}
+                        activeConversationId={activeConversation?._id || null}
                         onSelectConversation={handleSelectConversation}
                     />
                 </div>
