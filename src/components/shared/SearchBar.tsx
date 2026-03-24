@@ -20,7 +20,7 @@ export default function SearchBar({
     }, 400);
 
     return () => clearTimeout(delay);
-  }, [query, onSearch]);
+  }, [query]);
 
   return (
     <div className="relative w-full max-w-2xl mx-auto">
