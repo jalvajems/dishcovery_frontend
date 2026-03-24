@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, Clock, MapPin, Users, Ticket, ShieldCheck, Zap, X, Video, Play, ArrowLeft } from 'lucide-react';
+import { Calendar, Clock, MapPin, Users, Ticket, ShieldCheck, Zap, X, Video, Play, ArrowLeft, MessageSquare } from 'lucide-react';
 import { getWorkshopByIdApi } from '@/api/workshopApi';
 import FoodieNavbar from '@/components/shared/foodie/Navbar.foodie';
 import { toast } from 'react-toastify';
@@ -9,18 +9,29 @@ import Map, { Marker } from 'react-map-gl/mapbox';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { getErrorMessage } from '@/utils/errorHandler';
+import { useChatStore } from '@/store/chatStore';
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
 import type { IWorkshopPopulated } from '@/types/workshop.types';
-
-// ... imports
 
 export default function BookedWorkshopDetailFoodie() {
     const { id } = useParams();
     const navigate = useNavigate();
     const [workshop, setWorkshop] = useState<IWorkshopPopulated | null>(null);
     const [loading, setLoading] = useState(true);
+
+    const handleMessageChef = async () => {
+        try {
+            if (!workshop?.chefId?._id) return;
+            const conversation = await useChatStore.getState().createOrGetConversation(workshop.chefId._id, 'chef');
+            if (conversation) {
+                navigate(`/foodie/chat/${conversation._id}`);
+            }
+        } catch (error) {
+            toast.error(getErrorMessage(error, "Failed to initiate chat"));
+        }
+    };
 
     useEffect(() => {
         async function fetchDetails() {
@@ -37,8 +48,6 @@ export default function BookedWorkshopDetailFoodie() {
         fetchDetails();
         window.scrollTo(0, 0);
     }, [id]);
-    console.log('workshop=====', workshop);
-
 
     if (loading) {
         return (
@@ -52,8 +61,6 @@ export default function BookedWorkshopDetailFoodie() {
     }
 
     if (!workshop) return <div className="p-20 text-center">Workshop not found</div>;
-
-
 
     return (
         <div className="min-h-screen bg-[#fcfcfc]">
@@ -347,9 +354,17 @@ export default function BookedWorkshopDetailFoodie() {
                                             <ShieldCheck size={24} />
                                         </div>
                                         <p className="font-black text-green-800 text-lg mb-1">You're All Set!</p>
-                                        <p className="text-green-700/70 text-xs font-bold leading-relaxed px-4">
+                                        <p className="text-green-700/70 text-xs font-bold leading-relaxed px-4 mb-4">
                                             your spot is reserved. We'll send you a reminder before the session starts.
                                         </p>
+                                        
+                                        <button
+                                            onClick={handleMessageChef}
+                                            className="w-full py-3 bg-white border border-green-200 text-green-600 rounded-xl font-bold text-sm hover:bg-green-50 transition-all flex items-center justify-center gap-2 shadow-sm"
+                                        >
+                                            <MessageSquare size={16} />
+                                            Message Chef
+                                        </button>
                                     </div>
                                 )}
 

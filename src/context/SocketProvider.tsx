@@ -22,6 +22,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     useEffect(() => {
         if (!token || !user) {
             if (socketRef.current) {
+                console.log('Disconnecting global socket...');
                 socketRef.current.disconnect();
                 socketRef.current = null;
                 setIsConnected(false);
@@ -30,10 +31,25 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }
 
         if (!socketRef.current) {
-            const socketUrl = import.meta.env.PROD ? '/' : 'http://localhost:4000';
+            const getSocketUrl = () => {
+                if (import.meta.env.VITE_API_URL) {
+                    try {
+                        const url = new URL(import.meta.env.VITE_API_URL);
+                        return url.origin;
+                    } catch (e) {
+                        console.error("Invalid VITE_API_URL:", e);
+                    }
+                }
+                return import.meta.env.PROD ? window.location.origin : 'http://localhost:4000';
+            };
+
+            const socketUrl = getSocketUrl();
+            console.log('Connecting to global socket server at:', socketUrl);
+
             socketRef.current = io(socketUrl, {
                 auth: { token },
                 transports: ['websocket'],
+                path: '/socket.io',
                 reconnection: true,
                 reconnectionAttempts: 5,
                 reconnectionDelay: 1000
@@ -50,16 +66,20 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             });
 
             socketRef.current.on('notification:new', (notification) => {
+                console.log('New notification received:', notification);
                 addNotification(notification);
                 fetchUnreadCount();
-                toast.info(notification.message, {
-                    onClick: () => {
-                    }
-                });
+                toast.info(notification.message);
+            });
+            
+            socketRef.current.on('connect_error', (error) => {
+                console.error('Global Socket connection error:', error);
             });
         }
 
         return () => {
+            // We usually want the socket to persist across page navigations if the user is still logged in
+            // so we don't disconnect here unless we specifically want to.
         };
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token, user]);
