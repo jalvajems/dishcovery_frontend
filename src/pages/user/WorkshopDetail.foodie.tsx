@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, Clock, MapPin, Users, ArrowRight, ShieldCheck, Zap, X, Loader2 } from 'lucide-react';
+import { Calendar, Clock, MapPin, Users, ArrowRight, ShieldCheck, Zap, X, Loader2, MessageSquare } from 'lucide-react';
 import { getWorkshopByIdApi } from '@/api/workshopApi';
 import { bookWorkshopApi } from '@/api/bookingApi';
 import { Minus, Plus } from 'lucide-react';
@@ -15,6 +15,7 @@ import Map, { Marker } from 'react-map-gl/mapbox';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { getErrorMessage } from '@/utils/errorHandler';
+import { useChatStore } from '@/store/chatStore';
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
@@ -38,6 +39,18 @@ export default function WorkshopDetailFoodie() {
     const [clientSecret, setClientSecret] = useState<string | null>(null);
     const [ticketCount, setTicketCount] = useState(1);
 
+    const handleMessageChef = async () => {
+        try {
+            if (!workshop?.chefId?._id) return;
+            const conversation = await useChatStore.getState().createOrGetConversation(workshop.chefId._id, 'chef');
+            if (conversation) {
+                navigate(`/foodie/chat/${conversation._id}`);
+            }
+        } catch (error) {
+            toast.error(getErrorMessage(error, "Failed to initiate chat"));
+        }
+    };
+
     useEffect(() => {
         async function fetchDetails() {
             try {
@@ -53,8 +66,6 @@ export default function WorkshopDetailFoodie() {
         fetchDetails();
         window.scrollTo(0, 0);
     }, [id]);
-
-    // ... (rest of the component logic)
 
     const handleBooking = async () => {
         try {
@@ -76,9 +87,7 @@ export default function WorkshopDetailFoodie() {
             setBookingLoading(false);
         }
     };
-    console.log('00=====',bookWorkshopApi);
     
-
     if (loading) {
         return (
             <div className="flex h-screen items-center justify-center bg-white">
@@ -249,7 +258,18 @@ export default function WorkshopDetailFoodie() {
                                     <h3 className="text-sm font-black text-gray-400 uppercase tracking-[0.3em] mb-2 font-black">Meet your host</h3>
                                     <h4 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">{workshop.chefId?.name || 'Professional Chef'}</h4>
                                     <p className="text-gray-500 font-medium leading-relaxed max-w-xl">A world-class culinary expert dedicated to bringing the finest flavors to your table. Specializing in {workshop.category} and passionate about interactive teaching.</p>
-                                    <button className="mt-8 text-green-600 font-black text-xs uppercase tracking-widest border-b-2 border-green-200 py-1 hover:border-green-600 transition-all">View Full Profile</button>
+                                    <div className="flex gap-4 mt-8">
+                                        <button className="text-green-600 font-black text-xs uppercase tracking-widest border-b-2 border-green-200 py-1 hover:border-green-600 transition-all">
+                                            View Full Profile
+                                        </button>
+                                        <button 
+                                            onClick={handleMessageChef}
+                                            className="flex items-center gap-2 px-6 py-2.5 bg-white border border-gray-200 text-gray-900 rounded-full font-black text-xs uppercase tracking-widest hover:border-green-400 hover:text-green-600 transition-all shadow-sm"
+                                        >
+                                            <MessageSquare size={14} />
+                                            Message Chef
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </section>
@@ -315,7 +335,7 @@ export default function WorkshopDetailFoodie() {
                                         </div>
                                     </div>
                                 )}
-                                { }
+                                
                                 <div className="mb-10 text-center bg-gray-50 p-6 rounded-3xl border border-gray-100">
                                     <div className="flex items-center justify-center gap-2 mb-1">
                                         <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{workshop.mode} Session</span>

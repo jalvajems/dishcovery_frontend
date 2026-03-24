@@ -81,10 +81,25 @@ const LiveSession = () => {
                 setStream(currentStream);
                 streamRef.current = currentStream;
 
-                const socketUrl = import.meta.env.PROD ? '/' : 'http://localhost:4000';
+                const getSocketUrl = () => {
+                    if (import.meta.env.VITE_API_URL) {
+                        try {
+                            const url = new URL(import.meta.env.VITE_API_URL);
+                            return url.origin; // Use the base origin of the API URL
+                        } catch (e) {
+                            console.error("Invalid VITE_API_URL:", e);
+                        }
+                    }
+                    return import.meta.env.PROD ? window.location.origin : 'http://localhost:4000';
+                };
+
+                const socketUrl = getSocketUrl();
+                console.log('Connecting to socket server at:', socketUrl);
+
                 socketRef.current = io(socketUrl, {
                     auth: { token },
-                    transports: ['websocket']
+                    transports: ['websocket'],
+                    path: '/socket.io'
                 });
 
                 socketRef.current.on('connect', async () => {
@@ -106,7 +121,13 @@ const LiveSession = () => {
                         config: {
                             iceServers: [
                                 { urls: 'stun:stun.l.google.com:19302' },
-                                { urls: 'stun:global.stun.twilio.com:3478' }
+                                { urls: 'stun:global.stun.twilio.com:3478' },
+                                // Common free TURN server (OpenRelay) - better to use a dedicated provider for production
+                                {
+                                    urls: 'turn:openrelay.metered.ca:443',
+                                    username: 'openrelayproject',
+                                    credential: 'openrelayproject'
+                                }
                             ]
                         }
                     });
@@ -139,7 +160,12 @@ const LiveSession = () => {
                         config: {
                             iceServers: [
                                 { urls: 'stun:stun.l.google.com:19302' },
-                                { urls: 'stun:global.stun.twilio.com:3478' }
+                                { urls: 'stun:global.stun.twilio.com:3478' },
+                                {
+                                    urls: 'turn:openrelay.metered.ca:443',
+                                    username: 'openrelayproject',
+                                    credential: 'openrelayproject'
+                                }
                             ]
                         }
                     });
@@ -188,6 +214,11 @@ const LiveSession = () => {
 
                     if (normalizedJoinerId === myId) return;
 
+                    console.log(`New participant joined: ${normalizedJoinerId} (${data.role})`);
+                    
+                    // We don't initiate here because the joiner initiates for everyone in 'all-users'.
+                    // But we could add them to the peers list (waiting for their signal) if we wanted to show them "connecting"
+                    // Or just let 'webrtc-signal' handle it when it arrives.
                 });
 
                 socketRef.current.on('webrtc-signal', (data: { from: string, signal: SignalData }) => {
