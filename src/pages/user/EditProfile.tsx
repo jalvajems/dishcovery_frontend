@@ -17,7 +17,10 @@ export default function FoodieEditProfile() {
         lng: 77.5946,
         address: ""
     });
-    const [preferences, setPreferences] = useState<string[]>([]);
+    const [preferences, setPreferences] = useState({
+        recipeCategory: [] as string[],
+        blogTags: [] as string[]
+    });
     const [bio, setBio] = useState("");
     const [image, setImage] = useState<string | null>(null);
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -43,7 +46,15 @@ export default function FoodieEditProfile() {
                     setLocation(prev => ({ ...prev, address: profile.location || "" }));
                 }
 
-                setPreferences(profile.preferences ?? []);
+                const prefs = profile.preferences;
+                if (prefs && typeof prefs === 'object' && !Array.isArray(prefs)) {
+                    setPreferences({
+                        recipeCategory: Array.isArray(prefs.recipeCategory) ? prefs.recipeCategory : [],
+                        blogTags: Array.isArray(prefs.blogTags) ? prefs.blogTags : []
+                    });
+                } else {
+                    setPreferences({ recipeCategory: [], blogTags: [] });
+                }
                 setBio(profile.bio ?? "");
                 setImage(profile.image ?? null);
 
@@ -89,8 +100,8 @@ export default function FoodieEditProfile() {
             newErrors.location = "Please select a location on the map";
         }
 
-        if (!preferences.length) {
-            newErrors.preferences = "Please select a food preference";
+        if (preferences.recipeCategory.length === 0 && preferences.blogTags.length === 0) {
+            newErrors.preferences = "Please select at least one food preference or blog tag";
         }
         if (!image) {
             newErrors.image = "Please add image";
@@ -219,26 +230,65 @@ export default function FoodieEditProfile() {
                     </div>
 
                     {/* Preferences */}
-                    <div>
+                    <div className="space-y-4">
                         <label className="text-sm font-medium flex items-center gap-1">
-                            <Heart size={16} className="text-red-500" />
-                            Food Preferences
+                            <Heart size={16} className="text-red-500" /> My Culinary Interests
                         </label>
                         {errors.preferences && (
                             <p className="text-red-500 text-sm mt-1">{errors.preferences}</p>
                         )}
 
-                        <select
-                            className="w-full bg-gray-50 p-3 rounded-lg outline-none"
-                            value={preferences[0] || ""}
-                            onChange={(e) => setPreferences([e.target.value])}
-                        >
-                            <option value="">Select Preference</option>
-                            <option value="Veg">Veg</option>
-                            <option value="Non-Veg">Non-Veg</option>
-                            <option value="Chef Specials">Chef Specials</option>
-                        </select>
+                        {/* Recipe Categories */}
+                        <div className="space-y-3">
+                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Recipe Categories</p>
+                            <div className="flex flex-wrap gap-2">
+                                {["Italian", "Arabic", "Thai", "Mexican", "Chinese", "Indian", "Quick & Easy", "Vegetarian", "Vegan"].map((cat) => (
+                                    <button
+                                        key={cat}
+                                        type="button"
+                                        onClick={() => {
+                                            const newCats = preferences.recipeCategory.includes(cat)
+                                                ? preferences.recipeCategory.filter(c => c !== cat)
+                                                : [...preferences.recipeCategory, cat];
+                                            setPreferences({ ...preferences, recipeCategory: newCats });
+                                        }}
+                                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-all border-2 ${
+                                            preferences.recipeCategory.includes(cat)
+                                                ? "bg-emerald-500 border-emerald-500 text-white shadow-md shadow-emerald-200"
+                                                : "bg-white border-gray-100 text-gray-600 hover:border-emerald-200"
+                                        }`}
+                                    >
+                                        {cat}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
 
+                        {/* Blog Tags */}
+                        <div className="space-y-3">
+                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Blog Tags</p>
+                            <div className="flex flex-wrap gap-2">
+                                {["Cooking Tips", "Healthy Eating", "Desserts", "Baking", "Meal Prep", "International Cuisine", "Seasonal", "Budget Friendly"].map((tag) => (
+                                    <button
+                                        key={tag}
+                                        type="button"
+                                        onClick={() => {
+                                            const newTags = preferences.blogTags.includes(tag)
+                                                ? preferences.blogTags.filter(t => t !== tag)
+                                                : [...preferences.blogTags, tag];
+                                            setPreferences({ ...preferences, blogTags: newTags });
+                                        }}
+                                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-all border-2 ${
+                                            preferences.blogTags.includes(tag)
+                                                ? "bg-teal-500 border-teal-500 text-white shadow-md shadow-teal-200"
+                                                : "bg-white border-gray-100 text-gray-600 hover:border-teal-200"
+                                        }`}
+                                    >
+                                        {tag}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                     </div>
 
                     {/* Bio */}

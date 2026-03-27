@@ -69,7 +69,7 @@ const ChatPage: React.FC = () => {
         <div className="flex flex-col h-screen bg-gray-50 overflow-hidden font-sans">
             {user?.role === 'chef' ? <ChefNavbar /> : <FoodieNavbar />}
             
-            <div className="flex flex-1 overflow-hidden relative mt-16 lg:mt-20">
+            <div className="flex flex-1 overflow-hidden relative ">
                 {/* Chat List - Hidden on mobile when a chat is active */}
                 <div className={`
                     ${isMobileView && activeConversation ? 'hidden' : 'flex'}

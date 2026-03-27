@@ -12,7 +12,10 @@ export interface IFoodieProfile {
     };
     address?: string;
     phone?: string;
-    preferences?: string[];
+    preferences: {
+        recipeCategory: string[];
+        blogTags: string[];
+    };
 }
 
 export interface IChefProfile {
