@@ -96,8 +96,19 @@ const LiveSession = () => {
                 const socketUrl = getSocketUrl();
                 console.log('Connecting to socket server at:', socketUrl);
 
+                const currentUserId = userRef.current?._id || userRef.current?.id;
                 socketRef.current = io(socketUrl, {
-                    auth: { token },
+                    auth: { 
+                        token,
+                        user: {
+                            id: currentUserId,
+                            role: userRef.current?.role
+                        }
+                    },
+                    query: {
+                        userId: currentUserId,
+                        role: userRef.current?.role
+                    },
                     transports: ['websocket'],
                     path: '/socket.io'
                 });
