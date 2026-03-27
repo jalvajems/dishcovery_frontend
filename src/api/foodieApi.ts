@@ -101,10 +101,11 @@ export const getAllFoodSpotApi = (
     page: number,
     limit: number,
     search?: string,
-    filter?: string
+    filter?: string,
+    sortBy?: string
 ) => {
     return API.get(FOODIE_ROUTES.FOODSPOT_LIST, {
-        params: { page, limit, search, filter },
+        params: { page, limit, search, filter, sortBy },
     });
 };
 

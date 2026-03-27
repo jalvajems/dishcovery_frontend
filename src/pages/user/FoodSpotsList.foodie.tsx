@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
-  ArrowRight,
+  ArrowRight, MapPin
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { showError } from '@/utils/toast';
@@ -18,6 +18,7 @@ export default function FoodSpotListing() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1);
   const [spots, setSpots] = useState<IFoodSpot[]>([])
+  const [sortBy, setSortBy] = useState<string>('')
   const limit = 4;
 
   const handlePageChange = (page: number) => {
@@ -26,7 +27,7 @@ export default function FoodSpotListing() {
 
   async function fetchFoodSpots() {
     try {
-      const res = await getAllFoodSpotApi(currentPage, limit, searchQuery, filter);
+      const res = await getAllFoodSpotApi(currentPage, limit, searchQuery, filter, sortBy);
       const computedTotalPages = Math.ceil(res.data.totalCount / limit);
       setTotalPages(computedTotalPages || 1);
       setSpots(res.data.data)
@@ -38,7 +39,7 @@ export default function FoodSpotListing() {
   useEffect(() => {
     fetchFoodSpots();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery, limit, currentPage, filter]);
+  }, [searchQuery, limit, currentPage, filter, sortBy]);
 
 
   return (
@@ -83,7 +84,23 @@ export default function FoodSpotListing() {
           </div>
 
           {/* Filter Buttons */}
-          <div className="flex gap-4 mb-8">
+          <div className="flex flex-wrap gap-4 mb-8">
+            <div className="flex gap-2 mr-4 border-r pr-4 border-gray-200">
+               <button
+                  onClick={() => {
+                    setSortBy(sortBy === 'distance' ? '' : 'distance');
+                    setCurrentPage(1);
+                  }}
+                  className={`flex items-center gap-2 px-6 py-2 rounded-xl font-bold transition-all ${sortBy === 'distance'
+                    ? 'bg-emerald-600 text-white shadow-lg'
+                    : 'bg-white text-emerald-700 border border-emerald-100 hover:bg-emerald-50'
+                    }`}
+                >
+                  <MapPin size={18} />
+                  {sortBy === 'distance' ? 'Sorting by Near Me' : 'Sort by Near Me'}
+                </button>
+            </div>
+
             {['', 'Cafe', 'Restaurant', 'Bakery'].map((category) => (
               <button
                 key={category}

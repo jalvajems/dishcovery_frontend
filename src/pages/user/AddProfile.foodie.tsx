@@ -5,33 +5,35 @@ import { getErrorMessage } from "@/utils/errorHandler";
 import { MapPin, Phone, User, FileText, Image as ImageIcon, Heart, Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAwsS3Upload } from "@/hooks/useAwsS3Upload";
+import MapLocationPicker from "@/utils/MapLocationPicker";
 
 export default function FoodieAddProfile() {
   const navigate = useNavigate()
   const [phone, setPhone] = useState("");
-  const [location, setLocation] = useState("");
+  const [location, setLocation] = useState({
+    lat: 12.9716,
+    lng: 77.5946,
+    address: ""
+  });
   const [preferences, setPreferences] = useState<string[]>([]);
   const [bio, setBio] = useState("");
   const [image, setImage] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-
   const { uploadToS3 } = useAwsS3Upload()
-
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-
       const Image = e.target.files?.[0]
       const url = await uploadToS3(Image)
-
       setImage(url)
-
     }
   };
-   const removeCoverImage = () => {
-        setImage(null);
-    };
+
+  const removeCoverImage = () => {
+    setImage(null);
+  };
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
@@ -43,10 +45,8 @@ export default function FoodieAddProfile() {
     }
 
     // Location
-    if (!location.trim()) {
-      newErrors.location = "Location is required";
-    } else if (location.length < 2) {
-      newErrors.location = "Location must be at least 2 characters";
+    if (!location.address.trim()) {
+      newErrors.location = "Please select a location on the map";
     }
 
     // Preferences
@@ -61,24 +61,27 @@ export default function FoodieAddProfile() {
       newErrors.bio = "Bio must be at least 10 characters";
     }
     if (!image?.trim()) {
-      newErrors.image = "Image  is required";
+      newErrors.image = "Image is required";
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) {
-      showError("Ivalid Credentials");
+      showError("Invalid Credentials");
       return;
     }
 
     const payload = {
       phone: phone,
-      location: location,
+      location: {
+        type: "Point",
+        coordinates: [location.lng, location.lat]
+      },
+      address: location.address,
       preferences: preferences,
       bio: bio,
       image: image
@@ -124,21 +127,29 @@ export default function FoodieAddProfile() {
           </div>
 
           {/* Location */}
-          <div>
-            <label className="text-sm font-medium">Location</label>
+          <div className="space-y-2">
+            <label className="text-sm font-medium flex items-center gap-2">
+              <MapPin className="text-green-600" size={18} />
+              Select Your Location
+            </label>
             {errors.location && (
-              <p className="text-red-500 text-sm mt-1">{errors.location}</p>
+              <p className="text-red-500 text-sm">{errors.location}</p>
             )}
-
-            <div className="flex items-center bg-gray-50 rounded-lg px-3">
-              <MapPin className="text-gray-400" size={18} />
-              <input
-                type="text"
-                placeholder="City or area"
-                className="w-full bg-transparent p-3 outline-none"
-                onChange={e => setLocation(e.target.value)}
-              />
+            
+            <div className="border rounded-xl overflow-hidden bg-gray-50">
+               <MapLocationPicker 
+                onSelect={(data) => setLocation({
+                  lat: data.lat,
+                  lng: data.lng,
+                  address: data.fullAddress
+                })}
+               />
             </div>
+            {location.address && (
+              <p className="text-sm text-gray-600 italic px-1">
+                Selected: {location.address}
+              </p>
+            )}
           </div>
 
           {/* Preferences */}

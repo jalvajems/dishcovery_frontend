@@ -5,13 +5,18 @@ import { getErrorMessage, logError } from "@/utils/errorHandler";
 import { User, Phone, MapPin, FileText, Image as ImageIcon, Heart, Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAwsS3Upload } from "@/hooks/useAwsS3Upload";
+import MapLocationPicker from "@/utils/MapLocationPicker";
 
 export default function FoodieEditProfile() {
     const navigate = useNavigate()
     const [name, setName] = useState("");
 
     const [phone, setPhone] = useState("");
-    const [location, setLocation] = useState("");
+    const [location, setLocation] = useState({
+        lat: 12.9716,
+        lng: 77.5946,
+        address: ""
+    });
     const [preferences, setPreferences] = useState<string[]>([]);
     const [bio, setBio] = useState("");
     const [image, setImage] = useState<string | null>(null);
@@ -26,7 +31,18 @@ export default function FoodieEditProfile() {
 
                 setName(profile.userId?.name ?? "");
                 setPhone(profile.phone ?? "");
-                setLocation(profile.location ?? "");
+                
+                if (profile.location?.coordinates) {
+                    setLocation({
+                        lat: profile.location.coordinates[1],
+                        lng: profile.location.coordinates[0],
+                        address: profile.address ?? ""
+                    });
+                } else {
+                    // Fallback for old simple string locations
+                    setLocation(prev => ({ ...prev, address: profile.location || "" }));
+                }
+
                 setPreferences(profile.preferences ?? []);
                 setBio(profile.bio ?? "");
                 setImage(profile.image ?? null);
@@ -69,8 +85,8 @@ export default function FoodieEditProfile() {
             newErrors.phone = "Enter a valid 10-digit phone number";
         }
 
-        if (!location.trim()) {
-            newErrors.location = "Location is required";
+        if (!location.address.trim()) {
+            newErrors.location = "Please select a location on the map";
         }
 
         if (!preferences.length) {
@@ -105,7 +121,11 @@ export default function FoodieEditProfile() {
         const payload = {
             name: name,
             phone: phone,
-            location: location,
+            location: {
+                type: "Point",
+                coordinates: [location.lng, location.lat]
+            },
+            address: location.address,
             preferences: preferences,
             bio: bio,
             image: image
@@ -171,21 +191,31 @@ export default function FoodieEditProfile() {
                     </div>
 
                     {/* Location */}
-                    <div>
-                        <label className="text-sm font-medium">Location</label>
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium flex items-center gap-2">
+                            <MapPin className="text-green-600" size={18} />
+                            Your Location
+                        </label>
                         {errors.location && (
-                            <p className="text-red-500 text-sm mt-1">{errors.location}</p>
+                            <p className="text-red-500 text-sm">{errors.location}</p>
                         )}
-
-                        <div className="flex items-center bg-gray-50 rounded-lg px-3">
-                            <MapPin size={18} className="text-gray-400" />
-                            <input
-                                type="text"
-                                value={location}
-                                className="w-full bg-transparent p-3 outline-none"
-                                onChange={(e) => setLocation(e.target.value)}
+                        
+                        <div className="border rounded-xl overflow-hidden bg-gray-50">
+                            <MapLocationPicker 
+                                initialLat={location.lat}
+                                initialLng={location.lng}
+                                onSelect={(data) => setLocation({
+                                    lat: data.lat,
+                                    lng: data.lng,
+                                    address: data.fullAddress
+                                })}
                             />
                         </div>
+                        {location.address && (
+                            <p className="text-sm text-gray-600 italic px-1">
+                                Selected: {location.address}
+                            </p>
+                        )}
                     </div>
 
                     {/* Preferences */}

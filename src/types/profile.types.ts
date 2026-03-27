@@ -6,7 +6,11 @@ export interface IFoodieProfile {
     };
     image?: string;
     bio?: string;
-    location?: string;
+    location?: {
+        type: "Point";
+        coordinates: [number, number];
+    };
+    address?: string;
     phone?: string;
     preferences?: string[];
 }

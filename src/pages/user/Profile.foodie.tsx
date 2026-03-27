@@ -228,7 +228,7 @@ export default function ProfileFoodie() {
                   <h3 className="font-bold text-gray-900 text-lg">Location</h3>
                 </div>
                 <p className="text-gray-600 font-semibold pl-14">
-                  {profile.location || "Not provided"}
+                  {profile.address || "Not provided"}
                 </p>
               </div>
 
