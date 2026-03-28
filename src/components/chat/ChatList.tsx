@@ -21,7 +21,8 @@ const ChatList: React.FC<ChatListProps> = ({ conversations, activeConversationId
         }
     };
 
-    const truncateMessage = (text: string, maxLength: number = 40) => {
+    const truncateMessage = (text: string | undefined, maxLength: number = 40) => {
+        if (!text) return '';
         if (text.length <= maxLength) return text;
         return text.substring(0, maxLength) + '...';
     };

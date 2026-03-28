@@ -25,8 +25,6 @@ export default function ChefDashboard() {
   const { name } = useUserStore()
   const navigate = useNavigate()
 
-
-
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [currentPageRecipe, setCurrentPageRecipe] = useState(1);
   const [totalPagesRecipe, setTotalPagesRecipe] = useState(1);
@@ -44,10 +42,6 @@ export default function ChefDashboard() {
     totalWorkshops: 0
   });
 
-
-
-
-
   //recipes===============
   const handlePageChangeRecipe = (page: number) => {
     setCurrentPageRecipe(page)
@@ -59,16 +53,12 @@ export default function ChefDashboard() {
 
   async function fetchRecipes() {
     try {
-
       const res = await getAllRecipeApi(currentPageRecipe, limit);
       setRecipes(res.data.data)
-
       setTotalPagesRecipe(res.data.totalPages)
-
     } catch (error: unknown) {
       logError(error);
     }
-
   }
 
   async function handleViewButtonRecipe(id: string) {
@@ -97,21 +87,14 @@ export default function ChefDashboard() {
   }, [currentPageBlog, limit]);
 
   async function fetchBlogs() {
-
     try {
       const res = await getMyBlogsChefApi(currentPageBlog, limit);
-
       setTotalPagesBlog(res.data.totalCount)
       setBlogs(res.data.datas);
     } catch (err) {
       console.log(err);
     }
   }
-
-
-
-
-
 
   useEffect(() => {
     checkChefProfile();
@@ -121,16 +104,12 @@ export default function ChefDashboard() {
   async function checkChefProfile() {
     try {
       const res = await chefDashboardApi();
-      console.log('----------', res);
-
       setIsVerifiedUser(res.data.isVerified)
       setIsVerified(res.data.isVerified)
 
-      // Set dashboard stats from API response
       if (res.data.stats) {
         setDashboardStats(res.data.stats);
       }
-console.log('----->>>>>>>>',res.data);
 
       if (!res.data.hasProfile) {
         setShowProfileModal(true);
@@ -138,10 +117,8 @@ console.log('----->>>>>>>>',res.data);
 
     } catch (error: unknown) {
       logError(error);
-      // showError(getErrorMessage(error, 'Something went wrong'));
     }
   }
-
 
   const stats = [
     {
@@ -152,7 +129,7 @@ console.log('----->>>>>>>>',res.data);
     },
     {
       label: "Average Rating",
-      value: dashboardStats.averageRating > 0 ? dashboardStats.averageRating.toFixed(1) : "N/A",
+      value: dashboardStats.averageRating > 0 ? dashboardStats.averageRating.toFixed(1) : "0",
       icon: Star,
       footer: "From chef reviews",
     },
@@ -163,18 +140,15 @@ console.log('----->>>>>>>>',res.data);
       footer: "Total followers",
     },
     {
-      label: "Total Workshops",
+      label: "Workshops",
       value: dashboardStats.totalWorkshops,
       icon: Utensils,
       footer: "All workshops",
     },
   ];
 
-
-
-
   return (
-    <main className="flex-1 p-8">
+    <main className="flex-1 p-4 md:p-8">
       <ConfirmModal
         isOpen={showProfileModal}
         title="Complete Your Chef Profile"
@@ -186,124 +160,127 @@ console.log('----->>>>>>>>',res.data);
         onCancel={() => setShowProfileModal(false)}
       />
       {!isVerified && (
-        <div className="bg-yellow-100 text-yellow-800 p-3 rounded mb-4 overflow-hidden">
-          <div className="animate-marquee whitespace-nowrap">
+        <div className="bg-yellow-100 text-yellow-800 p-3 rounded-xl mb-6 overflow-hidden border border-yellow-200">
+          <div className="animate-marquee whitespace-nowrap text-sm font-medium">
             Your chef account is not verified yet. You cannot perform actions until admin approval.
           </div>
         </div>
       )}
 
-      {/* ------------------------------------------------------ */}
-      {/* HERO SECTION */}
-      {/* ------------------------------------------------------ */}
-      <div className="relative mb-12 rounded-3xl overflow-hidden shadow-2xl group">
+      {/* Hero Section */}
+      <div className="relative mb-8 md:mb-12 rounded-3xl overflow-hidden shadow-2xl group">
         <img
           src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&h=400&fit=crop"
           alt="Featured Food"
-          className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-700"
+          className="w-full h-48 md:h-80 object-cover group-hover:scale-105 transition-transform duration-700"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
 
-        <div className="absolute inset-0 flex flex-col justify-end p-10">
-          <h1 className="text-5xl font-bold text-white mb-4 drop-shadow-2xl">
-            Welcome back, Chef {name} !
+        <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-10">
+          <h1 className="text-2xl md:text-5xl font-bold text-white mb-2 md:mb-4 drop-shadow-2xl">
+            Welcome back, Chef {name}!
           </h1>
-          <p className="text-gray-200 text-lg">
+          <p className="text-gray-200 text-sm md:text-lg opacity-90">
             Here’s your performance overview and recent activity.
           </p>
         </div>
       </div>
 
-      {/* ------------------------------------------------------ */}
-      {/* STATS SECTION */}
-      {/* ------------------------------------------------------ */}
-      <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-gray-900 to-green-700 bg-clip-text text-transparent">
-        Dashboard
+      {/* Stats Section */}
+      <h2 className="text-2xl md:text-3xl font-bold mb-6 bg-gradient-to-r from-gray-900 to-green-700 bg-clip-text text-transparent">
+        Overview
       </h2>
 
-      <div className="grid grid-cols-4 gap-6 mb-12">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-12">
         {stats.map((s, index) => (
           <div
             key={index}
-            className="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition-all cursor-pointer border border-gray-100"
+            className="bg-white p-4 md:p-6 rounded-2xl shadow-md hover:shadow-xl transition-all cursor-pointer border border-gray-100 group"
           >
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-gray-600 font-semibold">{s.label}</p>
-              <s.icon className="w-7 h-7 text-green-600" />
+            <div className="flex items-center justify-between mb-2 md:mb-4">
+              <p className="text-xs md:text-sm text-gray-600 font-semibold uppercase tracking-wider">{s.label}</p>
+              <s.icon className="w-5 h-5 md:w-7 md:h-7 text-green-600 group-hover:scale-110 transition-transform" />
             </div>
 
-            <h3 className="text-4xl font-bold text-gray-900 mb-1">{s.value}</h3>
-            <p className="text-gray-400 text-sm">{s.footer}</p>
+            <h3 className="text-2xl md:text-4xl font-bold text-gray-900 mb-1">{s.value}</h3>
+            <p className="text-gray-400 text-[10px] md:text-sm">{s.footer}</p>
           </div>
         ))}
       </div>
 
+      {/* Recent Recipes */}
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-gray-900 to-green-700 bg-clip-text text-transparent">
+          Recent Recipes
+        </h2>
+        <button onClick={() => navigate('/recipe-listing')} className="text-green-600 font-bold text-sm hover:underline">View All</button>
+      </div>
 
-
-      {/* ------------------------------------------------------ */}
-      {/* RECENT RECIPES */}
-      {/* ------------------------------------------------------ */}
-      <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-gray-900 to-green-700 bg-clip-text text-transparent">
-        Recent Recipes
-      </h2>
-
-      <div className="grid grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {recipes.map((r, i) => (
           <div
             key={i}
-            className="bg-white rounded-xl shadow-md overflow-hidden group hover:shadow-2xl transition-all cursor-pointer"
+            className="bg-white rounded-2xl shadow-md overflow-hidden group hover:shadow-2xl transition-all cursor-pointer border border-gray-50"
+            onClick={() => handleViewButtonRecipe(r._id)}
           >
-            <img
-              onClick={() => handleViewButtonRecipe(r._id)}
-              src={r.images}
-              alt={r.title}
-              className="h-48 w-full object-cover group-hover:scale-105 transition-transform duration-500"
-            />
+            <div className="h-48 overflow-hidden">
+              <img
+                src={typeof r.images === 'string' ? r.images : r.images[0]}
+                alt={r.title}
+                className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+            </div>
             <div className="p-4">
-              <h3 className="font-bold text-lg truncate">{r.title}</h3>
-              <p className="text-sm text-gray-500 mt-1">{r.cuisine}</p>
+              <h3 className="font-bold text-lg truncate group-hover:text-green-600 transition-colors uppercase tracking-tight">{r.title}</h3>
+              <p className="text-xs text-green-600 font-bold mt-1 bg-green-50 inline-block px-2 py-0.5 rounded uppercase">{r.cuisine}</p>
             </div>
           </div>
         ))}
       </div>
-      <Pagination
-        currentPage={currentPageRecipe}
-        totalPages={totalPagesRecipe}
-        onChange={handlePageChangeRecipe}
-      />
-      {/* ------------------------------------------------------ */}
-      {/* RECENT blog */}
-      {/* ------------------------------------------------------ */}
-      <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-gray-900 to-green-700 bg-clip-text text-transparent">
-        Recent Blogs
-      </h2>
+      <div className="mb-12 bg-white/50 backdrop-blur-sm p-4 rounded-2xl border border-gray-100">
+        <Pagination
+          currentPage={currentPageRecipe}
+          totalPages={totalPagesRecipe}
+          onChange={handlePageChangeRecipe}
+        />
+      </div>
 
-      <div className="grid grid-cols-3 gap-6 mb-8">
+      {/* Recent Blogs */}
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-gray-900 to-green-700 bg-clip-text text-transparent">
+          Recent Blogs
+        </h2>
+        <button onClick={() => navigate('/blog-list')} className="text-green-600 font-bold text-sm hover:underline">View All</button>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {blogs.map((b, i) => (
           <div
             key={i}
-            className="bg-white rounded-xl shadow-md overflow-hidden group hover:shadow-2xl transition-all cursor-pointer"
+            className="bg-white rounded-2xl shadow-md overflow-hidden group hover:shadow-2xl transition-all cursor-pointer border border-gray-50"
+            onClick={() => handleViewButtonBlog(b._id)}
           >
-            <img
-              onClick={() => handleViewButtonBlog(b._id)}
-              src={b.coverImage}
-              alt={b.title}
-              className="h-48 w-full object-cover group-hover:scale-105 transition-transform duration-500"
-            />
+            <div className="h-48 overflow-hidden">
+              <img
+                src={b.coverImage}
+                alt={b.title}
+                className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+            </div>
             <div className="p-4">
-              <h3 className="font-bold text-lg truncate">{b.title}</h3>
-              <p className="text-sm text-gray-500 mt-1">{b.tags?.[0] || 'Blog'}</p>
+              <h3 className="font-bold text-lg truncate group-hover:text-green-600 transition-colors uppercase tracking-tight">{b.title}</h3>
+              <p className="text-xs text-blue-600 font-bold mt-1 bg-blue-50 inline-block px-2 py-0.5 rounded uppercase">{b.tags?.[0] || 'Blog'}</p>
             </div>
           </div>
         ))}
       </div>
-      <Pagination
-        currentPage={currentPageBlog}
-        totalPages={totalPagesBlog}
-        onChange={handlePageChange}
-      />
-
-
+      <div className="mb-20 bg-white/50 backdrop-blur-sm p-4 rounded-2xl border border-gray-100">
+        <Pagination
+          currentPage={currentPageBlog}
+          totalPages={totalPagesBlog}
+          onChange={handlePageChange}
+        />
+      </div>
     </main>
   );
 }

@@ -16,7 +16,7 @@ interface ChatBoxProps {
 }
 
 const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
-    const { messages, loadMessages, sendMessage, addMessage, markAsRead, isTyping, setTyping } = useChatStore();
+    const { messages, loadMessages, sendMessage, addMessage, markAsRead, isTyping, setTyping, loading } = useChatStore();
     const { user } = useAuthStore();
     const { socket } = useSocket();
     const [messageInput, setMessageInput] = useState('');
@@ -243,6 +243,13 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
                     </div>
                 </div>
             </div>
+            
+            {/* Loading Overlay for Messages */}
+            {loading && messages.length === 0 && (
+                <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] z-20 flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                </div>
+            )}
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/50">
