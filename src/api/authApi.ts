@@ -37,3 +37,7 @@ export const logoutApi = () => {
     return API.post(AUTH_ROUTES.LOGOUT)
 }
 
+export const changePasswordApi = (data: { currentPassword: string, newPassword: string, confirmPassword: string }) => {
+    return API.post(AUTH_ROUTES.CHANGE_PASSWORD, data);
+}
+

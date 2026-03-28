@@ -22,6 +22,7 @@ import ChefWalletPage from "@/pages/chef/Wallet.chef";
 import FollowersList from "@/pages/chef/FollowersList.chef";
 import FoodieProfileDetail from "@/pages/chef/FoodieProfileDetail.chef";
 import ChatPage from "@/pages/shared/ChatPage";
+import ChangePassword from "@/pages/shared/ChangePassword";
 
 import ProtectedRoute from './Protected.routes';
 
@@ -46,6 +47,7 @@ function ChefRoutes() {
                 <Route path="/chef/profile" element={<ChefProfilePage />} />
                 <Route path="/chef/profile-add" element={<CreateProfileChef />} />
                 <Route path="/chef/profile-edit" element={<ChefProfileEdit />} />
+                <Route path="/chef/change-password" element={<ChangePassword />} />
 
                 <Route path="/chef/workshop-add" element={<AddWorkshopChef />} />
                 <Route path="/chef/workshop-edit/:id" element={<EditWorkshopChef />} />

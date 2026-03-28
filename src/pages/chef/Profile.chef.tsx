@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Award, Trophy, Lightbulb, MessageSquare, Pencil, Mail, ChevronRight, Home } from "lucide-react";
+import { Award, Trophy, Lightbulb, MessageSquare, Pencil, Mail, ChevronRight, Home, Lock } from "lucide-react";
 import {
   getChefProfileApi,
 } from "@/api/chefApi";
@@ -111,6 +111,13 @@ export default function ChefProfilePage() {
               title="Edit Profile"
             >
               <Pencil size={20} className="group-hover:rotate-12 transition-transform" />
+            </button>
+            <button
+              onClick={() => navigate(`/chef/change-password`)}
+              className="p-3 bg-white/90 backdrop-blur-md text-gray-700 hover:text-emerald-600 rounded-2xl shadow-lg border border-gray-100 transition-all hover:scale-110 active:scale-95 group"
+              title="Change Password"
+            >
+              <Lock size={20} className="group-hover:rotate-12 transition-transform" />
             </button>
           </div>
 
