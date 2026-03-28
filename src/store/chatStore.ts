@@ -49,8 +49,13 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         try {
             set({ loading: true, error: null });
             const data = await chatApi.getUserConversations();
-            set({ conversations: data.conversations, loading: false });
-            set({ conversations: data.conversations, loading: false });
+            // Sort conversations by lastMessageAt descending
+            const sortedConversations = [...data.conversations].sort((a, b) => {
+                const dateA = new Date(a.lastMessageAt || 0).getTime();
+                const dateB = new Date(b.lastMessageAt || 0).getTime();
+                return dateB - dateA;
+            });
+            set({ conversations: sortedConversations, loading: false });
         } catch (error: unknown) {
             set({ error: getErrorMessage(error, 'Failed to load conversations'), loading: false });
         }
@@ -60,7 +65,6 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         try {
             set({ loading: true, error: null });
             const data = await chatApi.getMessages(conversationId);
-            set({ messages: data.messages, loading: false });
             set({ messages: data.messages, loading: false });
         } catch (error: unknown) {
             set({ error: getErrorMessage(error, 'Failed to load messages'), loading: false });
@@ -123,13 +127,22 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     },
 
     updateConversationLastMessage: (conversationId: string, message: Message) => {
-        set((state) => ({
-            conversations: state.conversations.map((conv) =>
+        set((state) => {
+            const updatedConversations = state.conversations.map((conv) =>
                 conv._id === conversationId
                     ? { ...conv, lastMessage: message, lastMessageAt: message.createdAt }
                     : conv
-            )
-        }));
+            );
+            
+            // Re-sort conversations
+            const sortedConversations = [...updatedConversations].sort((a, b) => {
+                const dateA = new Date(a.lastMessageAt || 0).getTime();
+                const dateB = new Date(b.lastMessageAt || 0).getTime();
+                return dateB - dateA;
+            });
+            
+            return { conversations: sortedConversations };
+        });
     },
 
     createOrGetConversation: async (otherUserId: string, otherUserRole: 'chef' | 'foodie') => {
@@ -137,13 +150,13 @@ export const useChatStore = create<ChatStore>((set, get) => ({
             set({ loading: true, error: null });
             const data = await chatApi.createOrGetConversation({ otherUserId, otherUserRole });
 
-            // Add to conversations if not already there
-            const exists = get().conversations.find(c => c._id === data.conversation._id);
-            if (!exists) {
-                set((state) => ({
-                    conversations: [data.conversation, ...state.conversations]
-                }));
-            }
+            // Add to conversations or move to top if exists
+            set((state) => {
+                const otherConversations = state.conversations.filter(c => c._id !== data.conversation._id);
+                return {
+                    conversations: [data.conversation, ...otherConversations]
+                };
+            });
 
             set({ loading: false });
             return data.conversation;
