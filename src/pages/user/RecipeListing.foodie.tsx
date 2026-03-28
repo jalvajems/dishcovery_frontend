@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ArrowRight, Search } from 'lucide-react';
-import { getAllRecipesFoodieApi } from '@/api/foodieApi';
+import { getAllRecipesFoodieApi, getRecommendedRecipesApi } from '@/api/foodieApi';
 import { showError } from '@/utils/toast';
 import { getErrorMessage } from "@/utils/errorHandler";
 import { useNavigate } from 'react-router-dom';
@@ -17,32 +17,41 @@ export default function RecipeListing() {
   const [totalPages, setTotalPages] = useState(1);
   const limit = 2
   const [recipes, setRecipes] = useState<IRecipe[]>([]);
+  const [recommendedRecipes, setRecommendedRecipes] = useState<IRecipe[]>([]);
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page)
-  }
-
+    setCurrentPage(page);
+  };
 
   useEffect(() => {
-    fetchRecipes()
+    fetchRecipes();
+    fetchRecommendations();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, limit, searchQuery, filter])
-  async function fetchRecipes() {
+  }, [currentPage, limit, searchQuery, filter]);
 
+  async function fetchRecipes() {
     try {
-      const result = await getAllRecipesFoodieApi(currentPage, limit, searchQuery, filter)
-      setRecipes(result.data.datas)
-      setTotalPages(result.data.total)
+      const result = await getAllRecipesFoodieApi(currentPage, limit, searchQuery, filter);
+      setRecipes(result.data.datas);
+      setTotalPages(result.data.total);
     } catch (error: unknown) {
       showError(getErrorMessage(error, "Failed to load recipes"));
     }
-
-
   }
+
+  async function fetchRecommendations() {
+    try {
+      const result = await getRecommendedRecipesApi();
+      setRecommendedRecipes(result.data.datas || []);
+    } catch (error) {
+      console.error("Failed to fetch recommendations", error);
+    }
+  }
+
   const handleViewButton = async (id: string) => {
+    navigate(`/foodie/recipe-detail/${id}`);
+  };
 
-    navigate(`/foodie/recipe-detail/${id}`)
-  }
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50 p-8">
       <div className="max-w-6xl mx-auto">
@@ -75,6 +84,41 @@ export default function RecipeListing() {
 
           </div>
         </div>
+
+        {/* Recommended Section */}
+        {recommendedRecipes.length > 0 && !searchQuery && !filter && (
+          <div className="mb-12">
+            <h2 className="text-3xl font-bold mb-6 flex items-center gap-2 text-gray-800">
+              <span className="w-2 h-8 bg-green-500 rounded-full"></span>
+              Recommended for You
+            </h2>
+            <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide">
+              {recommendedRecipes.map((recipe) => (
+                <div
+                  key={recipe._id}
+                  onClick={() => handleViewButton(recipe._id)}
+                  className="min-w-[300px] bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all cursor-pointer group"
+                >
+                  <div className="h-44 overflow-hidden">
+                    <img
+                      src={Array.isArray(recipe.images) ? recipe.images[0] : (recipe.images as unknown as string)}
+                      alt={recipe.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md uppercase tracking-wider">
+                      {recipe.cuisine}
+                    </span>
+                    <h3 className="font-bold text-gray-900 mt-2 line-clamp-1 group-hover:text-green-600 transition-colors">
+                      {recipe.title}
+                    </h3>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Recipes Section */}
         <div className="mb-12">

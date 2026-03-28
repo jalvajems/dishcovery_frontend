@@ -8,6 +8,7 @@ export const FOODIE_ROUTES = {
   RELATED_RECIPES: (cuisine: string) =>
     `/foodie/related-recipes/${cuisine}`,
   SAVED_RECIPES: "/foodie/saved-recipes",
+  RECIPE_RECOMMENDED: "/foodie/recipes/recommended",
 
   // Blogs
   BLOG_LIST: "/foodie/blog-listing",
@@ -16,6 +17,7 @@ export const FOODIE_ROUTES = {
     `/foodie/blog-relate-blogs/${tag}`,
   SAVED_BLOGS: "/foodie/saved-blogs",
   TOGGLE_SAVE_BLOG: "/foodie/toggle-save-blog",
+  BLOG_RECOMMENDED: "/foodie/blogs/recommended",
 
   // Profile
   PROFILE_CREATE: "/foodie/profile",

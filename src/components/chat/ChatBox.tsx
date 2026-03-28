@@ -241,7 +241,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/50">
-                {messages.length === 0 ? (
+                {(!messages || messages.length === 0) ? (
                     <div className="flex flex-col items-center justify-center h-full text-gray-400 space-y-2 opacity-60">
                         <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mb-2">
                             <Send className="w-6 h-6 text-gray-300" />
@@ -251,7 +251,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
                     </div>
                 ) : (
                     <>
-                        {messages.map((message) => (
+                        {(messages || []).map((message) => (
                             <MessageBubble key={message._id} message={message} />
                         ))}
                         {isTyping && (
