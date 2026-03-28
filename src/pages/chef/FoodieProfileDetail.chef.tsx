@@ -131,7 +131,7 @@ export default function FoodieProfileDetail() {
                                     <h3 className="font-bold text-gray-900 text-lg">Location</h3>
                                 </div>
                                 <p className="text-gray-600 font-semibold pl-14">
-                                    {profile.location || "Not provided"}
+                                    {profile.address || (profile.location ? `Lat: ${profile.location.coordinates[1]}, Lng: ${profile.location.coordinates[0]}` : "Not provided")}
                                 </p>
                             </div>
 
@@ -143,12 +143,19 @@ export default function FoodieProfileDetail() {
                                     <h3 className="font-bold text-gray-900 text-lg">Interests</h3>
                                 </div>
                                 <div className="flex flex-wrap gap-2 pl-14">
-                                    {profile.preferences && profile.preferences.length > 0 ? (
-                                        profile.preferences.map((pref: string, idx: number) => (
-                                            <span key={idx} className="px-3 py-1 bg-white border border-green-100 text-green-700 rounded-lg text-xs font-bold">
-                                                {pref}
-                                            </span>
-                                        ))
+                                    {profile.preferences && (profile.preferences.recipeCategory.length > 0 || profile.preferences.blogTags.length > 0) ? (
+                                        <>
+                                            {profile.preferences.recipeCategory.map((pref: string, idx: number) => (
+                                                <span key={`recipe-${idx}`} className="px-3 py-1 bg-white border border-green-100 text-green-700 rounded-lg text-xs font-bold">
+                                                    {pref}
+                                                </span>
+                                            ))}
+                                            {profile.preferences.blogTags.map((tag: string, idx: number) => (
+                                                <span key={`tag-${idx}`} className="px-3 py-1 bg-white border border-blue-100 text-blue-700 rounded-lg text-xs font-bold">
+                                                    {tag}
+                                                </span>
+                                            ))}
+                                        </>
                                     ) : (
                                         <span className="text-gray-400 italic">No interests listed</span>
                                     )}
