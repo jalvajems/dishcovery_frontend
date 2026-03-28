@@ -40,14 +40,21 @@ const ChatPage: React.FC = () => {
     }, [loadConversations]);
 
     useEffect(() => {
-        console.log('ChatPage: Conversations loaded:', conversations.length);
+        const { loading } = useChatStore.getState();
+        console.log('ChatPage: Conversations state check:', { 
+            count: conversations.length, 
+            conversationId, 
+            loading 
+        });
+
         if (conversationId && conversations.length > 0) {
             const conversation = conversations.find((c: Conversation) => c._id === conversationId);
             if (conversation) {
                 console.log('ChatPage: Setting active conversation:', conversationId);
                 setActiveConversation(conversation);
-            } else {
-                console.warn('ChatPage: Conversation ID from URL not found in list:', conversationId);
+            } else if (!loading) {
+                console.warn('ChatPage: Conversation ID from URL not found in list after loading:', conversationId);
+                // If it's truly not found and we are not loading, maybe we should redirect or show a 404
             }
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
