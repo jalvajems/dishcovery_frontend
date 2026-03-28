@@ -79,6 +79,7 @@ export default function RecipeListing() {
                   setSearchQuery(value);
                   setCurrentPage(1); // reset to page 1 for search
                 }}
+                initialValue={searchQuery}
               />
             </div>
 
