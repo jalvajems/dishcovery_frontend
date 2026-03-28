@@ -247,13 +247,13 @@ export default function FoodieEditProfile() {
                                         key={cat}
                                         type="button"
                                         onClick={() => {
-                                            const newCats = preferences.recipeCategory.includes(cat)
+                                            const newCats = (preferences?.recipeCategory || []).includes(cat)
                                                 ? preferences.recipeCategory.filter(c => c !== cat)
-                                                : [...preferences.recipeCategory, cat];
+                                                : [...(preferences?.recipeCategory || []), cat];
                                             setPreferences({ ...preferences, recipeCategory: newCats });
                                         }}
                                         className={`px-4 py-2 rounded-xl text-sm font-medium transition-all border-2 ${
-                                            preferences.recipeCategory.includes(cat)
+                                            (preferences?.recipeCategory || []).includes(cat)
                                                 ? "bg-emerald-500 border-emerald-500 text-white shadow-md shadow-emerald-200"
                                                 : "bg-white border-gray-100 text-gray-600 hover:border-emerald-200"
                                         }`}
@@ -273,13 +273,13 @@ export default function FoodieEditProfile() {
                                         key={tag}
                                         type="button"
                                         onClick={() => {
-                                            const newTags = preferences.blogTags.includes(tag)
+                                            const newTags = (preferences?.blogTags || []).includes(tag)
                                                 ? preferences.blogTags.filter(t => t !== tag)
-                                                : [...preferences.blogTags, tag];
+                                                : [...(preferences?.blogTags || []), tag];
                                             setPreferences({ ...preferences, blogTags: newTags });
                                         }}
                                         className={`px-4 py-2 rounded-xl text-sm font-medium transition-all border-2 ${
-                                            preferences.blogTags.includes(tag)
+                                            (preferences?.blogTags || []).includes(tag)
                                                 ? "bg-teal-500 border-teal-500 text-white shadow-md shadow-teal-200"
                                                 : "bg-white border-gray-100 text-gray-600 hover:border-teal-200"
                                         }`}
