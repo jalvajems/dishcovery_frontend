@@ -259,7 +259,7 @@ export default function WorkshopDetailFoodie() {
                                     <h4 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">{workshop.chefId?.name || 'Professional Chef'}</h4>
                                     <p className="text-gray-500 font-medium leading-relaxed max-w-xl">A world-class culinary expert dedicated to bringing the finest flavors to your table. Specializing in {workshop.category} and passionate about interactive teaching.</p>
                                     <div className="flex gap-4 mt-8">
-                                        <button className="text-green-600 font-black text-xs uppercase tracking-widest border-b-2 border-green-200 py-1 hover:border-green-600 transition-all">
+                                        <button className="text-green-600 font-black text-xs uppercase tracking-widest border-b-2 border-green-200 py-1 hover:border-green-600 transition-all" onClick={()=>navigate(`/foodie/chef/${workshop.chefId?._id}`)}>
                                             View Full Profile
                                         </button>
                                         <button 

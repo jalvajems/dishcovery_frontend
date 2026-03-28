@@ -45,6 +45,15 @@ export default function AddRecipe() {
       ...prev,
       [name]: value
     }));
+
+    // Real-time validation clearing
+    if (errors[name as keyof FormErrors]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name as keyof FormErrors];
+        return newErrors;
+      });
+    }
   };
 
   const { uploadToS3 } = useAwsS3Upload()
@@ -95,32 +104,32 @@ export default function AddRecipe() {
     const newErrors: FormErrors = {};
 
     if (!formData.title.trim()) {
-      newErrors.title = "Recipe name is required";
+      newErrors.title = "Recipe name is missing or required";
     }
     if (!formData.tags.trim()) {
-      newErrors.tags = "Recipe tag is required";
+      newErrors.tags = "Recipe tag is missing or required";
     }
     if (!formData.dietType.trim()) {
-      newErrors.dietType = "Recipe diet type is required";
+      newErrors.dietType = "Recipe diet type is missing or required";
     }
     if (!uploadedImages?.trim()) {
-      newErrors.image = "Recipe image is required";
+      newErrors.image = "Recipe image is missing or required";
     }
 
     if (!formData.cuisine) {
-      newErrors.cuisine = "Please select a cuisine";
+      newErrors.cuisine = "Cuisine selection is missing or required";
     }
 
-    if (!formData.cookingTime || isNaN(Number(formData.cookingTime))) {
-      newErrors.cookingTime = "Enter a valid cooking time";
+    if (!formData.cookingTime || isNaN(Number(formData.cookingTime)) || Number(formData.cookingTime) <= 0) {
+      newErrors.cookingTime = "Valid cooking time is missing or required";
     }
 
     if (ingredients.filter(i => i.trim()).length === 0) {
-      newErrors.ingredients = "At least one ingredient is required";
+      newErrors.ingredients = "At least one ingredient is missing or required";
     }
 
     if (steps.filter(s => s.trim()).length === 0) {
-      newErrors.steps = "At least one step is required";
+      newErrors.steps = "At least one step is missing or required";
     }
 
     setErrors(newErrors);
@@ -148,8 +157,32 @@ export default function AddRecipe() {
       showSuccess(result.data.message)
       navigate('/chef/recipes-listing')
     } catch (error: unknown) {
-      logError(error);
-      showError(getErrorMessage(error, 'Failed to save recipe'))
+      logError(error, 'Save recipe failed');
+      const errorMessage = getErrorMessage(error);
+
+      // Handle server-side validation errors (format: "field: message, field2: message")
+      if (typeof errorMessage === "string" && errorMessage.includes(":")) {
+        const newErrors: FormErrors = {};
+        const parts = errorMessage.split(", ");
+        parts.forEach(part => {
+          const [field, ...messageParts] = part.split(": ");
+          if (field && messageParts.length > 0) {
+            let fieldName = field.trim().toLowerCase();
+            // Map server-side fields to frontend error keys
+            if (fieldName === "images") fieldName = "image";
+            
+            (newErrors as any)[fieldName] = messageParts.join(": ").trim();
+          }
+        });
+
+        if (Object.keys(newErrors).length > 0) {
+          setErrors(newErrors);
+          showError("Please fix the validation errors");
+          return;
+        }
+      }
+
+      showError(errorMessage || 'Failed to save recipe');
     }
   };
 

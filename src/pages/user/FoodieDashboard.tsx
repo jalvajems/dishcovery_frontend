@@ -140,7 +140,7 @@ export default function FoodieDashboard() {
         <div className="absolute inset-0 flex flex-col justify-center p-8 md:p-16 max-w-2xl">
           <span className="text-green-400 font-semibold tracking-wider mb-2 uppercase text-sm">Welcome Back</span>
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
-            Hello, {name}! <br />
+            Hello, {name||'Foodie'}! <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-300 to-emerald-500">
               What are we cooking today?
             </span>
