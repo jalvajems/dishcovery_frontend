@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
-import { getBlogsFoodieApi } from '@/api/foodieApi';
+import { getBlogsFoodieApi, getRecommendedBlogsApi } from '@/api/foodieApi';
 import { showError } from '@/utils/toast';
 import { getErrorMessage } from '@/utils/errorHandler';
 import { useNavigate } from 'react-router-dom';
@@ -15,6 +15,7 @@ export default function BlogListFoodie() {
     const [filter, setFilter] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [blogs, setBlogs] = useState<IBlog[]>([]);
+    const [recommendedBlogs, setRecommendedBlogs] = useState<IBlog[]>([]);
     const [totalPages, setTotalPages] = useState(1);
     const limit = 3;
 
@@ -22,27 +23,30 @@ export default function BlogListFoodie() {
         setCurrentPage(page)
     }
 
-
     useEffect(() => {
         fetchBlogs();
+        fetchRecommendations();
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentPage, searchQuery, limit, filter]);
 
     async function fetchBlogs() {
         try {
             const result = await getBlogsFoodieApi(currentPage, limit, searchQuery, filter);
-
             setBlogs(result.data.datas);
             setTotalPages(result.data.totalCount);
-
         } catch (error: unknown) {
             showError(getErrorMessage(error, "Failed to load blogs"));
         }
     }
 
-
-
-
+    async function fetchRecommendations() {
+        try {
+            const result = await getRecommendedBlogsApi();
+            setRecommendedBlogs(result.data.datas || []);
+        } catch (error) {
+            console.error("Failed to fetch recommendations", error);
+        }
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50 p-8">
@@ -74,6 +78,45 @@ export default function BlogListFoodie() {
                     </div>
                 </div>
 
+                {/* Recommended Section */}
+                {recommendedBlogs.length > 0 && !searchQuery && !filter && (
+                    <div className="mb-12">
+                        <h2 className="text-3xl font-bold mb-6 flex items-center gap-2 text-gray-800">
+                            <span className="w-2 h-8 bg-teal-500 rounded-full"></span>
+                            Recommended for You
+                        </h2>
+                        <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide">
+                            {recommendedBlogs.map((blog) => (
+                                <div
+                                    key={blog._id}
+                                    onClick={() => navigate(`/foodie/blog-detail/${blog._id}`)}
+                                    className="min-w-[300px] bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all cursor-pointer group"
+                                >
+                                    <div className="h-44 overflow-hidden">
+                                        <img
+                                            src={blog.coverImage}
+                                            alt={blog.title}
+                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                        />
+                                    </div>
+                                    <div className="p-4">
+                                        <div className="flex gap-1 flex-wrap">
+                                            {blog.tags?.slice(0, 2).map(tag => (
+                                                <span key={tag} className="text-[10px] font-bold text-teal-600 bg-teal-50 px-2 py-0.5 rounded uppercase tracking-wider">
+                                                    {tag}
+                                                </span>
+                                            ))}
+                                        </div>
+                                        <h3 className="font-bold text-gray-900 mt-2 line-clamp-1 group-hover:text-teal-600 transition-colors">
+                                            {blog.title}
+                                        </h3>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {/* Category Tags */}
                 <div className="flex gap-4 mb-10 overflow-x-auto pb-2 hide-scrollbar">
                     {["", "Healthy Eating", "International Cuisine", "Seasonal", "Budget Friendly",].map((category, index) => (
@@ -94,61 +137,61 @@ export default function BlogListFoodie() {
                 </div>
 
                 {/* Food Blog Section */}
-                {blogs.map((blog: IBlog) => (
-                    <div
-                        key={blog._id}
-                        className="bg-white/90 backdrop-blur-sm rounded-2xl m-6 p-6 shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-100 group "
-                    >
-                        <div className="flex gap-6 items-center">
-                            {/* Text Section */}
-                            <div className="flex-1">
+                <div className="space-y-6">
+                    {blogs.map((blog: IBlog) => (
+                        <div
+                            key={blog._id}
+                            className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-100 group "
+                        >
+                            <div className="flex gap-6 items-center">
+                                {/* Text Section */}
+                                <div className="flex-1">
 
-                                {blog.isNew && (
-                                    <span className="inline-block px-4 py-1.5 bg-green-100 text-green-700 rounded-lg font-semibold text-sm mb-3">
-                                        New
-                                    </span>
-                                )}
+                                    {blog.isNew && (
+                                        <span className="inline-block px-4 py-1.5 bg-green-100 text-green-700 rounded-lg font-semibold text-sm mb-3">
+                                            New
+                                        </span>
+                                    )}
 
-                                <h3 className="text-3xl font-bold text-gray-900 mb-3 group-hover:text-green-700 transition-colors">
-                                    {blog.title}
-                                </h3>
-{/* 
-                                <p className="text-gray-600 mb-5 leading-relaxed text-lg">
-                                    {blog.shortDescription}
-                                </p> */}
-                                 <button
-                            className={`px-6 py-2 my-4 font-semibold rounded-xl transition-all shadow-lg bg-white/90 text-gray-700 border-gray-200 hover:bg-green-100 hover:text-green-700 hover:scale-105`}
-                        > {blog.tags?.[0]}
-                        </button>
+                                    <h3 className="text-3xl font-bold text-gray-900 mb-3 group-hover:text-green-700 transition-colors">
+                                        {blog.title}
+                                    </h3>
+                                    <button
+                                        className={`px-6 py-2 my-4 font-semibold rounded-xl transition-all shadow-lg bg-white/90 text-gray-700 border-gray-200 hover:bg-green-100 hover:text-green-700 hover:scale-105`}
+                                    > 
+                                        {blog.tags?.[0]}
+                                    </button>
 
-                                <button
-                                    onClick={() => navigate(`/foodie/blog-detail/${blog._id}`)}
-                                    className="flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-green-100 hover:text-green-700 hover:scale-105 transition-all"
-                                >
-                                    View Details
-                                    <ArrowRight className="w-5 h-5" />
-                                </button>
-                            </div>
+                                    <button
+                                        onClick={() => navigate(`/foodie/blog-detail/${blog._id}`)}
+                                        className="flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-green-100 hover:text-green-700 hover:scale-105 transition-all"
+                                    >
+                                        View Details
+                                        <ArrowRight className="w-5 h-5" />
+                                    </button>
+                                </div>
 
-                            {/* Image */}
-                            <div className="w-72 h-56 rounded-2xl overflow-hidden shadow-lg flex-shrink-0">
-                                <img
-                                    src={blog.coverImage}
-                                    alt={blog.title}
-                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                />
+                                {/* Image */}
+                                <div className="w-72 h-56 rounded-2xl overflow-hidden shadow-lg flex-shrink-0">
+                                    <img
+                                        src={blog.coverImage}
+                                        alt={blog.title}
+                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                    />
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))}
-
+                    ))}
+                </div>
 
                 {/* Pagination */}
-                <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onChange={handlePageChange}
-                />
+                <div className="mt-12">
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onChange={handlePageChange}
+                    />
+                </div>
             </div>
         </div>
     );

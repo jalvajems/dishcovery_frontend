@@ -33,21 +33,25 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
 
     useEffect(() => {
         if (conversation._id) {
+            console.log('ChatBox: Loading messages for conversation:', conversation._id);
             loadMessages(conversation._id);
             // Only mark as read if there are unread messages from the other user
             markAsRead(conversation._id);
 
+            console.log('ChatBox: Emitting chat:join for:', conversation._id);
             socket?.emit('chat:join', conversation._id);
 
             return () => {
+                console.log('ChatBox: Emitting chat:leave for:', conversation._id);
                 socket?.emit('chat:leave', conversation._id);
             };
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [conversation._id]);
+    }, [conversation._id, socket]);
 
     useEffect(() => {
         const handleNewMessage = (data: SocketMessagePayload) => {
+            console.log('ChatBox: Received chat:message', data);
             if (data.conversationId === conversation._id) {
                 addMessage(data.message);
 
@@ -93,19 +97,21 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
             }
         }
 
+        console.log('ChatBox: Setting up socket listeners');
         socket?.on('chat:message', handleNewMessage);
         socket?.on('chat:typing', handleTyping);
         socket?.on('chat:messages-read', handleMessageRead);
         socket?.on('chat:message-deleted', handleMessageDeleted);
 
         return () => {
+            console.log('ChatBox: Cleaning up socket listeners');
             socket?.off('chat:message', handleNewMessage);
             socket?.off('chat:typing', handleTyping);
             socket?.off('chat:messages-read', handleMessageRead);
             socket?.off('chat:message-deleted', handleMessageDeleted);
         };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [socket, conversation._id, otherUser?._id, loadMessages]);
+    }, [socket, conversation._id, otherUser?._id, loadMessages, user?.id]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -129,6 +135,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
         if (!messageInput.trim() || isSending) return;
 
         setIsSending(true);
+        console.log('ChatBox: Sending message...');
         try {
             await sendMessage(conversation._id, messageInput.trim());
             setMessageInput('');
@@ -234,7 +241,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/50">
-                {messages.length === 0 ? (
+                {(!messages || messages.length === 0) ? (
                     <div className="flex flex-col items-center justify-center h-full text-gray-400 space-y-2 opacity-60">
                         <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mb-2">
                             <Send className="w-6 h-6 text-gray-300" />
@@ -244,7 +251,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
                     </div>
                 ) : (
                     <>
-                        {messages.map((message) => (
+                        {(messages || []).map((message) => (
                             <MessageBubble key={message._id} message={message} />
                         ))}
                         {isTyping && (

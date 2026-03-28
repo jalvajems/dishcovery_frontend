@@ -1,42 +1,27 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useChatStore } from '@/store/chatStore';
+import { useAuthStore } from '@/store/authStore';
 import ChatList from '@/components/chat/ChatList';
 import ChatBox from '@/components/chat/ChatBox';
-import { useParams, useNavigate } from 'react-router-dom';
-import { MessageSquare } from 'lucide-react';
-import { useAuthStore } from '@/store/authStore';
-import { useSocket } from '@/context/SocketProvider';
-
-import type { Conversation } from "@/types/chat";
+import FoodieNavbar from '@/components/shared/foodie/Navbar.foodie';
+import ChefNavbar from '@/components/shared/chef/NavBar.chef';
+import type { Conversation } from '@/types/chat';
 
 const ChatPage: React.FC = () => {
-    const { conversationId } = useParams<{ conversationId?: string }>();
+    const { conversationId } = useParams<{ conversationId: string }>();
     const navigate = useNavigate();
     const { user } = useAuthStore();
-    const { conversations, activeConversation, setActiveConversation, loadConversations } = useChatStore();
-    const { socket } = useSocket();
+    const { 
+        conversations, 
+        activeConversation, 
+        loadConversations, 
+        setActiveConversation 
+    } = useChatStore();
+
     const [isMobileView, setIsMobileView] = useState(false);
 
     const basePath = user?.role === 'chef' ? '/chef/chat' : '/foodie/chat';
-
-    useEffect(() => {
-        loadConversations();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    useEffect(() => {
-        if (!socket) return;
-
-        const handleMessage = () => {
-            loadConversations();
-        };
-
-        socket.on('chat:conversation-update', handleMessage);
-
-        return () => {
-            socket.off('chat:conversation-update', handleMessage);
-        };
-    }, [socket, loadConversations]);
 
     useEffect(() => {
         const checkMobileView = () => {
@@ -50,84 +35,75 @@ const ChatPage: React.FC = () => {
     }, []);
 
     useEffect(() => {
+        console.log('ChatPage: Loading conversations...');
+        loadConversations();
+    }, [loadConversations]);
+
+    useEffect(() => {
+        console.log('ChatPage: Conversations loaded:', conversations.length);
         if (conversationId && conversations.length > 0) {
             const conversation = conversations.find((c: Conversation) => c._id === conversationId);
             if (conversation) {
+                console.log('ChatPage: Setting active conversation:', conversationId);
                 setActiveConversation(conversation);
+            } else {
+                console.warn('ChatPage: Conversation ID from URL not found in list:', conversationId);
             }
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [conversationId, conversations]);
 
     const handleSelectConversation = (conversation: Conversation) => {
+        console.log('ChatPage: User selected conversation:', conversation._id);
         setActiveConversation(conversation);
         navigate(`${basePath}/${conversation._id}`);
     };
 
-    const handleBackToList = () => {
+    const handleBackToList = useCallback(() => {
+        console.log('ChatPage: User going back to list');
         setActiveConversation(null);
         navigate(basePath);
-    };
+    }, [navigate, basePath, setActiveConversation]);
 
     return (
-        <div className="h-screen flex flex-col bg-slate-50">
-            {/* Header */}
-            <div className="bg-white/80 backdrop-blur-md border-b border-gray-200 px-6 py-4 flex justify-between items-center sticky top-0 z-10">
-                <h1 className="text-2xl font-black text-gray-800 tracking-tight">Messages</h1>
-                <button
-                    onClick={() => navigate(user?.role === 'chef' ? '/chef/dashboard' : '/foodie/dashboard')}
-                    className="text-sm bg-white hover:bg-gray-50 text-gray-700 px-5 py-2.5 rounded-xl transition-all font-bold border border-gray-200 shadow-sm hover:shadow"
-                >
-                    Back to Dashboard
-                </button>
-            </div>
+        <div className="flex flex-col h-screen bg-gray-50 overflow-hidden font-sans">
+            {user?.role === 'chef' ? <ChefNavbar /> : <FoodieNavbar />}
+            
+            <div className="flex flex-1 overflow-hidden relative ">
+                {/* Chat List - Hidden on mobile when a chat is active */}
+                <div className={`
+                    ${isMobileView && activeConversation ? 'hidden' : 'flex'}
+                    w-full lg:w-[380px] xl:w-[420px] bg-white border-r border-gray-100 flex-col shadow-sm z-20 transition-all duration-300
+                `}>
+                    <ChatList 
+                        conversations={conversations}
+                        activeConversationId={activeConversation?._id}
+                        onSelectConversation={handleSelectConversation}
+                    />
+                </div>
 
-            {/* Main Content Container */}
-            <div className="flex-1 p-4 md:p-8 overflow-hidden flex justify-center">
-                <div className="w-full max-w-6xl bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden flex">
-                    {/* Desktop: Always show both panels */}
-                    {!isMobileView && (
-                        <>
-                            <div className="w-1/3 border-r border-gray-100 bg-gray-50/50">
-                                <ChatList
-                                    conversations={conversations}
-                                    activeConversationId={activeConversation?._id || null}
-                                    onSelectConversation={handleSelectConversation}
-                                />
+                {/* Chat Box - Full screen on mobile when active */}
+                <div className={`
+                    ${isMobileView && !activeConversation ? 'hidden' : 'flex'}
+                    flex-1 flex-col bg-white overflow-hidden z-10
+                `}>
+                    {activeConversation ? (
+                        <ChatBox 
+                            conversation={activeConversation}
+                            onBack={isMobileView ? handleBackToList : undefined}
+                        />
+                    ) : (
+                        <div className="hidden lg:flex flex-col items-center justify-center flex-1 space-y-6 bg-slate-50/30">
+                            <div className="w-24 h-24 bg-white rounded-[2.5rem] shadow-xl flex items-center justify-center text-green-500 animate-bounce-slow">
+                                <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                </svg>
                             </div>
-                            <div className="flex-1 bg-white">
-                                {activeConversation ? (
-                                    <ChatBox conversation={activeConversation} />
-                                ) : (
-                                    <div className="h-full flex flex-col items-center justify-center text-gray-400 bg-white/50">
-                                        <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-                                            <MessageSquare className="w-10 h-10 text-gray-300" />
-                                        </div>
-                                        <h3 className="text-xl font-bold text-gray-700 mb-2">Your Messages</h3>
-                                        <p className="text-gray-500">Select a conversation to start chatting</p>
-                                    </div>
-                                )}
+                            <div className="text-center">
+                                <h2 className="text-2xl font-black text-gray-900 mb-2">Pick up where you left off</h2>
+                                <p className="text-gray-400 font-medium">Select a conversation from the left to start chatting.</p>
                             </div>
-                        </>
-                    )}
-
-                    {/* Mobile: Show one panel at a time */}
-                    {isMobileView && (
-                        <>
-                            {!activeConversation ? (
-                                <div className="flex-1">
-                                    <ChatList
-                                        conversations={conversations}
-                                        activeConversationId={null}
-                                        onSelectConversation={handleSelectConversation}
-                                    />
-                                </div>
-                            ) : (
-                                <div className="flex-1">
-                                    <ChatBox conversation={activeConversation} onBack={handleBackToList} />
-                                </div>
-                            )}
-                        </>
+                        </div>
                     )}
                 </div>
             </div>

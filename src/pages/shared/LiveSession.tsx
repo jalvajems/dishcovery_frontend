@@ -81,10 +81,36 @@ const LiveSession = () => {
                 setStream(currentStream);
                 streamRef.current = currentStream;
 
-                const socketUrl = import.meta.env.PROD ? '/' : 'http://localhost:4000';
+                const getSocketUrl = () => {
+                    if (import.meta.env.VITE_API_URL) {
+                        try {
+                            const url = new URL(import.meta.env.VITE_API_URL);
+                            return url.origin; // Use the base origin of the API URL
+                        } catch (e) {
+                            console.error("Invalid VITE_API_URL:", e);
+                        }
+                    }
+                    return import.meta.env.PROD ? window.location.origin : 'http://localhost:4000';
+                };
+
+                const socketUrl = getSocketUrl();
+                console.log('Connecting to socket server at:', socketUrl);
+
+                const currentUserId = userRef.current?._id || userRef.current?.id;
                 socketRef.current = io(socketUrl, {
-                    auth: { token },
-                    transports: ['websocket']
+                    auth: { 
+                        token,
+                        user: {
+                            id: currentUserId,
+                            role: userRef.current?.role
+                        }
+                    },
+                    query: {
+                        userId: currentUserId,
+                        role: userRef.current?.role
+                    },
+                    transports: ['websocket'],
+                    path: '/socket.io'
                 });
 
                 socketRef.current.on('connect', async () => {
@@ -106,7 +132,13 @@ const LiveSession = () => {
                         config: {
                             iceServers: [
                                 { urls: 'stun:stun.l.google.com:19302' },
-                                { urls: 'stun:global.stun.twilio.com:3478' }
+                                { urls: 'stun:global.stun.twilio.com:3478' },
+                                // Common free TURN server (OpenRelay) - better to use a dedicated provider for production
+                                {
+                                    urls: 'turn:openrelay.metered.ca:443',
+                                    username: 'openrelayproject',
+                                    credential: 'openrelayproject'
+                                }
                             ]
                         }
                     });
@@ -128,6 +160,14 @@ const LiveSession = () => {
                     peer.on('error', (err) => console.error('PEER ERROR (Initiator):', err));
                     peer.on('close', () => console.log('PEER CLOSED (Initiator) with:', userToSignal));
 
+                    // Add ICE logging for production debugging
+                    // @ts-expect-error - access internal RTC connection
+                    const conn = peer._pc as RTCPeerConnection;
+                    if (conn) {
+                        conn.oniceconnectionstatechange = () => console.log(`ICE State (${userToSignal}):`, conn.iceConnectionState);
+                        conn.onicegatheringstatechange = () => console.log(`ICE Gathering (${userToSignal}):`, conn.iceGatheringState);
+                    }
+
                     return peer;
                 };
 
@@ -139,7 +179,12 @@ const LiveSession = () => {
                         config: {
                             iceServers: [
                                 { urls: 'stun:stun.l.google.com:19302' },
-                                { urls: 'stun:global.stun.twilio.com:3478' }
+                                { urls: 'stun:global.stun.twilio.com:3478' },
+                                {
+                                    urls: 'turn:openrelay.metered.ca:443',
+                                    username: 'openrelayproject',
+                                    credential: 'openrelayproject'
+                                }
                             ]
                         }
                     });
@@ -161,6 +206,14 @@ const LiveSession = () => {
                     peer.on('error', (err) => console.error('PEER ERROR (Answerer):', err));
                     peer.on('close', () => console.log('PEER CLOSED (Answerer) with:', callerId));
 
+                    // Add ICE logging for production debugging
+                    // @ts-expect-error - Expected description for eslint
+                    const conn = peer._pc as RTCPeerConnection;
+                    if (conn) {
+                        conn.oniceconnectionstatechange = () => console.log(`ICE State (${callerId}):`, conn.iceConnectionState);
+                        conn.onicegatheringstatechange = () => console.log(`ICE Gathering (${callerId}):`, conn.iceGatheringState);
+                    }
+
                     peer.signal(incomingSignal);
                     return peer;
                 }
@@ -174,8 +227,12 @@ const LiveSession = () => {
                     usersInRoom.forEach(u => {
                         const normalizedTargetId = normalizeId(u.userId);
                         if (normalizedTargetId === myId) return;
-                        if (peersRef.current.find(p => normalizeId(p.peerId) === normalizedTargetId)) return;
+                        if (peersRef.current.find(p => normalizeId(p.peerId) === normalizedTargetId)) {
+                            console.log(`Peer ${normalizedTargetId} already exists, skipping duplicate initiation.`);
+                            return;
+                        }
 
+                        console.log(`Initiating connection to existing user: ${normalizedTargetId}`);
                         const peer = createPeer(normalizedTargetId, myId, currentStream);
                         peersRef.current.push({ peerId: normalizedTargetId, peer });
                         setPeers((users) => [...users, { peerId: normalizedTargetId, peer }]);
@@ -183,21 +240,20 @@ const LiveSession = () => {
                 });
 
                 socketRef.current.on('participant-joined', (data: { userId: string, role: string, socketId: string }) => {
-                    const myId = normalizeId(userRef.current?._id || userRef.current?.id);
-                    const normalizedJoinerId = normalizeId(data.userId);
-
-                    if (normalizedJoinerId === myId) return;
-
+                    console.log(`Participant joined notification: ${data.userId} (${data.role})`);
+                    // Note: In this mesh setup, the joiner initiates connections to existing users via 'all-users'.
+                    // Existing users wait for the 'webrtc-signal' from the joiner.
                 });
 
                 socketRef.current.on('webrtc-signal', (data: { from: string, signal: SignalData }) => {
                     const fromId = normalizeId(data.from);
+                    console.log(`Received signal from: ${fromId}`, data.signal.type || 'trickle');
 
                     const item = peersRef.current.find((p) => normalizeId(p.peerId) === fromId);
                     if (item) {
                         item.peer.signal(data.signal);
                     } else {
-                        // Receiving a call from anyone in the mesh
+                        console.log(`Receiving new call from: ${fromId}. Adding peer.`);
                         const peer = addPeer(data.signal, fromId, currentStream);
                         peersRef.current.push({ peerId: fromId, peer });
                         setPeers((users) => [...users, { peerId: fromId, peer }]);
@@ -205,10 +261,10 @@ const LiveSession = () => {
                         // Auto-pin Chef for Foodies
                         const chefId = normalizeId(sessionInfoRef.current?.chefId?._id);
                         if (fromId === chefId) {
+                            console.log('Chef detected in mesh. Setting as chefPeer.');
                             setChefPeer({ peerId: fromId, peer });
                             if (!checkIsHost()) {
                                 setPinnedId(fromId);
-                                // toast.info("Chef joined. Pinning to stage.");
                             }
                         }
                     }

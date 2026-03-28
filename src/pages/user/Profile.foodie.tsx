@@ -150,7 +150,7 @@ export default function ProfileFoodie() {
           {/* Action Buttons (Floating Top Right) */}
           <div className="absolute top-6 right-6 flex gap-3">
             <button
-              onClick={() => navigate(`/foodie/profile-edit/${profile.userId}`)}
+              onClick={() => navigate(`/foodie/profile-edit/${profile.userId._id}`)}
               className="p-3 bg-white/90 backdrop-blur-md text-gray-700 hover:text-emerald-600 rounded-2xl shadow-lg border border-gray-100 transition-all hover:scale-110 active:scale-95 group"
               title="Edit Profile"
             >
@@ -208,7 +208,9 @@ export default function ProfileFoodie() {
                     <span className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-widest group-hover:text-emerald-500 transition-colors">Following Chefs</span>
                   </div>
                   <div className="text-center md:text-left">
-                    <span className="block text-2xl font-black text-gray-900">{profile.preferences?.length || 0}</span>
+                    <span className="block text-2xl font-black text-gray-900">
+                      {(profile.preferences?.recipeCategory?.length || 0) + (profile.preferences?.blogTags?.length || 0)}
+                    </span>
                     <span className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-widest">Preferences</span>
                   </div>
                 </div>
@@ -228,7 +230,7 @@ export default function ProfileFoodie() {
                   <h3 className="font-bold text-gray-900 text-lg">Location</h3>
                 </div>
                 <p className="text-gray-600 font-semibold pl-14">
-                  {profile.location || "Not provided"}
+                  {profile.address || "Not provided"}
                 </p>
               </div>
 
@@ -250,22 +252,46 @@ export default function ProfileFoodie() {
               <h2 className="text-2xl font-black text-gray-900 mb-6 flex items-center gap-2">
                 <Settings className="text-emerald-600" size={24} /> My Food Preferences
               </h2>
-              {profile.preferences && profile.preferences.length > 0 ? (
-                <div className="flex flex-wrap gap-3">
-                  {profile.preferences?.map((pref: string, idx: number) => (
-                    <span
-                      key={idx}
-                      className="px-6 py-2.5 bg-white border-2 border-emerald-100 text-emerald-700 font-bold rounded-2xl text-sm shadow-sm hover:shadow-md hover:border-emerald-400 transition-all cursor-default"
-                    >
-                      {pref}
-                    </span>
-                  ))}
+              
+              <div className="space-y-6">
+                {/* Recipe Categories */}
+                <div>
+                  <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-3">Recipe Categories</h3>
+                  {profile.preferences?.recipeCategory && profile.preferences.recipeCategory.length > 0 ? (
+                    <div className="flex flex-wrap gap-3">
+                      {profile.preferences.recipeCategory.map((pref: string, idx: number) => (
+                        <span
+                          key={idx}
+                          className="px-6 py-2.5 bg-white border-2 border-emerald-100 text-emerald-700 font-bold rounded-2xl text-sm shadow-sm hover:shadow-md hover:border-emerald-400 transition-all cursor-default"
+                        >
+                          {pref}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-400 italic text-sm text-center py-4 bg-slate-50 rounded-2xl border-2 border-dashed border-gray-100">No recipe categories selected</p>
+                  )}
                 </div>
-              ) : (
-                <div className="bg-slate-50 p-8 rounded-[2rem] text-center border-2 border-dashed border-gray-200 text-gray-400">
-                  No preferences added yet. Edit profile to add some!
+
+                {/* Blog Tags */}
+                <div>
+                  <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-3">Blog Tags</h3>
+                  {profile.preferences?.blogTags && profile.preferences.blogTags.length > 0 ? (
+                    <div className="flex flex-wrap gap-3">
+                      {profile.preferences.blogTags.map((pref: string, idx: number) => (
+                        <span
+                          key={idx}
+                          className="px-6 py-2.5 bg-white border-2 border-teal-100 text-teal-700 font-bold rounded-2xl text-sm shadow-sm hover:shadow-md hover:border-teal-400 transition-all cursor-default"
+                        >
+                          {pref}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-400 italic text-sm text-center py-4 bg-slate-50 rounded-2xl border-2 border-dashed border-gray-100">No blog tags selected</p>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
 
             {/* Saved Recipes Section */}
