@@ -171,7 +171,7 @@ export default function AddRecipe() {
             // Map server-side fields to frontend error keys
             if (fieldName === "images") fieldName = "image";
             
-            (newErrors as any)[fieldName] = messageParts.join(": ").trim();
+            (newErrors as Record<string, string>)[fieldName] = messageParts.join(": ").trim();
           }
         });
 
