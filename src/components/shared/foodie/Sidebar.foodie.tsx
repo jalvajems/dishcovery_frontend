@@ -1,11 +1,18 @@
 import { NavLink } from "react-router-dom";
-import { Home, BookOpen, FileText, MapPin, MessageCircle, LogOut, Pen, ToolCase, Store, Wallet, ChefHat, UserPlus } from 'lucide-react';
+import { Home, BookOpen, FileText, MapPin, MessageCircle, LogOut, Pen, ToolCase, Store, Wallet, ChefHat, UserPlus, X } from 'lucide-react';
 import { logoutApi } from "@/api/authApi";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
 import { useUserStore } from "@/store/userStore";
+import profile from "../../../assets/profile.jpg";
 
-export default function FoodieSidebar() {
+
+
+interface FoodieSidebarProps {
+  onClose?: () => void;
+}
+
+export default function FoodieSidebar({ onClose }: FoodieSidebarProps) {
   const navigate = useNavigate();
   const { delUserStore, name, image } = useUserStore()
 
@@ -42,19 +49,31 @@ export default function FoodieSidebar() {
     navigate("/login");
   };
 
+  const handleNavClick = () => {
+    if (onClose) onClose();
+  };
+
   return (
-    <aside className="w-72 bg-white h-full border-r border-gray-100 flex flex-col overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
+    <aside className="w-72 bg-white h-screen flex flex-col overflow-y-auto scrollbar-hide border-r border-gray-100 shadow-2xl md:shadow-none relative">
+      
+      {/* Mobile Close Button */}
+      <button 
+        onClick={onClose}
+        className="absolute top-4 right-4 p-2 rounded-xl bg-gray-50 text-gray-500 hover:bg-red-50 hover:text-red-500 transition-all md:hidden"
+      >
+        <X className="w-5 h-5" />
+      </button>
 
       {/* Profile Header */}
       <div className="p-6 pb-2">
         <div
-          onClick={() => navigate('/foodie/profile')}
+          onClick={() => { navigate('/foodie/profile'); handleNavClick(); }}
           className="flex items-center gap-4 p-3 rounded-2xl bg-gradient-to-br from-gray-50 to-green-50/50 border border-gray-100 cursor-pointer hover:shadow-md transition-all duration-300 group"
         >
           <div className="relative">
             <div className="w-12 h-12 rounded-full overflow-hidden ring-2 ring-white shadow-sm group-hover:ring-green-200 transition-all">
               <img
-                src={image || "/default-avatar.png"}
+                src={image || profile}
                 alt="profile"
                 className="w-full h-full object-cover"
               />
@@ -79,6 +98,7 @@ export default function FoodieSidebar() {
                   <NavLink
                     key={item.label}
                     to={item.path}
+                    onClick={handleNavClick}
                     className={({ isActive }) =>
                       `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
                       ${isActive

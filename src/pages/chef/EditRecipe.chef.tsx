@@ -67,6 +67,15 @@ export default function EditRecipe() {
       ...prev,
       [name]: value
     }));
+
+    // Real-time validation clearing
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
   const { uploadToS3 } = useAwsS3Upload()
@@ -118,36 +127,36 @@ export default function EditRecipe() {
     const newErrors: Record<string, string> = {};
 
     if (!formData.title.trim()) {
-      newErrors.title = 'Recipe name is required';
+      newErrors.title = 'Recipe name is missing or required';
     } else if (formData.title.length < 3) {
       newErrors.title = 'Recipe name must be at least 3 characters';
     }
 
     if (!formData.cuisine) {
-      newErrors.cuisine = 'Cuisine is required';
+      newErrors.cuisine = 'Cuisine selection is missing or required';
     }
     if (!formData.tags) {
-      newErrors.tags = 'Tag is required';
+      newErrors.tags = 'Tag is missing or required';
     }
     if (!formData.dietType) {
-      newErrors.dietType = 'Diet type is required';
+      newErrors.dietType = 'Diet type is missing or required';
     }
     if (!uploadedImages) {
-      newErrors.image = 'Image is required';
+      newErrors.image = 'Recipe image is missing or required';
     }
 
     if (!formData.cookingTime) {
-      newErrors.cookingTime = 'Cooking time is required';
+      newErrors.cookingTime = 'Cooking time is missing or required';
     } else if (Number(formData.cookingTime) <= 0) {
       newErrors.cookingTime = 'Cooking time must be greater than 0';
     }
 
     if (ingredients.filter(i => i.trim()).length === 0) {
-      newErrors.ingredients = 'At least one ingredient is required';
+      newErrors.ingredients = 'At least one ingredient is missing or required';
     }
 
     if (steps.filter(s => s.trim()).length === 0) {
-      newErrors.steps = 'At least one step is required';
+      newErrors.steps = 'At least one step is missing or required';
     }
 
     setErrors(newErrors);
@@ -180,8 +189,32 @@ export default function EditRecipe() {
       navigate(`/recipe-detail/${recipeId}`)
       showSuccess(result.data.message)
     } catch (error: unknown) {
-      logError(error);
-      showError(getErrorMessage(error));
+      logError(error, 'Update recipe failed');
+      const errorMessage = getErrorMessage(error);
+
+      // Handle server-side validation errors (format: "field: message, field2: message")
+      if (typeof errorMessage === "string" && errorMessage.includes(":")) {
+        const newErrors: Record<string, string> = {};
+        const parts = errorMessage.split(", ");
+        parts.forEach(part => {
+          const [field, ...messageParts] = part.split(": ");
+          if (field && messageParts.length > 0) {
+            let fieldName = field.trim().toLowerCase();
+            // Map server-side fields to frontend error keys
+            if (fieldName === "images") fieldName = "image";
+            
+            newErrors[fieldName] = messageParts.join(": ").trim();
+          }
+        });
+
+        if (Object.keys(newErrors).length > 0) {
+          setErrors(newErrors);
+          showError("Please fix the validation errors");
+          return;
+        }
+      }
+
+      showError(errorMessage);
     }
   };
 

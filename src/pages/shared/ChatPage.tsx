@@ -94,14 +94,19 @@ const ChatPage: React.FC = () => {
 
                 {/* Chat Box - Full screen on mobile when active */}
                 <div className={`
-                    ${isMobileView && !activeConversation ? 'hidden' : 'flex'}
+                    ${isMobileView && !conversationId ? 'hidden' : 'flex'}
                     flex-1 flex-col bg-white overflow-hidden z-10
                 `}>
-                    {activeConversation ? (
+                    {activeConversation && activeConversation._id === conversationId ? (
                         <ChatBox 
                             conversation={activeConversation}
                             onBack={isMobileView ? handleBackToList : undefined}
                         />
+                    ) : conversationId ? (
+                        <div className="flex-1 flex flex-col items-center justify-center space-y-4 bg-slate-50/30">
+                            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-green-600"></div>
+                            <p className="text-gray-500 font-medium">Loading your conversation...</p>
+                        </div>
                     ) : (
                         <div className="hidden lg:flex flex-col items-center justify-center flex-1 space-y-6 bg-slate-50/30">
                             <div className="w-24 h-24 bg-white rounded-[2.5rem] shadow-xl flex items-center justify-center text-green-500 animate-bounce-slow">

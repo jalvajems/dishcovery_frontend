@@ -89,30 +89,30 @@ export default function FoodieEditProfile() {
         const newErrors: Record<string, string> = {};
 
         if (!name.trim()) {
-            newErrors.name = "Name is required";
+            newErrors.name = "Name is missing or required";
         } else if (name.length < 2) {
             newErrors.name = "Name must be at least 2 characters";
         }
 
         if (!phone.trim()) {
-            newErrors.phone = "Phone number is required";
+            newErrors.phone = "Phone number is missing or required";
         } else if (!/^\d{10}$/.test(phone)) {
             newErrors.phone = "Enter a valid 10-digit phone number";
         }
 
         if (!location.address.trim()) {
-            newErrors.location = "Please select a location on the map";
+            newErrors.location = "Location selection is missing or required";
         }
 
         if (preferences.recipeCategory.length === 0 && preferences.blogTags.length === 0) {
-            newErrors.preferences = "Please select at least one food preference or blog tag";
+            newErrors.preferences = "At least one culinary interest is missing or required";
         }
         if (!image) {
-            newErrors.image = "Please add image";
+            newErrors.image = "Profile image is missing or required";
         }
 
         if (!bio.trim()) {
-            newErrors.bio = "Bio is required";
+            newErrors.bio = "Bio is missing or required";
         } else if (bio.length < 10) {
             newErrors.bio = "Bio must be at least 10 characters";
         }
@@ -150,7 +150,32 @@ export default function FoodieEditProfile() {
             showSuccess("Profile Updated!");
             navigate('/foodie/profile')
         } catch (err: unknown) {
-            showError(getErrorMessage(err));
+            const errorMessage = getErrorMessage(err);
+            logError(err, "Update Profile failed");
+
+            // Handle server-side validation errors (format: "field: message, field2: message")
+            if (typeof errorMessage === "string" && errorMessage.includes(":")) {
+                const newErrors: Record<string, string> = {};
+                const parts = errorMessage.split(", ");
+                parts.forEach(part => {
+                    const [field, ...messageParts] = part.split(": ");
+                    if (field && messageParts.length > 0) {
+                        let fieldName = field.trim().toLowerCase();
+                        // Map server-side field names to frontend error keys if they differ
+                        if (fieldName === "address") fieldName = "location";
+                        
+                        newErrors[fieldName] = messageParts.join(": ").trim();
+                    }
+                });
+
+                if (Object.keys(newErrors).length > 0) {
+                    setErrors(newErrors);
+                    showError("Please fix the validation errors");
+                    return;
+                }
+            }
+
+            showError(errorMessage);
         }
 
     };
@@ -182,7 +207,7 @@ export default function FoodieEditProfile() {
                                     const val = e.target.value;
                                     setName(val);
                                     if (!val.trim()) {
-                                        setErrors(prev => ({ ...prev, name: "Name is required" }));
+                                        setErrors(prev => ({ ...prev, name: "Name is missing or required" }));
                                     } else if (val.length < 2) {
                                         setErrors(prev => ({ ...prev, name: "Name must be at least 2 characters" }));
                                     } else {
@@ -217,7 +242,7 @@ export default function FoodieEditProfile() {
                                     const val = e.target.value;
                                     setPhone(val);
                                     if (!val.trim()) {
-                                        setErrors(prev => ({ ...prev, phone: "Phone number is required" }));
+                                        setErrors(prev => ({ ...prev, phone: "Phone number is missing or required" }));
                                     } else if (!/^\d{10}$/.test(val)) {
                                         setErrors(prev => ({ ...prev, phone: "Enter a valid 10-digit phone number" }));
                                     } else {
@@ -340,7 +365,7 @@ export default function FoodieEditProfile() {
                                 const val = e.target.value;
                                 setBio(val);
                                 if (!val.trim()) {
-                                    setErrors(prev => ({ ...prev, bio: "Bio is required" }));
+                                    setErrors(prev => ({ ...prev, bio: "Bio is missing or required" }));
                                 } else if (val.length < 10) {
                                     setErrors(prev => ({ ...prev, bio: "Bio must be at least 10 characters" }));
                                 } else {

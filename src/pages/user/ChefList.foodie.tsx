@@ -83,6 +83,7 @@ export default function ChefList() {
                                 <SearchBar
                                     placeholder="Search chefs by name..."
                                     onSearch={handleSearch}
+                                    initialValue={searchQuery}
                                 />
                             </div>
                             <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
