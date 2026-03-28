@@ -13,4 +13,5 @@ export const AUTH_ROUTES = {
   VERIFY_FORGOT_OTP: "/auth/forget-otp-verify",
 
   LOGOUT: "/auth/logout",
+  CHANGE_PASSWORD: "/auth/change-password",
 } as const;

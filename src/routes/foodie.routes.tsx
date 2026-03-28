@@ -25,6 +25,7 @@ import FoodieWalletPage from '@/pages/user/Wallet.foodie';
 import FollowingList from '@/pages/user/FollowingList.foodie';
 import ChatPage from '@/pages/shared/ChatPage';
 import BookedWorkshopDetailFoodie from '@/pages/user/BookedWorkshopDetail.foodie';
+import ChangePassword from '@/pages/shared/ChangePassword';
 
 import ProtectedRoute from './Protected.routes';
 import MyFoodSpotDetailPage from '@/pages/user/MyFoodSpotDetail.foodie';
@@ -53,6 +54,7 @@ function UserRouter() {
                 <Route path='/foodie/profile' element={<ProfileFoodie />} />
                 <Route path='/foodie/profile-add' element={<AddFoodieProfile />} />
                 <Route path='/foodie/profile-edit/:id' element={<EditFoodieProfile />} />
+                <Route path='/foodie/change-password' element={<ChangePassword />} />
 
                 <Route path='/foodie/foodspot/:id' element={<FoodSpotDetailPage />} />
                 <Route path='/foodie/myfoodspot/:id' element={<MyFoodSpotDetailPage />} />
