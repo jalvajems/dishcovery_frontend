@@ -52,6 +52,11 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
     useEffect(() => {
         const handleNewMessage = (data: SocketMessagePayload) => {
             console.log('ChatBox: Received chat:message', data);
+            
+            // Update conversation list last message regardless of whether it's the active one
+            // this ensures the list is updated and sorted
+            useChatStore.getState().updateConversationLastMessage(data.conversationId, data.message);
+
             if (data.conversationId === conversation._id) {
                 addMessage(data.message);
 
