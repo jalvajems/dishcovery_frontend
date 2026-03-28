@@ -73,12 +73,16 @@ export default function FoodieEditProfile() {
 
     const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
-
             const Image = e.target.files?.[0]
             const url = await uploadToS3(Image)
-
-            setImage(url)
-
+            if (url) {
+                setImage(url)
+                setErrors(prev => {
+                    const newErrors = { ...prev };
+                    delete newErrors.image;
+                    return newErrors;
+                });
+            }
         }
     };
     const validateForm = () => {
@@ -125,7 +129,6 @@ export default function FoodieEditProfile() {
         e.preventDefault();
 
         if (!validateForm()) {
-            showError("Invalid Credentials");
             return;
         }
 
@@ -175,7 +178,21 @@ export default function FoodieEditProfile() {
                                 type="text"
                                 value={name}
                                 className="w-full bg-transparent p-3 outline-none"
-                                onChange={(e) => setName(e.target.value)}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    setName(val);
+                                    if (!val.trim()) {
+                                        setErrors(prev => ({ ...prev, name: "Name is required" }));
+                                    } else if (val.length < 2) {
+                                        setErrors(prev => ({ ...prev, name: "Name must be at least 2 characters" }));
+                                    } else {
+                                        setErrors(prev => {
+                                            const newErrors = { ...prev };
+                                            delete newErrors.name;
+                                            return newErrors;
+                                        });
+                                    }
+                                }}
                             />
                         </div>
                     </div>
@@ -196,7 +213,21 @@ export default function FoodieEditProfile() {
                                 type="text"
                                 value={phone}
                                 className="w-full bg-transparent p-3 outline-none"
-                                onChange={(e) => setPhone(e.target.value)}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    setPhone(val);
+                                    if (!val.trim()) {
+                                        setErrors(prev => ({ ...prev, phone: "Phone number is required" }));
+                                    } else if (!/^\d{10}$/.test(val)) {
+                                        setErrors(prev => ({ ...prev, phone: "Enter a valid 10-digit phone number" }));
+                                    } else {
+                                        setErrors(prev => {
+                                            const newErrors = { ...prev };
+                                            delete newErrors.phone;
+                                            return newErrors;
+                                        });
+                                    }
+                                }}
                             />
                         </div>
                     </div>
@@ -305,7 +336,21 @@ export default function FoodieEditProfile() {
                             rows={4}
                             value={bio}
                             className="w-full bg-gray-50 p-3 rounded-lg outline-none"
-                            onChange={(e) => setBio(e.target.value)}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setBio(val);
+                                if (!val.trim()) {
+                                    setErrors(prev => ({ ...prev, bio: "Bio is required" }));
+                                } else if (val.length < 10) {
+                                    setErrors(prev => ({ ...prev, bio: "Bio must be at least 10 characters" }));
+                                } else {
+                                    setErrors(prev => {
+                                        const newErrors = { ...prev };
+                                        delete newErrors.bio;
+                                        return newErrors;
+                                    });
+                                }
+                            }}
                         />
                     </div>
 

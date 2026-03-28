@@ -209,8 +209,14 @@ export default function EditFoodSpot() {
             const err: { name?: string; price?: string; image?: string } = {};
             if (!f.name.trim()) err.name = "Food item name is required.";
             if (!f.image.trim()) err.image = "Food item image is required.";
-            if (f.price && isNaN(Number(f.price))) err.price = "Price must be a valid number.";
-            if (f.price && Number(f.price) < 0) err.price = "Price cannot be negative.";
+            
+            if (!f.price.trim()) {
+                err.price = "Price is required.";
+            } else if (isNaN(Number(f.price))) {
+                err.price = "Price must be a valid number.";
+            } else if (Number(f.price) < 0) {
+                err.price = "Price cannot be negative.";
+            }
             return err;
         });
 

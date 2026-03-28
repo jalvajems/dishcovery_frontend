@@ -154,7 +154,8 @@ export const useChatStore = create<ChatStore>((set, get) => ({
             set((state) => {
                 const otherConversations = state.conversations.filter(c => c._id !== data.conversation._id);
                 return {
-                    conversations: [data.conversation, ...otherConversations]
+                    conversations: [data.conversation, ...otherConversations],
+                    activeConversation: data.conversation
                 };
             });
 

@@ -16,7 +16,8 @@ const ChatPage: React.FC = () => {
         conversations, 
         activeConversation, 
         loadConversations, 
-        setActiveConversation 
+        setActiveConversation,
+        loading
     } = useChatStore();
 
     const [isMobileView, setIsMobileView] = useState(false);
@@ -35,30 +36,32 @@ const ChatPage: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        console.log('ChatPage: Loading conversations...');
+        console.log('ChatPage: Initial conversation load...');
         loadConversations();
     }, [loadConversations]);
 
     useEffect(() => {
-        const { loading } = useChatStore.getState();
         console.log('ChatPage: Conversations state check:', { 
             count: conversations.length, 
             conversationId, 
-            loading 
+            loading,
+            currentActive: activeConversation?._id 
         });
 
         if (conversationId && conversations.length > 0) {
-            const conversation = conversations.find((c: Conversation) => c._id === conversationId);
-            if (conversation) {
-                console.log('ChatPage: Setting active conversation:', conversationId);
-                setActiveConversation(conversation);
-            } else if (!loading) {
-                console.warn('ChatPage: Conversation ID from URL not found in list after loading:', conversationId);
-                // If it's truly not found and we are not loading, maybe we should redirect or show a 404
+            // Only set if not already set or if it's different to avoid loops
+            if (!activeConversation || activeConversation._id !== conversationId) {
+                const conversation = conversations.find((c: Conversation) => c._id === conversationId);
+                if (conversation) {
+                    console.log('ChatPage: Setting active conversation from list:', conversationId);
+                    setActiveConversation(conversation);
+                } else if (!loading) {
+                    console.warn('ChatPage: Conversation ID from URL not found in list after loading:', conversationId);
+                }
             }
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [conversationId, conversations]);
+    }, [conversationId, conversations, loading]);
 
     const handleSelectConversation = (conversation: Conversation) => {
         console.log('ChatPage: User selected conversation:', conversation._id);
