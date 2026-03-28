@@ -51,14 +51,17 @@ export default function ChefProfileEdit() {
 
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-
-      const Image = e.target.files?.[0]
+    if (e.target.files && e.target.files[0]) {
+      const Image = e.target.files[0]
       const url = await uploadToS3(Image)
-      console.log(url);
-
-      setImagePreview(url)
-
+      if (url) {
+        setImagePreview(url)
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors.image;
+          return newErrors;
+        });
+      }
     }
   };
 
@@ -94,44 +97,97 @@ export default function ChefProfileEdit() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+    validateField(name, value);
+  };
+
+  const validateField = (name: string, value: string) => {
+    const newErrors: ProfileErrors = { ...errors };
+
+    switch (name) {
+      case "name":
+        if (!value.trim()) {
+          newErrors.name = "Name is required";
+        } else {
+          delete newErrors.name;
+        }
+        break;
+      case "email":
+        if (!value.trim()) {
+          newErrors.email = "Email is required";
+        } else if (!/^\S+@\S+\.\S+$/.test(value)) {
+          newErrors.email = "Enter a valid email address";
+        } else {
+          delete newErrors.email;
+        }
+        break;
+      case "phone":
+        if (!value.trim()) {
+          newErrors.phone = "Phone number is required";
+        } else if (!/^[6-9]\d{9}$/.test(value)) {
+          newErrors.phone = "Enter a valid 10-digit phone number";
+        } else {
+          delete newErrors.phone;
+        }
+        break;
+      case "location":
+        if (!value.trim()) {
+          newErrors.location = "Location is required";
+        } else {
+          delete newErrors.location;
+        }
+        break;
+      case "specialities":
+        if (!value) {
+          newErrors.specialities = "Please select a speciality";
+        } else {
+          delete newErrors.specialities;
+        }
+        break;
+      case "bio":
+        if (!value.trim()) {
+          newErrors.bio = "Bio is required";
+        } else if (value.length < 30) {
+          newErrors.bio = "Bio must be at least 30 characters";
+        } else {
+          delete newErrors.bio;
+        }
+        break;
+      case "image":
+        if (!value && !form.image) {
+          newErrors.image = "Profile image is required";
+        } else {
+          delete newErrors.image;
+        }
+        break;
+      default:
+        break;
+    }
+
+    setErrors(newErrors);
   };
 
   const validateProfile = () => {
     const newErrors: ProfileErrors = {};
 
-    if (!form.name.trim()) {
-      newErrors.name = "Name is required";
-    }
-
+    if (!form.name.trim()) newErrors.name = "Name is required";
     if (!form.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/^\S+@\S+\.\S+$/.test(form.email)) {
       newErrors.email = "Enter a valid email address";
     }
-
     if (!form.phone.trim()) {
       newErrors.phone = "Phone number is required";
     } else if (!/^[6-9]\d{9}$/.test(form.phone)) {
       newErrors.phone = "Enter a valid 10-digit phone number";
     }
-
-    if (!form.location.trim()) {
-      newErrors.location = "Location is required";
-    }
-
-    if (!form.specialities) {
-      newErrors.specialities = "Please select a speciality";
-    }
-
+    if (!form.location.trim()) newErrors.location = "Location is required";
+    if (!form.specialities) newErrors.specialities = "Please select a speciality";
     if (!form.bio.trim()) {
       newErrors.bio = "Bio is required";
     } else if (form.bio.length < 30) {
       newErrors.bio = "Bio must be at least 30 characters";
     }
-
-    if (!imagePreview && !form.image) {
-      newErrors.image = "Profile image is required";
-    }
+    if (!imagePreview && !form.image) newErrors.image = "Profile image is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;

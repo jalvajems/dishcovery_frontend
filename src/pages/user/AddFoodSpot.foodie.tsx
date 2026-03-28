@@ -97,6 +97,15 @@ export default function AddFoodSpot() {
     const updated = [...foods];
     updated[index].image = url;
     setFoods(updated);
+
+    // Clear food-level error for image on upload
+    setErrors((prev) => {
+      const foodErrors = [...(prev.foods || [])];
+      if (foodErrors[index]) {
+        foodErrors[index] = { ...foodErrors[index], image: undefined };
+      }
+      return { ...prev, foods: foodErrors };
+    });
   };
 
   const addFood = () =>
@@ -144,16 +153,22 @@ export default function AddFoodSpot() {
       const err: { name?: string; price?: string; image?:string; } = {};
       if (!f.name.trim()) err.name = "Food item name is required.";
       if (!f.image.trim()) err.image = "Food item image is required.";
-      if (f.price && isNaN(Number(f.price))) err.price = "Price must be a valid number.";
-      if (f.price && Number(f.price) < 0) err.price = "Price cannot be negative.";
+      
+      if (!f.price.trim()) {
+        err.price = "Price is required.";
+      } else if (isNaN(Number(f.price))) {
+        err.price = "Price must be a valid number.";
+      } else if (Number(f.price) < 0) {
+        err.price = "Price cannot be negative.";
+      }
       return err;
     });
 
-    const hasFoodErrors = foodErrors.some((e) => e.name || e.price);
+    const hasFoodErrors = foodErrors.some((e) => e.name || e.price || e.image);
     if (hasFoodErrors) newErrors.foods = foodErrors;
 
     setErrors(newErrors);
-    return !newErrors.name && !newErrors.coverImage && !newErrors.location && !newErrors.openingClose && !hasFoodErrors;
+    return !newErrors.name && !newErrors.coverImage && !newErrors.location && !newErrors.openingClose && !newErrors.description && !newErrors.speciality && !newErrors.tag && !hasFoodErrors;
   };
 
   const handleSave = async () => {
