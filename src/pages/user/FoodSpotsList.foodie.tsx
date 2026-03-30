@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   ArrowRight, MapPin
 } from 'lucide-react';
@@ -21,9 +21,14 @@ export default function FoodSpotListing() {
   const [sortBy, setSortBy] = useState<string>('')
   const limit = 4;
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page)
-  }
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+  }, []);
+
+  const handleSearch = useCallback((value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  }, []);
 
   async function fetchFoodSpots() {
     try {
@@ -64,10 +69,7 @@ export default function FoodSpotListing() {
             <div className="w-full max-w-2xl px-4 md:px-0">
               <SearchBar
                 placeholder="Search spots by name or tag..."
-                onSearch={(value) => {
-                  setSearchQuery(value);
-                  setCurrentPage(1);
-                }}
+                onSearch={handleSearch}
               />
             </div>
           </div>
