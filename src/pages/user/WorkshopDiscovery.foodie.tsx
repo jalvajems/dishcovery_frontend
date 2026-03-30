@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Search, Calendar, Video, MapPin, ArrowRight, Clock } from 'lucide-react';
 import { logError } from '@/utils/errorHandler';
 import { getApprovedWorkshopsApi } from '@/api/workshopApi';
@@ -17,6 +17,15 @@ export default function WorkshopDiscovery() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const limit = 6;
+
+    const handlePageChange = useCallback((page: number) => {
+        setCurrentPage(page);
+    }, []);
+
+    const handleSearch = useCallback((val: string) => {
+        setSearchQuery(val);
+        setCurrentPage(1);
+    }, []);
 
     useEffect(() => {
         fetchWorkshops();
@@ -57,7 +66,7 @@ export default function WorkshopDiscovery() {
                             <div className="max-w-md">
                                 <SearchBar
                                     placeholder="Search workshops or chefs..."
-                                    onSearch={(val) => { setSearchQuery(val); setCurrentPage(1); }}
+                                    onSearch={handleSearch}
                                 />
                             </div>
                         </div>
@@ -194,7 +203,7 @@ export default function WorkshopDiscovery() {
                     <Pagination
                         currentPage={currentPage}
                         totalPages={totalPages}
-                        onChange={setCurrentPage}
+                        onChange={handlePageChange}
                     />
                 </div>
             </div>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { ArrowRight, Search } from 'lucide-react';
 import { getAllRecipesFoodieApi, getRecommendedRecipesApi } from '@/api/foodieApi';
 import { showError } from '@/utils/toast';
@@ -19,9 +19,14 @@ export default function RecipeListing() {
   const [recipes, setRecipes] = useState<IRecipe[]>([]);
   const [recommendedRecipes, setRecommendedRecipes] = useState<IRecipe[]>([]);
 
-  const handlePageChange = (page: number) => {
+  const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
-  };
+  }, []);
+
+  const handleSearch = useCallback((value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  }, []);
 
   useEffect(() => {
     fetchRecipes();
@@ -75,10 +80,7 @@ export default function RecipeListing() {
             <div className="w-full max-w-2xl px-4 md:px-0">
               <SearchBar
                 placeholder="Search recipes, cuisine..."
-                onSearch={(value) => {
-                  setSearchQuery(value);
-                  setCurrentPage(1); // reset to page 1 for search
-                }}
+                onSearch={handleSearch}
                 initialValue={searchQuery}
               />
             </div>
