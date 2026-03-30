@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { MapPin, ArrowRight, ChefHat } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getChefsApi } from '@/api/foodieApi';
@@ -40,10 +40,14 @@ export default function ChefList() {
     };
     console.log('----------', chefs);
 
-    const handleSearch = (query: string) => {
+    const handlePageChange = useCallback((page: number) => {
+        setCurrentPage(page);
+    }, []);
+
+    const handleSearch = useCallback((query: string) => {
         setSearchQuery(query);
         setCurrentPage(1);
-    };
+    }, []);
 
     return (
         <div className="min-h-screen bg-white text-gray-900 pb-20 font-sans">
@@ -174,7 +178,7 @@ export default function ChefList() {
                             <Pagination
                                 currentPage={currentPage}
                                 totalPages={totalPages}
-                                onChange={setCurrentPage}
+                                onChange={handlePageChange}
                             />
                         </div>
                     </>

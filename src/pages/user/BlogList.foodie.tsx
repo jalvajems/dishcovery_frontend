@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { getBlogsFoodieApi, getRecommendedBlogsApi } from '@/api/foodieApi';
 import { showError } from '@/utils/toast';
@@ -19,9 +19,14 @@ export default function BlogListFoodie() {
     const [totalPages, setTotalPages] = useState(1);
     const limit = 3;
 
-    const handlePageChange = (page: number) => {
-        setCurrentPage(page)
-    }
+    const handlePageChange = useCallback((page: number) => {
+        setCurrentPage(page);
+    }, []);
+
+    const handleSearch = useCallback((value: string) => {
+        setSearchQuery(value);
+        setCurrentPage(1);
+    }, []);
 
     useEffect(() => {
         fetchBlogs();
@@ -70,10 +75,7 @@ export default function BlogListFoodie() {
                         {/* Search Bar */}
                         <SearchBar
                             placeholder="Search recipes, cuisine..."
-                            onSearch={(value) => {
-                                setSearchQuery(value);
-                                setCurrentPage(1)
-                            }}
+                            onSearch={handleSearch}
                         />
                     </div>
                 </div>

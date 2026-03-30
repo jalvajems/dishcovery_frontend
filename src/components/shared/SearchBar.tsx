@@ -1,5 +1,5 @@
 import { Search, X } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface SearchBarProps {
   placeholder?: string;
@@ -18,13 +18,19 @@ export default function SearchBar({
     setQuery(initialValue);
   }, [initialValue]);
 
+  const onSearchRef = useRef(onSearch);
+
+  useEffect(() => {
+    onSearchRef.current = onSearch;
+  }, [onSearch]);
+
   useEffect(() => {
     const delay = setTimeout(() => {
-      onSearch(query);
+      onSearchRef.current(query);
     }, 400);
 
     return () => clearTimeout(delay);
-  }, [query, onSearch]);
+  }, [query]);
 
   return (
     <div className="relative w-full max-w-2xl mx-auto">
