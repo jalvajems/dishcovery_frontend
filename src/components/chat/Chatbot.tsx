@@ -27,7 +27,6 @@ const Chatbot: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    // Get current user role from store
     const { user } = useAuthStore();
     const userRole = user?.role || 'foodie';
 

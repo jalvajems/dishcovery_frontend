@@ -46,21 +46,17 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
                 socket?.emit('chat:leave', conversation._id);
             };
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [conversation._id, socket]);
 
     useEffect(() => {
         const handleNewMessage = (data: SocketMessagePayload) => {
             console.log('ChatBox: Received chat:message', data);
             
-            // Update conversation list last message regardless of whether it's the active one
-            // this ensures the list is updated and sorted
             useChatStore.getState().updateConversationLastMessage(data.conversationId, data.message);
 
             if (data.conversationId === conversation._id) {
                 addMessage(data.message);
 
-                // Only mark as read if the message is NOT from me
                 const senderId = typeof data.message.senderId === 'string'
                     ? data.message.senderId
                     : data.message.senderId._id;

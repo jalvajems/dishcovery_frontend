@@ -6,21 +6,37 @@ import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 export const useOtp = () => {
-  const { email, type, clearOtpData } = useOtpStore()
+  const { email, type, otpExpiry, clearOtpData, setOtpExpiry } = useOtpStore()
   const navigate = useNavigate();
   const [otp, setOtp] = useState(['', '', '', '']);
   const [otpError, setOtpError] = useState(false);
-  const [timer, setTimer] = useState(60);
+  const [timer, setTimer] = useState(0);
 
   useEffect(() => {
+    const calculateTimeRemaining = () => {
+      if (!otpExpiry) return 0;
+      const now = Date.now();
+      const remaining = Math.max(0, Math.floor((otpExpiry - now) / 1000));
+      return remaining;
+    };
+
+    setTimer(calculateTimeRemaining());
+
     let interval: NodeJS.Timeout;
-    if (timer > 0) {
+    if (calculateTimeRemaining() > 0) {
       interval = setInterval(() => {
-        setTimer((prev) => prev - 1);
+        const remaining = calculateTimeRemaining();
+        setTimer(remaining);
+        if (remaining <= 0) {
+          clearInterval(interval);
+        }
       }, 1000);
     }
-    return () => clearInterval(interval);
-  }, [timer]);
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [otpExpiry]);
 
   const inputRefs = [
     useRef<HTMLInputElement>(null),
@@ -55,6 +71,12 @@ export const useOtp = () => {
 
 
   const handleVerify = async () => {
+    if (timer <= 0) {
+      setOtpError(true);
+      showError("OTP has expired. Please resend the OTP.");
+      return;
+    }
+
     if (otp.some((digit) => digit.trim() === "")) {
       setOtpError(true);
       showError("Please enter all 4 digits of the OTP");
@@ -92,7 +114,7 @@ export const useOtp = () => {
     try {
       const { data } = await resendOtpApi({ email: email })
       showSuccess(data.message)
-      setTimer(60);
+      setOtpExpiry(Date.now() + 60 * 1000);
     } catch (error) {
       logError(error, "Resend OTP failed");
     }
