@@ -21,8 +21,10 @@ export const useAuthStore = create<AuthState>()(persist((set) => ({
 interface OtpState {
   email: string | null;
   type: "signup" | "forgotPassword" | null;
+  otpExpiry: number | null;
   setOtpData: (email: string, type: "signup" | "forgotPassword") => void;
   clearOtpData: () => void;
+  setOtpExpiry: (expiry: number | null) => void;
 }
 
 export const useOtpStore = create<OtpState>()(
@@ -30,9 +32,14 @@ export const useOtpStore = create<OtpState>()(
     (set) => ({
       email: null,
       type: null,
+      otpExpiry: null,
 
-      setOtpData: (email, type) => set({ email, type }),
-      clearOtpData: () => set({ email: null, type: null }),
+      setOtpData: (email, type) => {
+        const otpExpiry = Date.now() + 60 * 1000;
+        set({ email, type, otpExpiry });
+      },
+      clearOtpData: () => set({ email: null, type: null, otpExpiry: null }),
+      setOtpExpiry: (otpExpiry) => set({ otpExpiry }),
     }),
     { name: "otp-store" }
   )
