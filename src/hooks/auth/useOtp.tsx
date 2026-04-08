@@ -117,6 +117,8 @@ export const useOtp = () => {
       setOtpExpiry(Date.now() + 60 * 1000);
     } catch (error) {
       logError(error, "Resend OTP failed");
+      const msg = getErrorMessage(error, "Resend OTP failed");
+      showError(msg);
     }
   }
 
