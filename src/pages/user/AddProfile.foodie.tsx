@@ -21,6 +21,7 @@ export default function FoodieAddProfile() {
   });
   const [bio, setBio] = useState("");
   const [image, setImage] = useState<string | null>(null);
+  const [imageKey, setImageKey] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const { uploadToS3 } = useAwsS3Upload()
@@ -28,13 +29,17 @@ export default function FoodieAddProfile() {
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const Image = e.target.files?.[0]
-      const url = await uploadToS3(Image)
-      setImage(url)
+      const result = await uploadToS3(Image)
+      if (result) {
+        setImage(result.fileUrl)
+        setImageKey(result.s3Key)
+      }
     }
   };
 
   const removeCoverImage = () => {
     setImage(null);
+    setImageKey(null);
   };
 
   const validateForm = () => {
@@ -63,7 +68,7 @@ export default function FoodieAddProfile() {
     } else if (bio.length < 10) {
       newErrors.bio = "Bio must be at least 10 characters";
     }
-    if (!image?.trim()) {
+    if (!imageKey?.trim()) {
       newErrors.image = "Profile image is missing or required";
     }
 
@@ -87,7 +92,7 @@ export default function FoodieAddProfile() {
       address: location.address,
       preferences: preferences,
       bio: bio,
-      image: image
+      image: imageKey
     }
     try {
       if (!payload) return;

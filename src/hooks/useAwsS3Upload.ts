@@ -4,12 +4,14 @@ import { useState } from "react";
 
 interface UploadResult {
     fileUrl: string | null;
-    uploadToS3: (file: File) => Promise<string | null>;
+    s3Key: string | null;
+    uploadToS3: (file: File) => Promise<{ fileUrl: string; s3Key: string } | null>;
     loading: boolean;
     error: string | null;
 }
 export const useAwsS3Upload=():UploadResult=>{
     const [fileUrl, setFileUrl] = useState<string | null>(null);
+    const [s3Key, setS3Key] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -24,7 +26,7 @@ export const useAwsS3Upload=():UploadResult=>{
                 });
                 
 
-            const  {uploadUrl,fileUrl}=data.data;
+            const { uploadUrl, fileUrl: fetchedFileUrl, key } = data.data;
             
             const s3Response=await fetch(uploadUrl,{
                 method:"PUT",
@@ -35,10 +37,11 @@ export const useAwsS3Upload=():UploadResult=>{
             });
             
             
-            if(!s3Response)throw new Error("s3 upload failed")
+            if(!s3Response.ok) throw new Error("s3 upload failed")
             
-                setFileUrl(fileUrl)
-                return fileUrl;
+            setFileUrl(fetchedFileUrl)
+            setS3Key(key)
+            return { fileUrl: fetchedFileUrl, s3Key: key };
         } catch (error) {
             console.error("S3 upload error:", error);
             setError("Upload failed");
@@ -49,6 +52,6 @@ export const useAwsS3Upload=():UploadResult=>{
         }
 
     };
-    return {fileUrl,uploadToS3,loading,error}
+    return {fileUrl, s3Key, uploadToS3, loading, error}
 
 }

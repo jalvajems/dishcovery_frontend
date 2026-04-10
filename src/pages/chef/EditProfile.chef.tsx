@@ -53,9 +53,10 @@ export default function ChefProfileEdit() {
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const Image = e.target.files[0]
-      const url = await uploadToS3(Image)
-      if (url) {
-        setImagePreview(url)
+      const result = await uploadToS3(Image)
+      if (result) {
+        setImagePreview(result.fileUrl)
+        setForm(prev => ({ ...prev, image: result.s3Key }))
         setErrors((prev) => {
           const newErrors = { ...prev };
           delete newErrors.image;
@@ -206,7 +207,7 @@ export default function ChefProfileEdit() {
         location: form.location,
         specialities: [form.specialities],
         bio: form.bio,
-        image: imagePreview || form.image,
+        image: form.image,
         certificates: form.certificates ? form.certificates.split(",").map(s => s.trim()).filter(Boolean) : [],
         achievements: form.achievements ? form.achievements.split(",").map(s => s.trim()).filter(Boolean) : [],
         skills: form.skills ? form.skills.split(",").map(s => s.trim()).filter(Boolean) : [],

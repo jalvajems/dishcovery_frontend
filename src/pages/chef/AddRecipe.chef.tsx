@@ -34,6 +34,7 @@ export default function AddRecipe() {
   const [ingredients, setIngredients] = useState(['']);
   const [steps, setSteps] = useState(['']);
   const [uploadedImages, setUploadedImages] = useState<string | null>(null);
+  const [uploadedImageKey, setUploadedImageKey] = useState<string | null>(null);
   const navigate = useNavigate()
   const { isVerifiedUser } = useUserStore()
 
@@ -60,12 +61,12 @@ export default function AddRecipe() {
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-
       const Image = e.target.files?.[0]
-      const url = await uploadToS3(Image)
-
-      setUploadedImages(url)
-
+      const result = await uploadToS3(Image)
+      if (result) {
+        setUploadedImages(result.fileUrl)
+        setUploadedImageKey(result.s3Key)
+      }
     }
   };
 
@@ -88,6 +89,7 @@ export default function AddRecipe() {
   };
    const removeCoverImage = () => {
         setUploadedImages(null);
+        setUploadedImageKey(null);
     };
 
   const removeStep = (index: number) => {
@@ -112,7 +114,7 @@ export default function AddRecipe() {
     if (!formData.dietType.trim()) {
       newErrors.dietType = "Recipe diet type is missing or required";
     }
-    if (!uploadedImages?.trim()) {
+    if (!uploadedImageKey?.trim()) {
       newErrors.image = "Recipe image is missing or required";
     }
 
@@ -149,7 +151,7 @@ export default function AddRecipe() {
         tags: formData.tags ? [formData.tags] : [],
         dietType: formData.dietType ? [formData.dietType] : [],
         ingredients: ingredients.filter(i => i.trim() !== ''),
-        images: uploadedImages,
+        images: uploadedImageKey,
         steps: steps.filter(s => s.trim() !== ''),
         isDraft: formData.isDraft
       }
