@@ -20,6 +20,6 @@ export const expandImageUrl = (key?: string | null, defaultValue: string = 'http
   
   // If apiBase is just '', the result is /api/file/image/key
   // If apiBase is https://api.xxx.com, the result is https://api.xxx.com/api/file/image/key
-  // We use encodeURI to handle spaces and special characters in the key while preserving slashes
-  return `${apiBase}${proxyPath}${encodeURI(cleanKey)}`;
+  // We use encodeURIComponent to handle spaces and special characters in the key while preserving the proxy path
+  return `${apiBase}${proxyPath}${encodeURIComponent(cleanKey)}`;
 };
