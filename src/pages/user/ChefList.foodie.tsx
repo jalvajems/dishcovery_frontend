@@ -127,7 +127,7 @@ export default function ChefList() {
                                 >
                                     <div className="relative h-72 overflow-hidden bg-gray-100">
                                         <img
-                                            src={expandImageUrl(((chef as any)?.image) || (chef as any)?.chefId?.image)}
+                                            src={expandImageUrl(chef.image || chef.chefId?.image)}
                                             alt={chef.chefId?.name}
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                                         />

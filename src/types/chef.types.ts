@@ -6,6 +6,7 @@ export interface IChefDetail {
         image?: string;
         email: string;
     };
+    image?: string;
     bio?: string;
     specialities?: string[];
     experience?: number;
@@ -28,6 +29,7 @@ export interface IChefListItem {
         name: string;
         image?: string;
     };
+    image?: string;
     specialities: string[];
     experience: number;
     rating: number;
