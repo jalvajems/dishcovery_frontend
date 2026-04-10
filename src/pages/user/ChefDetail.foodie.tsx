@@ -29,6 +29,7 @@ import FoodieNavbar from '@/components/shared/foodie/Navbar.foodie';
 import ReviewSection from '@/components/shared/ReviewPage';
 import Pagination from '@/components/shared/Pagination';
 import { useChatStore } from '@/store/chatStore';
+import { expandImageUrl } from '@/utils/imageUrl';
 
 import type { IRecipe } from '@/types/recipe.types';
 import type { IBlog } from '@/types/blog.types';
@@ -175,7 +176,7 @@ export default function ChefDetail() {
                             <div className="relative mb-6">
                                 <div className="w-40 h-40 rounded-full p-2 bg-white shadow-lg -mt-20">
                                     <img
-                                        src={chef.chefId?.image || 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=400&h=400&fit=crop'}
+                                        src={expandImageUrl(chef.chefId?.image)}
                                         alt={chef.chefId?.name}
                                         className="w-full h-full rounded-full object-cover"
                                     />
@@ -415,7 +416,7 @@ function ActivityCard({ item, type, navigate }: ActivityCardProps) {
     // Type guards or direct safe access
     const title = item.title;
     // Images handling: Workshop has 'banner', Blog has 'coverImage', Recipe has 'images[]'
-    const image = (item as IRecipe).images?.[0] || (item as IBlog).coverImage || (item as IWorkshop).banner || 'https://images.unsplash.com/photo-1495195129352-aed325a55b65?w=400&h=300&fit=crop';
+    const image = expandImageUrl((item as IRecipe).images?.[0] || (item as IBlog).coverImage || (item as IWorkshop).banner);
 
     // Category/Tag/Cuisine
     const tag = (item as IWorkshop).category || (item as IBlog).tags?.[0] || (item as IRecipe).cuisine || 'General';

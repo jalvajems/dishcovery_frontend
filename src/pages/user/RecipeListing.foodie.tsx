@@ -6,6 +6,7 @@ import { getErrorMessage } from "@/utils/errorHandler";
 import { useNavigate } from 'react-router-dom';
 import Pagination from '@/components/shared/Pagination';
 import SearchBar from '@/components/shared/SearchBar';
+import { expandImageUrl } from '@/utils/imageUrl';
 
 import type { IRecipe } from '@/types/recipe.types';
 
@@ -102,13 +103,13 @@ export default function RecipeListing() {
                   onClick={() => handleViewButton(recipe._id)}
                   className="min-w-[260px] md:min-w-[300px] bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all cursor-pointer group"
                 >
-                  <div className="h-40 md:h-44 overflow-hidden">
-                    <img
-                      src={Array.isArray(recipe.images) ? recipe.images[0] : (recipe.images as unknown as string)}
-                      alt={recipe.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                  </div>
+                    <div className="h-40 md:h-44 overflow-hidden">
+                      <img
+                        src={expandImageUrl(Array.isArray(recipe.images) ? recipe.images[0] : (recipe.images as unknown as string))}
+                        alt={recipe.title}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      />
+                    </div>
                   <div className="p-4">
                     <span className="text-[10px] md:text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md uppercase tracking-wider">
                       {recipe.cuisine}
@@ -184,7 +185,7 @@ export default function RecipeListing() {
                     <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-start md:items-center">
                       <div className="w-full md:w-72 h-48 md:h-56 rounded-2xl overflow-hidden shadow-lg flex-shrink-0 order-1 md:order-2">
                         <img
-                          src={mainImage}
+                          src={expandImageUrl(mainImage)}
                           alt={recipe.title}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         />
