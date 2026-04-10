@@ -32,6 +32,7 @@ interface FoodItem {
   name: string;
   price: string;
   image: string;
+  s3Key?: string;
 }
 
 interface LocationData {
@@ -152,7 +153,7 @@ export default function EditFoodSpot() {
     if (!result) return;
     const updated = [...foods];
     updated[index].image = result.fileUrl;
-    (updated[index] as any).s3Key = result.s3Key;
+    updated[index].s3Key = result.s3Key;
     setFoods(updated);
   };
 
@@ -228,7 +229,7 @@ export default function EditFoodSpot() {
         exploredFoods: foods.map((f) => ({
           name: f.name,
           price: f.price ? Number(f.price) : undefined,
-          image: (f as any).s3Key || f.image,
+          image: f.s3Key || f.image,
         })),
         speciality: form.speciality
           ? form.speciality.split(",").map((s: string) => s.trim())

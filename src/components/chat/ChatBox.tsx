@@ -46,7 +46,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
                 socket?.emit('chat:leave', conversation._id);
             };
         }
-    }, [conversation._id, socket]);
+    }, [conversation._id, socket, loadMessages, markAsRead]);
 
     useEffect(() => {
         const handleNewMessage = (data: SocketMessagePayload) => {

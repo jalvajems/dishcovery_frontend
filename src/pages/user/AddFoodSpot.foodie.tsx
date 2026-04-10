@@ -28,6 +28,7 @@ interface FoodItem {
   name: string;
   price: string;
   image: string;
+  s3Key?: string;
 }
 
 interface LocationData {
@@ -98,7 +99,7 @@ export default function AddFoodSpot() {
 
     const updated = [...foods];
     updated[index].image = result.fileUrl;
-    (updated[index] as any).s3Key = result.s3Key; // Dynamically add s3Key
+    updated[index].s3Key = result.s3Key; // Dynamically add s3Key
     setFoods(updated);
 
     // Clear food-level error for image on upload
@@ -155,7 +156,7 @@ export default function AddFoodSpot() {
     const foodErrors: { name?: string; price?: string; image?:string; }[] = foods.map((f) => {
       const err: { name?: string; price?: string; image?:string; } = {};
       if (!f.name.trim()) err.name = "Food item name is required.";
-      if (!f.image.trim() && !(f as any).s3Key) err.image = "Food item image is required.";
+      if (!f.image.trim() && !f.s3Key) err.image = "Food item image is required.";
       
       if (!f.price.trim()) {
         err.price = "Price is required.";
@@ -198,7 +199,7 @@ export default function AddFoodSpot() {
         exploredFoods: foods.map((f) => ({
           name: f.name,
           price: f.price ? Number(f.price) : undefined,
-          image: (f as any).s3Key || f.image,
+          image: f.s3Key || f.image,
         })),
         speciality: form.speciality
           ? form.speciality.split(",").map((s) => s.trim())
