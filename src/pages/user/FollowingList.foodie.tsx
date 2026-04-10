@@ -6,6 +6,7 @@ import { showError } from '@/utils/toast';
 import { getErrorMessage } from "@/utils/errorHandler";
 import SearchBar from '@/components/shared/SearchBar';
 import Pagination from '@/components/shared/Pagination';
+import { expandImageUrl } from '@/utils/imageUrl';
 import type { IFollowing } from '@/types/follower.types';
 
 export default function FollowingList() {
@@ -125,7 +126,7 @@ export default function FollowingList() {
                                 >
                                     <div className="relative h-64 overflow-hidden bg-gray-100">
                                         <img
-                                            src={follow.followingId?.image || 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=400&h=400&fit=crop'}
+                                            src={expandImageUrl(follow.followingId?.image)}
                                             alt={follow.followingId?.name}
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                                         />
