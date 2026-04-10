@@ -176,7 +176,7 @@ export default function ChefDetail() {
                             <div className="relative mb-6">
                                 <div className="w-40 h-40 rounded-full p-2 bg-white shadow-lg -mt-20">
                                     <img
-                                        src={expandImageUrl(chef.chefId?.image)}
+                                        src={expandImageUrl((chef as any).image || chef.chefId?.image)}
                                         alt={chef.chefId?.name}
                                         className="w-full h-full rounded-full object-cover"
                                     />
