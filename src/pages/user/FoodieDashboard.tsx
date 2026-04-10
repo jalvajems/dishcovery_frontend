@@ -11,6 +11,7 @@ import ConfirmModal from '@/components/shared/ConfirmModal';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Clock, MapPin, ChefHat, BookOpen, Calendar } from 'lucide-react';
 import { logError } from '@/utils/errorHandler';
+import { expandImageUrl } from '@/utils/imageUrl';
 
 interface Recipe {
   _id: string;
@@ -175,7 +176,7 @@ export default function FoodieDashboard() {
             {recipes.length > 0 ? recipes.map(recipe => (
               <div key={recipe._id} onClick={() => navigate(`/foodie/recipe-detail/${recipe._id}`)} className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer group flex flex-col h-full border border-gray-100 hover:border-green-100">
                 <div className="relative h-64 overflow-hidden">
-                  <img src={recipe.images?.[0]} alt={recipe.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                  <img src={expandImageUrl(recipe.images?.[0])} alt={recipe.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                   <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-green-700 shadow-sm flex items-center gap-1">
                     <Clock className="w-3 h-3" /> {recipe.cookingTime} min
                   </div>
@@ -216,7 +217,7 @@ export default function FoodieDashboard() {
             {blogs.length > 0 ? blogs.map(blog => (
               <div key={blog._id} onClick={() => navigate(`/foodie/blog-detail/${blog._id}`)} className="group cursor-pointer">
                 <div className="relative h-64 rounded-2xl overflow-hidden mb-4 shadow-lg">
-                  <img src={blog.coverImage || ''} alt={blog.heading} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <img src={expandImageUrl(blog.coverImage)} alt={blog.heading} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
                 </div>
                 <div>
@@ -251,7 +252,7 @@ export default function FoodieDashboard() {
             {foodSpots.length > 0 ? foodSpots.map(spot => (
               <div key={spot._id} onClick={() => navigate(`/foodie/food-spots/${spot._id}`)} className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 cursor-pointer flex flex-col">
                 <div className="h-48 overflow-hidden relative">
-                  <img src={spot.coverImage || ''} alt={spot.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                  <img src={expandImageUrl(spot.coverImage)} alt={spot.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
                   <div className="absolute top-3 left-3 bg-white/95 px-3 py-1 rounded-md text-xs font-bold text-gray-800 shadow-sm">
                     {spot.speciality?.[0] || spot.tags?.[0] || 'Food Spot'}
                   </div>
@@ -289,7 +290,7 @@ export default function FoodieDashboard() {
             {workshops.length > 0 ? workshops.map(workshop => (
               <div key={workshop._id} onClick={() => navigate(`/foodie/workshop-detail/${workshop._id}`)} className="bg-gradient-to-br from-white to-purple-50 rounded-2xl p-4 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer border border-purple-100 flex gap-4 items-center">
                 <div className="w-24 h-24 md:w-28 md:h-28 rounded-xl overflow-hidden shrink-0 shadow-sm">
-                  <img src={workshop.banner || ''} alt={workshop.title} className="w-full h-full object-cover" />
+                  <img src={expandImageUrl(workshop.banner)} alt={workshop.title} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
                   <span className="text-xs font-bold text-purple-600 uppercase tracking-wider mb-1 block">Workshop</span>

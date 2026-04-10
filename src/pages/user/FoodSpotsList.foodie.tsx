@@ -8,6 +8,7 @@ import { getAllFoodSpotApi } from '@/api/foodieApi';
 import Pagination from '@/components/shared/Pagination';
 import SearchBar from '@/components/shared/SearchBar';
 import { getErrorMessage } from '@/utils/errorHandler';
+import { expandImageUrl } from '@/utils/imageUrl';
 
 import type { IFoodSpot } from '@/types/foodSpot.types';
 
@@ -131,7 +132,7 @@ export default function FoodSpotListing() {
                 <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-start md:items-center">
                   <div className="w-full md:w-72 h-48 md:h-56 rounded-2xl overflow-hidden shadow-lg flex-shrink-0 order-1 md:order-2">
                     <img
-                      src={spot.coverImage}
+                      src={expandImageUrl(spot.coverImage)}
                       alt={spot.name}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />

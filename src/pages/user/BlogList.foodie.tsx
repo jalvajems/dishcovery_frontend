@@ -6,6 +6,7 @@ import { getErrorMessage } from '@/utils/errorHandler';
 import { useNavigate } from 'react-router-dom';
 import Pagination from '@/components/shared/Pagination';
 import SearchBar from '@/components/shared/SearchBar';
+import { expandImageUrl } from '@/utils/imageUrl';
 
 import type { IBlog } from '@/types/blog.types';
 
@@ -96,7 +97,7 @@ export default function BlogListFoodie() {
                                 >
                                     <div className="h-44 overflow-hidden">
                                         <img
-                                            src={blog.coverImage}
+                                            src={expandImageUrl(blog.coverImage)}
                                             alt={blog.title}
                                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                         />
@@ -176,7 +177,7 @@ export default function BlogListFoodie() {
                                 {/* Image */}
                                 <div className="w-72 h-56 rounded-2xl overflow-hidden shadow-lg flex-shrink-0">
                                     <img
-                                        src={blog.coverImage}
+                                        src={expandImageUrl(blog.coverImage)}
                                         alt={blog.title}
                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                     />
