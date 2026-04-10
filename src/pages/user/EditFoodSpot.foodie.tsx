@@ -29,6 +29,7 @@ interface FoodItem {
     name: string;
     price: string;
     image: string;
+    s3Key?: string;
 }
 
 interface LocationData {
@@ -75,6 +76,7 @@ export default function EditFoodSpot() {
     });
 
     const [coverImage, setCoverImage] = useState<string>("");
+    const [coverImageKey, setCoverImageKey] = useState<string>("");
     const [foods, setFoods] = useState<FoodItem[]>([
         { name: "", price: "", image: "" },
     ]);
@@ -137,9 +139,10 @@ export default function EditFoodSpot() {
         cb: (url: string) => void
     ) => {
         if (!e.target.files?.[0]) return;
-        const url = await uploadToS3(e.target.files[0]);
-        if (url) {
-            cb(url);
+        const result = await uploadToS3(e.target.files[0]);
+        if (result) {
+            cb(result.fileUrl);
+            setCoverImageKey(result.s3Key);
             setErrors((prev) => ({ ...prev, coverImage: undefined }));
         }
     };
@@ -149,11 +152,12 @@ export default function EditFoodSpot() {
         e: React.ChangeEvent<HTMLInputElement>
     ) => {
         if (!e.target.files?.[0]) return;
-        const url = await uploadToS3(e.target.files[0]);
-        if (!url) return;
+        const result = await uploadToS3(e.target.files[0]);
+        if (!result) return;
 
         const updated = [...foods];
-        updated[index].image = url;
+        updated[index].image = result.fileUrl;
+        updated[index].s3Key = result.s3Key;
         setFoods(updated);
 
         // Clear image error for this item
@@ -245,7 +249,7 @@ export default function EditFoodSpot() {
             const payload = {
                 name: form.name,
                 description: form.description,
-                coverImage,
+                coverImage: coverImageKey || coverImage,
                 location: {
                     type: "Point",
                     coordinates: [location!.lng, location!.lat],
@@ -260,7 +264,7 @@ export default function EditFoodSpot() {
                 exploredFoods: foods.map((f) => ({
                     name: f.name,
                     price: f.price ? Number(f.price) : undefined,
-                    image: f.image,
+                    image: f.s3Key || f.image,
                 })),
                 speciality: form.speciality
                     ? form.speciality.split(",").map((s) => s.trim())

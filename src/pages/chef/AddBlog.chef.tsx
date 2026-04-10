@@ -53,6 +53,7 @@ const AddNewBlog: React.FC = () => {
 
   const [isPublished] = useState(false);
   const [coverImage, setCoverImage] = useState<string | null>(null);
+  const [coverImageKey, setCoverImageKey] = useState<string | null>(null);
 
   const [errors, setErrors] = useState<BlogErrors>({});
 
@@ -68,7 +69,7 @@ const AddNewBlog: React.FC = () => {
       newErrors.shortDescription = "Short description is required";
     if (content.length < 20) newErrors.content = "At least 20 characters needed";
     if (!content.trim()) newErrors.content = "Content is required";
-    if (!coverImage) newErrors.coverImage = "Cover image is required";
+    if (!coverImageKey) newErrors.coverImage = "Cover image is required";
     if (!tags.length) newErrors.tags = "Tag is required";
 
     setErrors(newErrors);
@@ -85,7 +86,7 @@ const AddNewBlog: React.FC = () => {
       shortDescription,
       content,
       tags,
-      coverImage,
+      coverImage: coverImageKey,
       isDraft: !isPublished,
     };
 
@@ -103,9 +104,12 @@ const AddNewBlog: React.FC = () => {
     if (!e.target.files) return;
 
     const image = e.target.files[0];
-    const url = await uploadToS3(image);
-    setCoverImage(url);
-    setErrors({ ...errors, coverImage: undefined });
+    const result = await uploadToS3(image);
+    if (result) {
+      setCoverImage(result.fileUrl);
+      setCoverImageKey(result.s3Key);
+      setErrors({ ...errors, coverImage: undefined });
+    }
   };
 
   const addTag = (tag?: string) => {
@@ -122,6 +126,7 @@ const AddNewBlog: React.FC = () => {
 
   const removeCoverImage = () => {
     setCoverImage(null);
+    setCoverImageKey(null);
   };
 
   const filteredSuggestedTags = SUGGESTED_TAGS.filter(

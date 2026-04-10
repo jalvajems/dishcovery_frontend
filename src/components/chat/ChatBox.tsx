@@ -46,7 +46,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
                 socket?.emit('chat:leave', conversation._id);
             };
         }
-    }, [conversation._id, socket]);
+    }, [conversation._id, socket, loadMessages, markAsRead]);
 
     useEffect(() => {
         const handleNewMessage = (data: SocketMessagePayload) => {
@@ -189,7 +189,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
         try {
             // 1. Get Signed URL
             const { data } = await getSignedUrlApi(file.name, file.type);
-            const { uploadUrl, fileUrl } = data.data;
+            const { uploadUrl, fileUrl, key } = data.data;
 
             // 2. Upload to S3
             // The signed URL allows PUT request with specific Content-Type
@@ -206,7 +206,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({ conversation, onBack }) => {
             else if (file.type.startsWith('audio/')) messageType = 'audio';
 
             // 5. Send Message
-            await sendMessage(conversation._id, '', fileUrl, messageType);
+            // Use 'key' for database storage, backend mapper will expand it back to full URL for UI
+            await sendMessage(conversation._id, '', key || fileUrl, messageType);
 
         } catch (error) {
             console.error('File upload failed:', error);
