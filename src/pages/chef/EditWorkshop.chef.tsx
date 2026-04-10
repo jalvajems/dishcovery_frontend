@@ -34,6 +34,7 @@ export default function EditWorkshopChef() {
 
     const { uploadToS3, loading: uploadLoading } = useAwsS3Upload();
     const [uploadedBanner, setUploadedBanner] = useState<string | null>(null);
+    const [uploadedBannerKey, setUploadedBannerKey] = useState<string | null>(null);
 
     const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -86,10 +87,10 @@ export default function EditWorkshopChef() {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
             try {
-                const url = await uploadToS3(file);
-                if (url) {
-                    setUploadedBanner(url);
-                    setFormData(prev => ({ ...prev, banner: url }));
+                const result = await uploadToS3(file);
+                if (result) {
+                    setUploadedBanner(result.fileUrl);
+                    setUploadedBannerKey(result.s3Key);
                 }
             } catch (error) {
                 console.error("Banner upload failed", error);
@@ -100,7 +101,7 @@ export default function EditWorkshopChef() {
 
     const removeBanner = () => {
         setUploadedBanner(null);
-        setFormData(prev => ({ ...prev, banner: '' }));
+        setUploadedBannerKey(null);
     };
 
     const validate = () => {
@@ -157,7 +158,7 @@ export default function EditWorkshopChef() {
                 mode: formData.mode as 'ONLINE' | 'OFFLINE',
                 isFree: formData.isFree,
                 price: formData.isFree ? 0 : formData.price,
-                banner: formData.banner
+                banner: uploadedBannerKey || formData.banner
             };
 
             if (formData.mode === 'OFFLINE') {

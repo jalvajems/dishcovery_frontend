@@ -23,6 +23,7 @@ export default function FoodieEditProfile() {
     });
     const [bio, setBio] = useState("");
     const [image, setImage] = useState<string | null>(null);
+    const [imageKey, setImageKey] = useState<string | null>(null);
     const [errors, setErrors] = useState<Record<string, string>>({});
 
 
@@ -74,9 +75,10 @@ export default function FoodieEditProfile() {
     const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
             const Image = e.target.files?.[0]
-            const url = await uploadToS3(Image)
-            if (url) {
-                setImage(url)
+            const result = await uploadToS3(Image)
+            if (result) {
+                setImage(result.fileUrl)
+                setImageKey(result.s3Key)
                 setErrors(prev => {
                     const newErrors = { ...prev };
                     delete newErrors.image;
@@ -120,8 +122,9 @@ export default function FoodieEditProfile() {
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
- const removeCoverImage = () => {
+    const removeCoverImage = () => {
         setImage(null);
+        setImageKey(null);
     };
 
 
@@ -142,7 +145,7 @@ export default function FoodieEditProfile() {
             address: location.address,
             preferences: preferences,
             bio: bio,
-            image: image
+            image: imageKey || image
         }
 
         try {

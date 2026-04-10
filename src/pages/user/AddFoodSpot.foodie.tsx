@@ -64,6 +64,7 @@ export default function AddFoodSpot() {
   });
 
   const [coverImage, setCoverImage] = useState<string>("");
+  const [coverImageKey, setCoverImageKey] = useState<string>("");
   const [foods, setFoods] = useState<FoodItem[]>([
     { name: "", price: "", image: "" },
   ]);
@@ -79,9 +80,10 @@ export default function AddFoodSpot() {
     cb: (url: string) => void
   ) => {
     if (!e.target.files?.[0]) return;
-    const url = await uploadToS3(e.target.files[0]);
-    if (url) {
-      cb(url);
+    const result = await uploadToS3(e.target.files[0]);
+    if (result) {
+      cb(result.fileUrl);
+      setCoverImageKey(result.s3Key);
       setErrors((prev) => ({ ...prev, coverImage: undefined }));
     }
   };
@@ -91,11 +93,12 @@ export default function AddFoodSpot() {
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     if (!e.target.files?.[0]) return;
-    const url = await uploadToS3(e.target.files[0]);
-    if (!url) return;
+    const result = await uploadToS3(e.target.files[0]);
+    if (!result) return;
 
     const updated = [...foods];
-    updated[index].image = url;
+    updated[index].image = result.fileUrl;
+    (updated[index] as any).s3Key = result.s3Key; // Dynamically add s3Key
     setFoods(updated);
 
     // Clear food-level error for image on upload
@@ -139,7 +142,7 @@ export default function AddFoodSpot() {
     const newErrors: FormErrors = {};
 
     if (!form.name.trim()) newErrors.name = "Spot name is required.";
-    if (!coverImage) newErrors.coverImage = "Cover image is required.";
+    if (!coverImageKey) newErrors.coverImage = "Cover image is required.";
     if (!location) newErrors.location = "Please select a location on the map.";
     if (!form.description) newErrors.description = "Please add description";
     if (!form.speciality) newErrors.speciality = "Please add speciality";
@@ -152,7 +155,7 @@ export default function AddFoodSpot() {
     const foodErrors: { name?: string; price?: string; image?:string; }[] = foods.map((f) => {
       const err: { name?: string; price?: string; image?:string; } = {};
       if (!f.name.trim()) err.name = "Food item name is required.";
-      if (!f.image.trim()) err.image = "Food item image is required.";
+      if (!f.image.trim() && !(f as any).s3Key) err.image = "Food item image is required.";
       
       if (!f.price.trim()) {
         err.price = "Price is required.";
@@ -180,7 +183,7 @@ export default function AddFoodSpot() {
       const payload = {
         name: form.name,
         description: form.description,
-        coverImage,
+        coverImage: coverImageKey,
         location: {
           type: "Point",
           coordinates: [location!.lng, location!.lat],
@@ -195,7 +198,7 @@ export default function AddFoodSpot() {
         exploredFoods: foods.map((f) => ({
           name: f.name,
           price: f.price ? Number(f.price) : undefined,
-          image: f.image,
+          image: (f as any).s3Key || f.image,
         })),
         speciality: form.speciality
           ? form.speciality.split(",").map((s) => s.trim())

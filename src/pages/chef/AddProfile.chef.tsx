@@ -42,10 +42,10 @@ export default function CreateChefProfile() {
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const Image = e.target.files[0];
-      const url = await uploadToS3(Image);
-      if (url) {
-        setImagePreview(url);
-        setForm((prev) => ({ ...prev, image: url }));
+      const result = await uploadToS3(Image);
+      if (result) {
+        setImagePreview(result.fileUrl);
+        setForm((prev) => ({ ...prev, image: result.s3Key }));
         setErrors((prev) => ({ ...prev, image: undefined }));
       }
     }

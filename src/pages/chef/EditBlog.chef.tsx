@@ -56,6 +56,7 @@ const EditBlog: React.FC = () => {
     const [showTagDropdown, setShowTagDropdown] = useState(false);
     const [isPublished, setIsPublished] = useState(false);
     const [coverImage, setCoverImage] = useState<string | null>(null);
+    const [coverImageKey, setCoverImageKey] = useState<string | null>(null);
     const [errors, setErrors] = useState<BlogErrors>({});
     const [isLoading, setIsLoading] = useState(true);
 
@@ -125,7 +126,7 @@ const EditBlog: React.FC = () => {
             shortDescription,
             content,
             tags,
-            coverImage,
+            coverImage: coverImageKey || coverImage,
             isDraft: !isPublished
         };
 
@@ -144,9 +145,12 @@ const EditBlog: React.FC = () => {
         if (!e.target.files) return;
 
         const image = e.target.files[0];
-        const url = await uploadToS3(image);
-        setCoverImage(url);
-        setErrors({ ...errors, coverImage: undefined });
+        const result = await uploadToS3(image);
+        if (result) {
+            setCoverImage(result.fileUrl);
+            setCoverImageKey(result.s3Key);
+            setErrors({ ...errors, coverImage: undefined });
+        }
     };
 
     const addTag = (tag?: string) => {
@@ -164,6 +168,7 @@ const EditBlog: React.FC = () => {
 
     const removeCoverImage = () => {
         setCoverImage(null);
+        setCoverImageKey(null);
     };
 
     // Filter suggested tags based on input and exclude already selected tags
