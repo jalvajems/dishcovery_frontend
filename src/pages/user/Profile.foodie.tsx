@@ -10,6 +10,7 @@ import { logoutApi } from "@/api/authApi";
 import FoodieNavbar from "@/components/shared/foodie/Navbar.foodie";
 import Pagination from "@/components/shared/Pagination";
 import { getErrorMessage } from "@/utils/errorHandler";
+import { expandImageUrl } from "@/utils/imageUrl";
 import type { IFoodieProfile } from "@/types/profile.types";
 import type { IFollower } from "@/types/follower.types";
 import type { IRecipe } from "@/types/recipe.types";
@@ -178,7 +179,7 @@ export default function ProfileFoodie() {
               <div className="relative group">
                 <div className="w-40 h-40 md:w-48 md:h-48 rounded-[2rem] overflow-hidden shadow-2xl ring-8 ring-emerald-50 transition-transform group-hover:scale-[1.02]">
                   <img
-                    src={profile.image || "/default-avatar.png"}
+                    src={expandImageUrl(profile.image, "/default-avatar.png")}
                     alt="profile"
                     className="w-full h-full object-cover"
                   />
@@ -328,7 +329,7 @@ export default function ProfileFoodie() {
                       >
                         <div className="h-48 overflow-hidden relative">
                           <img
-                            src={recipe.images?.[0] || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c'}
+                            src={expandImageUrl(recipe.images?.[0], 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c')}
                             onClick={() => navigate(`/foodie/recipe-detail/${recipe._id}`)}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 cursor-pointer"
                             alt={recipe.title}
@@ -390,7 +391,7 @@ export default function ProfileFoodie() {
                       >
                         <div className="h-48 overflow-hidden relative">
                           <img
-                            src={blog.coverImage || 'https://images.unsplash.com/photo-1493770348161-369560ae357d'}
+                            src={expandImageUrl(blog.coverImage, 'https://images.unsplash.com/photo-1493770348161-369560ae357d')}
                             onClick={() => navigate(`/foodie/blog-detail/${blog._id}`)}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 cursor-pointer"
                             alt={blog.title}
@@ -452,7 +453,7 @@ export default function ProfileFoodie() {
                       >
                         <div className="h-48 overflow-hidden relative">
                           <img
-                            src={spot.coverImage || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4'}
+                            src={expandImageUrl(spot.coverImage, 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4')}
                             onClick={() => navigate(`/foodie/foodspot/${spot._id}`)}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 cursor-pointer"
                             alt={spot.name}
