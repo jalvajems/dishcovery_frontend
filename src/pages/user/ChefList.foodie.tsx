@@ -39,7 +39,6 @@ export default function ChefList() {
             setLoading(false);
         }
     };
-    console.log('----------', chefs);
 
     const handlePageChange = useCallback((page: number) => {
         setCurrentPage(page);

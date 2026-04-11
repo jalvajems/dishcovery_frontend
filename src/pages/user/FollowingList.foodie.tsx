@@ -126,7 +126,7 @@ export default function FollowingList() {
                                 >
                                     <div className="relative h-64 overflow-hidden bg-gray-100">
                                         <img
-                                            src={expandImageUrl(follow.followingId?.image)}
+                                            src={expandImageUrl(follow.followingId?.image || (follow.followingId as any)?.chefId?.image)}
                                             alt={follow.followingId?.name}
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                                         />
