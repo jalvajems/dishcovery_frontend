@@ -10,6 +10,7 @@ import { getAllMyFoodSpotApi } from '@/api/foodieApi';
 import Pagination from '@/components/shared/Pagination';
 import SearchBar from '@/components/shared/SearchBar';
 import { getErrorMessage } from '@/utils/errorHandler';
+import { expandImageUrl } from '@/utils/imageUrl';
 import type { IFoodSpot } from '@/types/foodSpot.types';
 
 export default function MyFoodSpotList() {
@@ -147,7 +148,7 @@ export default function MyFoodSpotList() {
 
                   <div className="w-72 h-56 rounded-2xl overflow-hidden shadow-lg">
                     <img
-                      src={spot.coverImage}
+                      src={expandImageUrl(spot.coverImage)}
                       alt={spot.name}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />

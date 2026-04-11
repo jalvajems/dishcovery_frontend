@@ -15,5 +15,10 @@ export interface IFollowing {
         image?: string;
         location?: string;
         specialities?: string[];
+        chefId?: {
+            _id: string;
+            image?: string;
+            name?: string;
+        };
     };
 }
