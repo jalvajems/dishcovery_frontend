@@ -10,6 +10,7 @@ import { getAllMyFoodSpotApi } from '@/api/foodieApi';
 import Pagination from '@/components/shared/Pagination';
 import SearchBar from '@/components/shared/SearchBar';
 import { getErrorMessage } from '@/utils/errorHandler';
+import { expandImageUrl } from '@/utils/imageUrl';
 import type { IFoodSpot } from '@/types/foodSpot.types';
 
 export default function MyFoodSpotList() {
