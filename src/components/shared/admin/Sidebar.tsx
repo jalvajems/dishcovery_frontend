@@ -24,12 +24,12 @@ export default function Sidebar({ activePath, onMenuSelect }: SidebarProps) {
 
   const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/admin-dashboard" },
-    { icon: Users, label: "User Management", path: "/admin-dashboard/foodie" },
-    { icon: ChefHat, label: "Chef Management", path: "/admin-dashboard/chef" },
-    { icon: Heart, label: "Recipe Managemnent", path: "/admin-dashboard/recipe" },
-    { icon: BookOpen, label: "Blogs Management", path: "/admin-dashboard/blog" },
-    { icon: MapPin, label: "Food Spot Management", path: "/admin-dashboard/foodspot" },
-    { icon: BookOpen, label: "Workshop Management", path: "/admin-dashboard/workshop" },
+    { icon: Users, label: "User", path: "/admin-dashboard/foodie" },
+    { icon: ChefHat, label: "Chef", path: "/admin-dashboard/chef" },
+    { icon: Heart, label: "Recipe", path: "/admin-dashboard/recipe" },
+    { icon: BookOpen, label: "Blogs", path: "/admin-dashboard/blog" },
+    { icon: MapPin, label: "Food Spot", path: "/admin-dashboard/foodspot" },
+    { icon: BookOpen, label: "Workshop", path: "/admin-dashboard/workshop" },
   ];
 
   const handleLogout = async () => {
