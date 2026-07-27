@@ -291,7 +291,7 @@ export default function EditRecipe() {
             {/* Cooking Time */}
             <div>
               <label htmlFor="cookingTime" className="block text-sm font-bold text-gray-900 mb-2">
-                Cooking Time
+                Cooking Time in minutes
               </label>
               {errors.cookingTime && (
                 <p className="text-red-500 text-sm mt-1">{errors.cookingTime}</p>

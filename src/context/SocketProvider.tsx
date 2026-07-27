@@ -48,7 +48,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
             socketRef.current = io(socketUrl, {
                 auth: { token },
-                transports: ['websocket'],
+                transports: ['websocket', 'polling'],
                 path: '/socket.io',
                 reconnection: true,
                 reconnectionAttempts: 5,

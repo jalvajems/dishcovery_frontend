@@ -109,7 +109,7 @@ const LiveSession = () => {
                         userId: currentUserId,
                         role: userRef.current?.role
                     },
-                    transports: ['websocket'],
+                    transports: ['websocket', 'polling'],
                     path: '/socket.io'
                 });
 
